@@ -6,13 +6,14 @@
     <link rel="stylesheet" type="text/css" href="css/iiif-metadata-component.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsviews/0.9.75/jsviews.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.min.js"></script>
     <script src="js/manifold.bundle.js"></script>
-    <script src="js/base-component.bundle.js"></script>
+    <script src="js/base-component.js"></script>
     <script src="js/iiif-metadata-component.js"></script>
     <script src="js/jquery-plugins.js"></script>
     <script src="sanitize.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/extensions.js"></script>
 </head>
 <body>
     
@@ -34,7 +35,7 @@
             // http://bluemountain.princeton.edu/exist/restxq/iiif/collection/top
 
             Manifold.loadManifest({
-                iiifResourceUri: 'http://iiif.bodleian.ox.ac.uk/iiif/manifest/60834383-7146-41ab-bfe1-48ee97bc04be.json',
+                iiifResourceUri: 'http://wellcomelibrary.org/iiif/b18035978/manifest',
                 collectionIndex: 0,
                 manifestIndex: 0
             }).then(function(h){
@@ -42,41 +43,43 @@
                 helper = h;
                 
                 component = new IIIFComponents.MetadataComponent({
-                    canvasDisplayOrder: "attribution, title",
-                    canvases: [helper.getCanvasByIndex(0), helper.getCanvasByIndex(1)],
-                    canvasLabels: "Left page, Right page",
-                    canvasExclude: "attribution",
-                    copyToClipboardEnabled: true,
-                    element: "#metadata",
-                    helper: h,
-                    limitType: IIIFComponents.MetadataComponentOptions.LimitType.LINES,
-                    manifestDisplayOrder: "attribution, publication date, license, title",
-                    manifestExclude: "license, attribution",
-                    range: helper.getRanges()[0],
-                    sanitizer: function(html) {
-                        var elem = document.createElement('div');
-                        var $elem = $(elem);
-                        $elem.html(html);
+                    target: document.querySelector('#metadata'),
+                    data: {
+                        canvasDisplayOrder: "attribution, title",
+                        canvases: [helper.getCanvasByIndex(0), helper.getCanvasByIndex(1)],
+                        canvasLabels: "Left page, Right page",
+                        //canvasExclude: "attribution",
+                        copyToClipboardEnabled: true,
+                        helper: h,
+                        limitType: IIIFComponents.MetadataComponentOptions.LimitType.LINES,
+                        //manifestDisplayOrder: "attribution, publication date, license, title",
+                        //manifestExclude: "license, attribution",
+                        range: helper.getRanges()[0],
+                        sanitizer: function(html) {
+                            var elem = document.createElement('div');
+                            var $elem = $(elem);
+                            $elem.html(html);
 
-                        var s = new Sanitize({
-                            elements:   ['a', 'b', 'br', 'img', 'p', 'i', 'span'],
-                            attributes: {
-                                a: ['href'],
-                                img: ['src', 'alt']
-                            },
-                            protocols:  {
-                                a: { href: ['http', 'https'] }
-                            }
-                        });
+                            var s = new Sanitize({
+                                elements:   ['a', 'b', 'br', 'img', 'p', 'i', 'span'],
+                                attributes: {
+                                    a: ['href'],
+                                    img: ['src', 'alt']
+                                },
+                                protocols:  {
+                                    a: { href: ['http', 'https'] }
+                                }
+                            });
 
-                        $elem.html(s.clean_node(elem));
+                            $elem.html(s.clean_node(elem));
 
-                        return $elem.html();
-                    },
-                    showAllLanguages: false
+                            return $elem.html();
+                        },
+                        showAllLanguages: false
+                    }
                 });
 
-                component.databind();
+                component.set();
 
             }).catch(function(e) {
                 console.error(e);

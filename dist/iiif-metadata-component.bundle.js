@@ -1,74 +1,206 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.TinyEmitter = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-function E () {
-	// Keep this empty so it's easier to inherit from
-  // (via https://github.com/lipsmack from https://github.com/scottcorgan/tiny-emitter/issues/3)
-}
+// base-component v1.1.0 https://github.com/viewdir/base-component#readme
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.baseComponent = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
+///<reference path="../node_modules/typescript/lib/lib.es6.d.ts"/> 
 
-E.prototype = {
-	on: function (name, callback, ctx) {
-    var e = this.e || (this.e = {});
+var _Components;
+(function (_Components) {
+    var BaseComponent = (function () {
+        function BaseComponent(options) {
+            this.options = options;
+            this.options.data = $.extend(this.data(), options.data);
+        }
+        BaseComponent.prototype._init = function () {
+            this._$element = $(this.options.target);
+            if (!this._$element.length) {
+                console.warn('element not found');
+                return false;
+            }
+            this._$element.empty();
+            return true;
+        };
+        BaseComponent.prototype.data = function () {
+            return {};
+        };
+        BaseComponent.prototype.on = function (name, callback, ctx) {
+            var e = this._e || (this._e = {});
+            (e[name] || (e[name] = [])).push({
+                fn: callback,
+                ctx: ctx
+            });
+        };
+        BaseComponent.prototype.fire = function (name) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            var data = [].slice.call(arguments, 1);
+            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
+            var i = 0;
+            var len = evtArr.length;
+            for (i; i < len; i++) {
+                evtArr[i].fn.apply(evtArr[i].ctx, data);
+            }
+        };
+        BaseComponent.prototype._resize = function () {
+        };
+        BaseComponent.prototype.set = function (data) {
+        };
+        return BaseComponent;
+    }());
+    _Components.BaseComponent = BaseComponent;
+})(_Components || (_Components = {}));
+(function (g) {
+    if (!g._Components) {
+        g._Components = _Components;
+    }
+})(global);
 
-    (e[name] || (e[name] = [])).push({
-      fn: callback,
-      ctx: ctx
-    });
 
-    return this;
-  },
 
-  once: function (name, callback, ctx) {
-    var self = this;
-    function listener () {
-      self.off(name, listener);
-      callback.apply(ctx, arguments);
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}]},{},[1])(1)
+});
+// extensions v0.2.0 https://github.com/edsilv/extensions
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.extensions = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+///<reference path="../node_modules/typescript/lib/lib.es6.d.ts"/> 
+
+Array.prototype.clone = function () {
+    return this.slice(0);
+};
+if (!Array.prototype.includes) {
+    Array.prototype.includes = function (val) {
+        return this.indexOf(val) !== -1;
     };
-
-    listener._ = callback
-    return this.on(name, listener, ctx);
-  },
-
-  emit: function (name) {
-    var data = [].slice.call(arguments, 1);
-    var evtArr = ((this.e || (this.e = {}))[name] || []).slice();
-    var i = 0;
-    var len = evtArr.length;
-
-    for (i; i < len; i++) {
-      evtArr[i].fn.apply(evtArr[i].ctx, data);
+}
+Array.prototype.insert = function (item, index) {
+    this.splice(index, 0, item);
+};
+Array.prototype.move = function (fromIndex, toIndex) {
+    this.splice(toIndex, 0, this.splice(fromIndex, 1)[0]);
+};
+Array.prototype.remove = function (item) {
+    var index = this.indexOf(item);
+    if (index > -1) {
+        this.splice(index, 1);
     }
-
-    return this;
-  },
-
-  off: function (name, callback) {
-    var e = this.e || (this.e = {});
-    var evts = e[name];
-    var liveEvents = [];
-
-    if (evts && callback) {
-      for (var i = 0, len = evts.length; i < len; i++) {
-        if (evts[i].fn !== callback && evts[i].fn._ !== callback)
-          liveEvents.push(evts[i]);
-      }
-    }
-
-    // Remove event from queue to prevent memory leak
-    // Suggested by https://github.com/lazd
-    // Ref: https://github.com/scottcorgan/tiny-emitter/commit/c6ebfaa9bc973b33d110a84a307742b7cf94c953#commitcomment-5024910
-
-    (liveEvents.length)
-      ? e[name] = liveEvents
-      : delete e[name];
-
-    return this;
-  }
+};
+Array.prototype.removeAt = function (index) {
+    this.splice(index, 1);
 };
 
-module.exports = E;
+if (!Math.clamp) {
+    Math.clamp = function (value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    };
+}
+if (!Math.radians) {
+    Math.radians = function (degrees) {
+        return Math.TAU * (degrees / 360);
+    };
+}
+Math.distanceBetween = function (x1, y1, x2, y2) {
+    return Math.sqrt(((x2 - x1) * 2) + ((y2 - y1) * 2));
+};
+Math.lerp = function (start, stop, amount) {
+    return start + (stop - start) * amount;
+};
+Math.mag = function (a, b, c) {
+    return Math.sqrt(a * a + b * b + c * c);
+};
+Math.map = function (value, start1, stop1, start2, stop2) {
+    return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
+};
+Math.median = function (values) {
+    values.sort(function (a, b) { return a - b; });
+    var half = Math.floor(values.length / 2);
+    if (values.length % 2) {
+        return values[half];
+    }
+    else {
+        return (values[half - 1] + values[half]) / 2.0;
+    }
+};
+Math.normalise = function (num, min, max) {
+    return (num - min) / (max - min);
+};
+if (!Math.degrees) {
+    Math.degrees = function (radians) {
+        return (radians * 360) / Math.TAU;
+    };
+}
+/**
+ * Get a random number between two numbers.
+ * If 'high' isn't passed, get a number from 0 to 'low'.
+ * @param {Number} low The low number.
+ * @param {Number} [high] The high number.
+ */
+Math.randomBetween = function (low, high) {
+    if (!high) {
+        high = low;
+        low = 0;
+    }
+    if (low >= high)
+        return low;
+    return low + (high - low) * Math.random();
+};
+Math.roundToDecimalPlace = function (num, dec) {
+    return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+};
+Math.TAU = Math.PI * 2;
+
+String.prototype.b64_to_utf8 = function () {
+    return decodeURIComponent(escape(window.atob(this)));
+};
+String.format = function () {
+    var s = arguments[0];
+    for (var i = 0; i < arguments.length - 1; i++) {
+        var reg = new RegExp("\\{" + i + "\\}", "gm");
+        s = s.replace(reg, arguments[i + 1]);
+    }
+    return s;
+};
+if (!String.prototype.includes) {
+    String.prototype.includes = function (str) {
+        return this.indexOf(str) !== -1;
+    };
+}
+String.prototype.isAlphanumeric = function () {
+    return /^[a-zA-Z0-9]*$/.test(this);
+};
+String.prototype.ltrim = function () {
+    return this.replace(/^\s+/, '');
+};
+String.prototype.rtrim = function () {
+    return this.replace(/\s+$/, '');
+};
+String.prototype.toCssClass = function () {
+    return this.replace(/[^a-z0-9]/g, function (s) {
+        var c = s.charCodeAt(0);
+        if (c == 32)
+            return '-';
+        if (c >= 65 && c <= 90)
+            return '_' + s.toLowerCase();
+        return '__' + ('000' + c.toString(16)).slice(-4);
+    });
+};
+String.prototype.toFileName = function () {
+    return this.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+};
+String.prototype.utf8_to_b64 = function () {
+    return window.btoa(unescape(encodeURIComponent(this)));
+};
 
 },{}]},{},[1])(1)
 });
-!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.baseComponent=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var _Components;!function(_Components){function applyMixins(derivedCtor,baseCtors){baseCtors.forEach(function(baseCtor){Object.getOwnPropertyNames(baseCtor.prototype).forEach(function(name){derivedCtor.prototype[name]=baseCtor.prototype[name]})})}var BaseComponent=function(){function BaseComponent(options){this.options=$.extend(this._getDefaultOptions(),options)}return BaseComponent.prototype._init=function(){return this._$element=$(this.options.element),this._$element.length?(this._$element.empty(),!0):(console.warn("element not found"),!1)},BaseComponent.prototype._getDefaultOptions=function(){return{}},BaseComponent.prototype._emit=function(event){for(var args=[],_i=1;_i<arguments.length;_i++)args[_i-1]=arguments[_i];return this.emit(event,args)},BaseComponent.prototype._resize=function(){},BaseComponent.prototype.databind=function(data){},BaseComponent}();_Components.BaseComponent=BaseComponent,_Components.applyMixins=applyMixins,applyMixins(BaseComponent,[TinyEmitter])}(_Components||(_Components={})),function(g){g._Components||(g._Components=_Components)}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});
+// jquery-plugins v0.1.0 https://github.com/edsilv/jquery-plugins
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.jqueryPlugins = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+///<reference path="../node_modules/typescript/lib/lib.es6.d.ts"/> 
+// declare var Length: Length;
+// interface Length{
+//     toPx(elem, value, prop?, force?): number;
+// }
+
 (function ($) {
     $.fn.checkboxButton = function (onClick) {
         return this.each(function () {
@@ -113,55 +245,24 @@ module.exports = E;
             if (!textPassed)
                 text = $self.text();
             $self.empty();
-            $self.spanElem = $('<span title="' + text + '"></span>');
-            $self.append($self.spanElem);
+            var $spanElem = $('<span title="' + text + '"></span>');
+            $self.append($spanElem);
             $self.css('overflow', 'hidden');
-            $self.spanElem.css('white-space', 'nowrap');
-            $self.spanElem.html(text);
+            $spanElem.css('white-space', 'nowrap');
+            $spanElem.html(text);
             // get the width of the span.
             // if it's wider than the container, remove a word until it's not.
-            if ($self.spanElem.width() > $self.width()) {
-                var lastText;
-                while ($self.spanElem.width() > $self.width()) {
-                    var t = $self.spanElem.html();
+            if ($spanElem.width() > $self.width()) {
+                var lastText = null;
+                while ($spanElem.width() > $self.width()) {
+                    var t = $spanElem.html();
                     t = t.substring(0, t.lastIndexOf(' ')) + '&hellip;';
                     if (t === lastText)
                         break;
-                    $self.spanElem.html(t);
+                    $spanElem.html(t);
                     lastText = t;
                 }
             }
-        });
-    };
-    $.fn.ellipsisFixed = function (chars, buttonText) {
-        return this.each(function () {
-            var $self = $(this);
-            var text = $self.text();
-            $self.empty();
-            var $span = $('<span></span>');
-            var $ellipsis = $('<a href="#" title="more" class="ellipsis"></a>');
-            if (buttonText) {
-                $ellipsis.html(buttonText);
-            }
-            else {
-                $ellipsis.html('&hellip;');
-            }
-            $ellipsis.click(function (e) {
-                e.preventDefault();
-                var $this = $(this);
-                $span.html(text);
-                $this.remove();
-            });
-            if (text.length > chars) {
-                var trimmedText = text.substr(0, chars);
-                trimmedText = trimmedText.substr(0, Math.min(trimmedText.length, trimmedText.lastIndexOf(" ")));
-                $span.html(trimmedText + "&nbsp;");
-                $span.append($ellipsis);
-            }
-            else {
-                $span.html(text);
-            }
-            $self.append($span);
         });
     };
     // Truncates to a certain number of letters, while ignoring and preserving HTML
@@ -207,9 +308,9 @@ module.exports = E;
     };
     $.fn.enable = function () {
         return this.each(function () {
-            var $this = $(this);
-            $this.removeClass('disabled');
-            $this.attr('tabindex', $this.data('tabindex'));
+            var $self = $(this);
+            $self.removeClass('disabled');
+            $self.attr('tabindex', $self.data('tabindex'));
         });
     };
     $.fn.equaliseHeight = function (reset, average) {
@@ -241,7 +342,7 @@ module.exports = E;
         var $self = $(this);
         var maxTabIndex = 0;
         var $elementWithGreatestTabIndex = null;
-        $self.find('*:visible[tabindex]').each(function (idx, el) {
+        $self.find('*:visible[tabindex]').each(function (index, el) {
             var $el = $(el);
             var tabIndex = parseInt($el.attr('tabindex'));
             if (tabIndex > maxTabIndex) {
@@ -282,7 +383,7 @@ module.exports = E;
         $current.find("iframe").load(documentHandler);
     }
     $(documentHandler);
-    $.fn.ismouseover = function (overThis) {
+    $.fn.ismouseover = function () {
         var result = false;
         this.eq(0).each(function () {
             var $current = $(this).is("iframe") ? $(this).contents().find("body") : $(this);
@@ -292,7 +393,8 @@ module.exports = E;
         });
         return result;
     };
-    var on = $.fn.on, timer;
+    var on = $.fn.on;
+    var timer;
     $.fn.on = function () {
         var args = Array.apply(null, arguments);
         var last = args[args.length - 1];
@@ -301,7 +403,8 @@ module.exports = E;
         var delay = args.pop();
         var fn = args.pop();
         args.push(function () {
-            var self = this, params = arguments;
+            var self = this;
+            var params = arguments;
             clearTimeout(timer);
             timer = setTimeout(function () {
                 fn.apply(self, params);
@@ -337,10 +440,8 @@ module.exports = E;
     };
     // Recursively removes the last empty element (img, audio, etc) or word in an element
     $.fn.removeLastWord = function (chars, depth) {
-        if ('undefined' === typeof chars)
-            chars = 8;
-        if ('undefined' === typeof depth)
-            depth = 0;
+        if (chars === void 0) { chars = 8; }
+        if (depth === void 0) { depth = 0; }
         return this.each(function () {
             var $self = $(this);
             if ($self.contents().length > 0) {
@@ -475,8 +576,8 @@ module.exports = E;
     };
     $.fn.toggleText = function (text1, text2) {
         return this.each(function () {
-            var $this = $(this);
-            if ($this.text() === text1) {
+            var $self = $(this);
+            if ($self.text() === text1) {
                 $(this).text(text2);
             }
             else {
@@ -486,11 +587,11 @@ module.exports = E;
     };
     $.fn.updateAttr = function (attrName, oldVal, newVal) {
         return this.each(function () {
-            var $this = $(this);
-            var attr = $this.attr(attrName);
+            var $self = $(this);
+            var attr = $self.attr(attrName);
             if (attr && attr.indexOf(oldVal) === 0) {
                 attr = attr.replace(oldVal, newVal);
-                $this.attr(attrName, attr);
+                $self.attr(attrName, attr);
             }
         });
     };
@@ -504,12 +605,14 @@ module.exports = E;
     };
 })(jQuery);
 
-// manifold v1.1.6 https://github.com/viewdir/manifold#readme
-var exjs;!function(r){r.version="0.4.0"}(exjs||(exjs={}));var exjs;!function(r){Array.isArray||(Array.isArray=function(r){return"[object Array]"===Object.prototype.toString.call(r)})}(exjs||(exjs={}));var exjs;!function(r){var e=function(){function r(){}return r.prototype.getEnumerator=function(){return{moveNext:function(){return!1},current:void 0}},r.prototype.aggregate=function(r,e){for(var t=r,n=this.getEnumerator();n.moveNext();)t=e(t,n.current);return t},r.prototype.all=function(r){if(r)for(var e=this.getEnumerator(),t=0;e.moveNext();){if(!r(e.current,t))return!1;t++}return!0},r.prototype.any=function(r){for(var e=this.getEnumerator(),t=0;e.moveNext();){if(!r)return!0;if(r(e.current,t))return!0;t++}return!1},r.prototype.append=function(){for(var r=[],e=0;e<arguments.length;e++)r[e-0]=arguments[e];throw new Error("Not implemented")},r.prototype.apply=function(r){throw new Error("Not implemented")},r.prototype.at=function(r){for(var e=this.getEnumerator(),t=0;e.moveNext();){if(t===r)return e.current;t++}},r.prototype.average=function(r){var e=0,t=0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var n=this.getEnumerator();n.moveNext();)t+=r(n.current),e++;return 0===e?0:t/e},r.prototype.concat=function(r){throw new Error("Not implemented")},r.prototype.count=function(r){for(var e=0,t=this.getEnumerator();t.moveNext();)(!r||r(t.current))&&e++;return e},r.prototype.difference=function(r,e){return e=e||function(r,e){return r===e},r instanceof Array&&(r=r.en()),{intersection:this.intersect(r,e).toArray().en(),aNotB:this.except(r,e).toArray().en(),bNotA:r.except(this,e).toArray().en()}},r.prototype.distinct=function(r){throw new Error("Not implemented")},r.prototype.except=function(r,e){throw new Error("Not implemented")},r.prototype.first=function(r){for(var e=this.getEnumerator();e.moveNext();)if(!r||r(e.current))return e.current},r.prototype.firstIndex=function(r){for(var e=this.getEnumerator(),t=0;e.moveNext();t++)if(!r||r(e.current))return t;return-1},r.prototype.forEach=function(r){for(var e=this.getEnumerator();e.moveNext();)r(e.current)},r.prototype.groupBy=function(r,e){throw new Error("Not implemented")},r.prototype.intersect=function(r,e){throw new Error("Not implemented")},r.prototype.join=function(r,e,t,n,o){throw new Error("Not implemented")},r.prototype.last=function(r){for(var e,t=this.getEnumerator();t.moveNext();)(!r||r(t.current))&&(e=t.current);return e},r.prototype.lastIndex=function(r){for(var e=-1,t=this.getEnumerator(),n=0;t.moveNext();n++)(!r||r(t.current))&&(e=n);return e},r.prototype.max=function(r){var e=this.getEnumerator();if(!e.moveNext())return 0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var t=r(e.current);e.moveNext();)t=Math.max(t,r(e.current));return t},r.prototype.min=function(r){var e=this.getEnumerator();if(!e.moveNext())return 0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var t=r(e.current);e.moveNext();)t=Math.min(t,r(e.current));return t},r.prototype.orderBy=function(r,e){throw new Error("Not implemented")},r.prototype.orderByDescending=function(r,e){throw new Error("Not implemented")},r.prototype.prepend=function(){for(var r=[],e=0;e<arguments.length;e++)r[e-0]=arguments[e];throw new Error("Not implemented")},r.prototype.reverse=function(){throw new Error("Not implemented")},r.prototype.select=function(r){throw new Error("Not implemented")},r.prototype.selectMany=function(r){throw new Error("Not implemented")},r.prototype.skip=function(r){throw new Error("Not implemented")},r.prototype.skipWhile=function(r){throw new Error("Not implemented")},r.prototype.standardDeviation=function(r){var e=this.average(r),t=0,n=0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var o=this.getEnumerator();o.moveNext();){var u=r(o.current)-e;t+=u*u,n++}return Math.sqrt(t/n)},r.prototype.sum=function(r){var e=0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var t=this.getEnumerator();t.moveNext();)e+=r(t.current);return e},r.prototype.take=function(r){throw new Error("Not implemented")},r.prototype.takeWhile=function(r){throw new Error("Not implemented")},r.prototype.traverse=function(r){throw new Error("Not implemented")},r.prototype.traverseUnique=function(r,e){throw new Error("Not implemented")},r.prototype.toArray=function(){for(var r=[],e=this.getEnumerator();e.moveNext();)r.push(e.current);return r},r.prototype.toMap=function(r,e){throw new Error("Not implemented")},r.prototype.toList=function(){throw new Error("Not implemented")},r.prototype.union=function(r,e){throw new Error("Not implemented")},r.prototype.where=function(r){throw new Error("Not implemented")},r.prototype.zip=function(r,e){throw new Error("Not implemented")},r}();r.Enumerable=e}(exjs||(exjs={}));var Symbol,exjs;!function(r){function e(r){var e;return{next:function(){var t={done:!0,value:void 0};return r&&(e=e||r.getEnumerator())?(t.done=!e.moveNext(),t.value=e.current,t):t}}}Symbol&&Symbol.iterator&&(r.Enumerable.prototype[Symbol.iterator]=function(){return e(this)})}(exjs||(exjs={}));var exjs;!function(r){var e=function(){function e(r){this.size=0,this._keys=[],this._values=[];var e;if(r instanceof Array?e=r.en():r&&r.getEnumerator instanceof Function&&(e=r),e)for(var t=e.getEnumerator();t&&t.moveNext();)this.set(t.current[0],t.current[1])}return e.prototype.clear=function(){this._keys.length=0,this._values.length=0,this.size=0},e.prototype["delete"]=function(r){var e=this._keys.indexOf(r);return e>-1?(this._keys.splice(e,1),this._values.splice(e,1),this.size--,!0):!1},e.prototype.entries=function(){var e=this;return r.range(0,this.size).select(function(r){return[e._keys[r],e._values[r]]})},e.prototype.forEach=function(r,e){null==e&&(e=this);for(var t=0,n=this._keys,o=this._values,u=n.length;u>t;t++)r.call(e,o[t],n[t],this)},e.prototype.get=function(r){var e=this._keys.indexOf(r);return this._values[e]},e.prototype.has=function(r){return this._keys.indexOf(r)>-1},e.prototype.keys=function(){return this._keys.en()},e.prototype.set=function(r,e){var t=this._keys.indexOf(r);t>-1?this._values[t]=e:(this._keys.push(r),this._values.push(e),this.size++)},e.prototype.values=function(){return this._values.en()},e}();r.Map3=e,r.Enumerable.prototype.toMap=function(r,t){for(var n=new e,o=this.getEnumerator();o.moveNext();)n.set(r(o.current),t(o.current));return n},r.List&&(r.List.prototype.toMap=r.Enumerable.prototype.toMap)}(exjs||(exjs={})),function(r){r.Map||(r.Map=exjs.Map3)}("undefined"==typeof window?global:window);var exjs;!function(r){function e(e){var t=new r.Enumerable;return t.getEnumerator=function(){var r={current:void 0,moveNext:function(){return e(r)}};return r},t}r.anonymous=e}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n,o=1,u={current:void 0,moveNext:function(){if(2>o){if(t=t||r.getEnumerator(),t.moveNext())return u.current=t.current,!0;o++}return n=n||e.en().getEnumerator(),n.moveNext()?(u.current=n.current,!0):(u.current=void 0,!1)}};return u}r.Enumerable.prototype.append=function(){for(var t=this,n=[],o=0;o<arguments.length;o++)n[o-0]=arguments[o];var u=new r.Enumerable;return u.getEnumerator=function(){return e(t,n)},u},r.List&&(r.List.prototype.append=r.Enumerable.prototype.append)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),t.moveNext()?(e(o.current=t.current,n),n++,!0):!1}};return o}r.Enumerable.prototype.apply=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.List&&(r.List.prototype.apply=r.Enumerable.prototype.apply)}(exjs||(exjs={}));var __extends=this&&this.__extends||function(r,e){function t(){this.constructor=r}for(var n in e)e.hasOwnProperty(n)&&(r[n]=e[n]);r.prototype=null===e?Object.create(e):(t.prototype=e.prototype,new t)},exjs;!function(r){function e(r){var e=r.length,t={moveNext:void 0,current:void 0},n=-1;return t.moveNext=function(){return n++,n>=e?(t.current=void 0,!1):(t.current=r[n],!0)},t}function t(){return this&&Array.isArray(this)?new n(this):new r.Enumerable}var n=function(r){function t(t){r.call(this),this.getEnumerator=function(){return e(t)},this.toArray=function(){return t.slice(0)}}return __extends(t,r),t}(r.Enumerable);try{Object.defineProperty(Array.prototype,"en",{value:t,enumerable:!1,writable:!1,configurable:!1})}catch(o){Array.prototype.en=t}}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=!1,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),o.current=void 0,t.moveNext()?(o.current=t.current,!0):n?!1:(n=!0,t=e.getEnumerator(),t.moveNext()?(o.current=t.current,!0):!1)}};return o}r.Enumerable.prototype.concat=function(t){var n=this,o=t instanceof Array?t.en():t,u=new r.Enumerable;return u.getEnumerator=function(){return e(n,o)},u},r.List&&(r.List.prototype.concat=r.Enumerable.prototype.concat)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=[],o={current:void 0,moveNext:function(){if(t||(t=r.getEnumerator()),o.current=void 0,!e){for(;t.moveNext();)if(n.indexOf(t.current)<0)return n.push(o.current=t.current),!0;return!1}for(;t.moveNext();){for(var u=0,i=n.length,c=!1;i>u&&!c;u++)c=!!e(n[u],t.current);if(!c)return n.push(o.current=t.current),!0}return!1}};return o}r.Enumerable.prototype.distinct=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.List&&(r.List.prototype.distinct=r.Enumerable.prototype.distinct)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e,t){t=t||function(r,e){return r===e};var n,o={current:void 0,moveNext:function(){for(n||(n=r.getEnumerator()),o.current=void 0;n.moveNext();){for(var u=!1,i=e.getEnumerator();i.moveNext()&&!u;)u=t(n.current,i.current);if(!u)return o.current=n.current,!0}return!1}};return o}r.Enumerable.prototype.except=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.except=r.Enumerable.prototype.except)}(exjs||(exjs={})),Function.prototype.fromJson=function(r,e){function t(r,e){if(null==r)return r;if(e instanceof Function)return e(r);if(e instanceof Array){if(e=e[0],!(e instanceof Function&&r instanceof Array))return;for(var t=[],n=0;n<r.length;n++)t.push(e(r[n]));return t}}var n=new this;if(null==r)return n;var o=[];for(var u in e){var i=t(r[u],e[u]);void 0!==i&&(n[u]=i,o.push(u))}for(var u in this.$jsonMappings)if(!(o.indexOf(u)>-1)){var i=t(r[u],this.$jsonMappings[u]);void 0!==i&&(n[u]=i,o.push(u))}for(var u in r)o.indexOf(u)>-1||(n[u]=r[u]);return n};var exjs;!function(r){function e(r,e,n){var o,u=0,i={current:void 0,moveNext:function(){return o||(o=t(r,e,n)),i.current=void 0,u>=o.length?!1:(i.current=o[u],u++,!0)}};return i}function t(r,e,t){t=t||function(r,e){return r===e};for(var o,u=[],i=[],c=r.getEnumerator();c.moveNext();){o=e(c.current);for(var a=-1,p=0,s=i.length;s>p;p++)if(t(o,i[p])){a=p;break}var f;0>a?(i.push(o),u.push(f=new n(o))):f=u[a],f._add(c.current)}return u}var n=function(r){function e(e){var t=this;r.call(this),this.key=e,this._arr=[],this.getEnumerator=function(){return t._arr.en().getEnumerator()}}return __extends(e,r),e.prototype._add=function(r){this._arr.push(r)},e}(r.Enumerable);r.Enumerable.prototype.groupBy=function(t,n){var o=this,u=new r.Enumerable;return u.getEnumerator=function(){return e(o,t,n)},u},r.List&&(r.List.prototype.groupBy=r.Enumerable.prototype.groupBy)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t,n){n=n||function(r,e){return r===e};var o,u={current:void 0,moveNext:function(){for(o||(o=r.en(e).distinct().getEnumerator()),u.current=void 0;o.moveNext();){for(var i=!1,c=t.getEnumerator();c.moveNext()&&!i;)i=n(o.current,c.current);if(i)return u.current=o.current,!0}return!1}};return u}r.Enumerable.prototype.intersect=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.intersect=r.Enumerable.prototype.intersect)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t,n,o,u,i){i=i||function(r,e){return r===e};var c,a,p=0,s={current:void 0,moveNext:function(){if(s.current=void 0,!c){if(c=e.getEnumerator(),!c.moveNext())return!1;a=r.en(t).toArray()}var f;do{for(;p<a.length;p++)if(f=a[p],i(n(c.current),o(f)))return p++,s.current=u(c.current,f),!0;p=0}while(c.moveNext());return!1}};return s}r.Enumerable.prototype.join=function(t,n,o,u,i){var c=this,a=t instanceof Array?t.en():t,p=new r.Enumerable;return p.getEnumerator=function(){return e(c,a,n,o,u,i)},p},r.List&&(r.List.prototype.join=r.Enumerable.prototype.join)}(exjs||(exjs={}));var exjs;!function(r){function e(){this.constructor=t}r.Enumerable.prototype.toList=function(){for(var r=new t,e=this.getEnumerator();e.moveNext();)r.push(e.current);return r};var t=function(r){function e(){r.apply(this,arguments)}return __extends(e,r),e.prototype.toString=function(){throw new Error("Not implemented")},e.prototype.toLocaleString=function(){throw new Error("Not implemented")},e.prototype.pop=function(){throw new Error("Not implemented")},e.prototype.push=function(){for(var r=[],e=0;e<arguments.length;e++)r[e-0]=arguments[e];throw new Error("Not implemented")},e.prototype.shift=function(){throw new Error("Not implemented")},e.prototype.slice=function(r,e){throw new Error("Not implemented")},e.prototype.sort=function(r){throw new Error("Not implemented")},e.prototype.splice=function(){throw new Error("Not implemented")},e.prototype.unshift=function(){for(var r=[],e=0;e<arguments.length;e++)r[e-0]=arguments[e];throw new Error("Not implemented")},e.prototype.indexOf=function(r,e){throw new Error("Not implemented")},e.prototype.lastIndexOf=function(r,e){throw new Error("Not implemented")},e.prototype.every=function(r,e){throw new Error("Not implemented")},e.prototype.some=function(r,e){throw new Error("Not implemented")},e.prototype.forEach=function(r,e){throw new Error("Not implemented")},e.prototype.map=function(r,e){throw new Error("Not implemented")},e.prototype.filter=function(r,e){throw new Error("Not implemented")},e.prototype.reduce=function(r,e){throw new Error("Not implemented")},e.prototype.reduceRight=function(r,e){throw new Error("Not implemented")},e.prototype.remove=function(r){throw new Error("Not implemented")},e.prototype.removeWhere=function(r){throw new Error("Not implemented")},e}(r.Enumerable);r.List=t;for(var n in Array)Array.hasOwnProperty(n)&&(t[n]=Array[n]);e.prototype=Array.prototype,t.prototype=new e;for(var o in r.Enumerable.prototype)"getEnumerator"!==o&&(t.prototype[o]=r.Enumerable.prototype[o]);t.prototype.getEnumerator=function(){var r=this,e=r.length,t={moveNext:void 0,current:void 0},n=-1;return t.moveNext=function(){return n++,n>=e?(t.current=void 0,!1):(t.current=r[n],!0)},t},t.prototype.remove=function(r){return this.removeWhere(function(e){return e===r}).any()},t.prototype.removeWhere=function(r){for(var e,t=[],n=this.length-1;n>=0;n--)e=this[n],r(e,n)===!0&&(this.splice(n,1),t.push(e));return t.en().reverse()}}(exjs||(exjs={}));var exjs;!function(r){function e(r,e,n,o){return new t(r,e,n,o)}var t=function(e){function t(r,t,n,o){e.call(this),this.Source=r,o=o||function(r,e){return r>e?1:e>r?-1:0};var u=n===!0?-1:1;this.Sorter=function(r,e){return u*o(t(r),t(e))}}return __extends(t,e),t.prototype.getEnumerator=function(){var e,t=this.Source,n=this.Sorter,o=0,u={current:void 0,moveNext:function(){return e||(e=r.en(t).toArray(),e.sort(n)),u.current=void 0,o>=e.length?!1:(u.current=e[o],o++,!0)}};return u},t.prototype.thenBy=function(r,e){return new n(this,r,!1,e)},t.prototype.thenByDescending=function(r,e){return new n(this,r,!0,e)},t}(r.Enumerable),n=function(r){function e(e,t,n,o){r.call(this,e,t,n,o);var u=e.Sorter,i=this.Sorter;this.Sorter=function(r,e){return u(r,e)||i(r,e)}}return __extends(e,r),e}(t),o=r.Enumerable.prototype;o.orderBy=function(r,t){return e(this,r,!1,t)},o.orderByDescending=function(r,t){return e(this,r,!0,t)},r.List&&(r.List.prototype.orderBy=r.Enumerable.prototype.orderBy,r.List.prototype.orderByDescending=r.Enumerable.prototype.orderByDescending)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n,o=1,u={current:void 0,moveNext:function(){if(2>o){if(t=t||e.en().getEnumerator(),t.moveNext())return u.current=t.current,!0;o++}return n=n||r.getEnumerator(),n.moveNext()?(u.current=n.current,!0):(u.current=void 0,!1)}};return u}r.Enumerable.prototype.prepend=function(){for(var t=this,n=[],o=0;o<arguments.length;o++)n[o-0]=arguments[o];var u=new r.Enumerable;return u.getEnumerator=function(){return e(t,n)},u},r.List&&(r.List.prototype.prepend=r.Enumerable.prototype.prepend)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e,t){var n=r-t,o={current:void 0,moveNext:function(){return n+=t,n>=e?!1:(o.current=n,!0)}};return o}function t(t,n,o){if(t=t||0,n=n||0,t>n)throw new Error("Start cannot be greater than end.");null==o&&(o=1);var u=new r.Enumerable;return u.getEnumerator=function(){return e(t,n,o)},u}r.range=t}(exjs||(exjs={}));var exjs;!function(r){function e(e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.en(e).toArray(),n=t.length),n--,o.current=t[n],n>=0}};return o}r.Enumerable.prototype.reverse=function(){var t=this,n=new r.Enumerable;return n.getEnumerator=function(){return e(t)},n},r.List&&(r.List.prototype.reverse=r.Enumerable.prototype.reverse)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){if(e=e||0,0===e)return Math.round(r);var t=Math.pow(10,e);return Math.round(r*t)/t}r.round=e}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),t.moveNext()?(o.current=e(t.current,n),n++,!0):!1}};return o}function t(e,t){var n,o,u={current:void 0,moveNext:function(){for(u.current=void 0,n||(n=e.getEnumerator());!o||!o.moveNext();){if(!n.moveNext())return!1;o=r.selectorEnumerator(t(n.current))}return u.current=o.current,!0}};return u}r.Enumerable.prototype.select=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.selectMany=function(e){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return t(n,e)},o},r.List&&(r.List.prototype.select=r.Enumerable.prototype.select,r.List.prototype.selectMany=r.Enumerable.prototype.selectMany)}(exjs||(exjs={}));var exjs;!function(r){function e(r){return Array.isArray(r)?r.en().getEnumerator():null!=r&&"function"==typeof r.getEnumerator?r.getEnumerator():null}r.selectorEnumerator=e}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n={current:void 0,moveNext:function(){if(!t){t=r.getEnumerator();for(var o=0;e>o;o++)if(!t.moveNext())return!1}return t.moveNext()?(n.current=t.current,!0):(n.current=void 0,!1)}};return n}function t(r,e){var t,n={current:void 0,moveNext:function(){if(!t){t=r.getEnumerator();for(var o=0;t.moveNext();o++)if(!e(n.current=t.current,o))return!0;return n.current=void 0,!1}return t.moveNext()?(n.current=t.current,!0):(n.current=void 0,!1)}};return n}r.Enumerable.prototype.skip=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.skipWhile=function(e){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return t(n,e)},o},r.List&&(r.List.prototype.skip=r.Enumerable.prototype.skip,r.List.prototype.skipWhile=r.Enumerable.prototype.skipWhile)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),n++,n>e?!1:(o.current=void 0,t.moveNext()?(o.current=t.current,!0):!1)}};return o}function t(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),t.moveNext()&&e(t.current,n)?(n++,o.current=t.current,!0):(o.current=void 0,!1)}};return o}r.Enumerable.prototype.take=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.takeWhile=function(e){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return t(n,e)},o},r.List&&(r.List.prototype.take=r.Enumerable.prototype.take,r.List.prototype.takeWhile=r.Enumerable.prototype.takeWhile)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t){var n,o=!1,u=[],i={current:void 0,moveNext:function(){if(o){if(null==n)return!1;u.push(n),n=r.selectorEnumerator(t(i.current))}else n=e.getEnumerator(),o=!0;for(;!(n&&n.moveNext()||u.length<1);)n=u.pop();return i.current=null==n?void 0:n.current,void 0!==i.current}};return i}function t(e,t,n){var o,u=!1,i=[],c={current:void 0,moveNext:function(){if(u){if(null==o)return!1;i.push(o),o=r.selectorEnumerator(t(c.current))}else o=e.getEnumerator(),u=!0;do{for(;!(o&&o.moveNext()||i.length<1);)o=i.pop();c.current=null==o?void 0:o.current}while(n(c.current));return void 0!==c.current}};return c}r.Enumerable.prototype.traverse=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.traverseUnique=function(e,n){var o=this,u=[],i=new r.Enumerable;return n?i.getEnumerator=function(){return t(o,e,function(r){return u.some(function(e){return n(r,e)})?!0:(u.push(r),!1)})}:i.getEnumerator=function(){return t(o,e,function(r){return u.indexOf(r)>-1?!0:(u.push(r),!1)})},i},r.List&&(r.List.prototype.traverse=r.Enumerable.prototype.traverse,r.List.prototype.traverseUnique=r.Enumerable.prototype.traverseUnique)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t,n){n=n||function(r,e){return r===e};var o,u,i=[],c={current:void 0,moveNext:function(){if(o||(o=r.en(e).distinct().getEnumerator()),c.current=void 0,!u&&o.moveNext())return i.push(c.current=o.current),!0;for(u=u||r.en(t).distinct().getEnumerator();u.moveNext();){for(var a=0,p=!1,s=i.length;s>a&&!p;a++)p=n(i[a],u.current);if(!p)return c.current=u.current,!0}return!1}};return c}r.Enumerable.prototype.union=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.union=r.Enumerable.prototype.union)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n={current:void 0,moveNext:function(){t||(t=r.getEnumerator());for(var o;t.moveNext();)if(e(o=t.current))return n.current=o,!0;return!1}};return n}r.Enumerable.prototype.where=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.List&&(r.List.prototype.where=r.Enumerable.prototype.where)}(exjs||(exjs={}));var exjs;!function(r){function e(e){var n=new r.Enumerable;return n.getEnumerator=function(){return t(e)},n}function t(r){var e=r.getEnumerator(),t={current:void 0,moveNext:void 0};return t.moveNext=function(){return e.moveNext()?(t.current=e.current,!0):(t.current=void 0,!1)},t}r.en=e}(exjs||(exjs={}));var ex=exjs.en,exjs;!function(r){function e(r,e,t){var n,o,u={current:void 0,moveNext:function(){return n||(n=r.getEnumerator()),o||(o=e.getEnumerator()),u.current=void 0,n.moveNext()&&o.moveNext()?(u.current=t(n.current,o.current),!0):!1}};return u}r.Enumerable.prototype.zip=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.zip=r.Enumerable.prototype.zip)}(exjs||(exjs={}));
+},{}]},{},[1])(1)
+});
+var __extends=this&&this.__extends||function(){var r=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(r,e){r.__proto__=e}||function(r,e){for(var t in e)e.hasOwnProperty(t)&&(r[t]=e[t])};return function(e,t){function n(){this.constructor=e}r(e,t),e.prototype=null===t?Object.create(t):(n.prototype=t.prototype,new n)}}(),exjs;!function(r){r.version="0.5.0"}(exjs||(exjs={}));var exjs;!function(r){Array.isArray||(Array.isArray=function(r){return"[object Array]"===Object.prototype.toString.call(r)})}(exjs||(exjs={}));var exjs;!function(r){var e=function(){function r(){}return r.prototype.getEnumerator=function(){return{moveNext:function(){return!1},current:void 0}},r.prototype.aggregate=function(r,e){for(var t=r,n=this.getEnumerator();n.moveNext();)t=e(t,n.current);return t},r.prototype.all=function(r){if(r)for(var e=this.getEnumerator(),t=0;e.moveNext();){if(!r(e.current,t))return!1;t++}return!0},r.prototype.any=function(r){for(var e=this.getEnumerator(),t=0;e.moveNext();){if(!r)return!0;if(r(e.current,t))return!0;t++}return!1},r.prototype.append=function(){for(var r=[],e=0;e<arguments.length;e++)r[e]=arguments[e];throw new Error("Not implemented")},r.prototype.apply=function(r){throw new Error("Not implemented")},r.prototype.at=function(r){for(var e=this.getEnumerator(),t=0;e.moveNext();){if(t===r)return e.current;t++}},r.prototype.average=function(r){var e=0,t=0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var n=this.getEnumerator();n.moveNext();)t+=r(n.current),e++;return 0===e?0:t/e},r.prototype.concat=function(r){throw new Error("Not implemented")},r.prototype.count=function(r){for(var e=0,t=this.getEnumerator();t.moveNext();)r&&!r(t.current)||e++;return e},r.prototype.difference=function(r,e){return e=e||function(r,e){return r===e},r instanceof Array&&(r=r.en()),{intersection:this.intersect(r,e).toArray().en(),aNotB:this.except(r,e).toArray().en(),bNotA:r.except(this,e).toArray().en()}},r.prototype.distinct=function(r){throw new Error("Not implemented")},r.prototype.except=function(r,e){throw new Error("Not implemented")},r.prototype.first=function(r){for(var e=this.getEnumerator();e.moveNext();)if(!r||r(e.current))return e.current},r.prototype.firstIndex=function(r){for(var e=this.getEnumerator(),t=0;e.moveNext();t++)if(!r||r(e.current))return t;return-1},r.prototype.forEach=function(r){for(var e=this.getEnumerator();e.moveNext();)r(e.current)},r.prototype.groupBy=function(r,e){throw new Error("Not implemented")},r.prototype.intersect=function(r,e){throw new Error("Not implemented")},r.prototype.join=function(r,e,t,n,o){throw new Error("Not implemented")},r.prototype.last=function(r){for(var e,t=this.getEnumerator();t.moveNext();)r&&!r(t.current)||(e=t.current);return e},r.prototype.lastIndex=function(r){for(var e=-1,t=this.getEnumerator(),n=0;t.moveNext();n++)r&&!r(t.current)||(e=n);return e},r.prototype.max=function(r){var e=this.getEnumerator();if(!e.moveNext())return 0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var t=r(e.current);e.moveNext();)t=Math.max(t,r(e.current));return t},r.prototype.min=function(r){var e=this.getEnumerator();if(!e.moveNext())return 0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var t=r(e.current);e.moveNext();)t=Math.min(t,r(e.current));return t},r.prototype.orderBy=function(r,e){throw new Error("Not implemented")},r.prototype.orderByDescending=function(r,e){throw new Error("Not implemented")},r.prototype.prepend=function(){for(var r=[],e=0;e<arguments.length;e++)r[e]=arguments[e];throw new Error("Not implemented")},r.prototype.reverse=function(){throw new Error("Not implemented")},r.prototype.select=function(r){throw new Error("Not implemented")},r.prototype.selectMany=function(r){throw new Error("Not implemented")},r.prototype.skip=function(r){throw new Error("Not implemented")},r.prototype.skipWhile=function(r){throw new Error("Not implemented")},r.prototype.standardDeviation=function(r){var e=this.average(r),t=0,n=0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var o=this.getEnumerator();o.moveNext();){var u=r(o.current)-e;t+=u*u,n++}return Math.sqrt(t/n)},r.prototype.sum=function(r){var e=0;r=r||function(r){if("number"!=typeof r)throw new Error("Object is not a number.");return r};for(var t=this.getEnumerator();t.moveNext();)e+=r(t.current);return e},r.prototype.take=function(r){throw new Error("Not implemented")},r.prototype.takeWhile=function(r){throw new Error("Not implemented")},r.prototype.traverse=function(r){throw new Error("Not implemented")},r.prototype.traverseUnique=function(r,e){throw new Error("Not implemented")},r.prototype.toArray=function(){for(var r=[],e=this.getEnumerator();e.moveNext();)r.push(e.current);return r},r.prototype.toMap=function(r,e){throw new Error("Not implemented")},r.prototype.toList=function(){throw new Error("Not implemented")},r.prototype.union=function(r,e){throw new Error("Not implemented")},r.prototype.where=function(r){throw new Error("Not implemented")},r.prototype.zip=function(r,e){throw new Error("Not implemented")},r}();r.Enumerable=e}(exjs||(exjs={}));var exjs;!function(r){var e=function(){function e(r){this.size=0,this._keys=[],this._values=[];var e;if(r instanceof Array?e=r.en():r&&r.getEnumerator instanceof Function&&(e=r),e)for(var t=e.getEnumerator();t&&t.moveNext();)this.set(t.current[0],t.current[1])}return e.prototype.clear=function(){this._keys.length=0,this._values.length=0,this.size=0},e.prototype.delete=function(r){var e=this._keys.indexOf(r);return e>-1&&(this._keys.splice(e,1),this._values.splice(e,1),this.size--,!0)},e.prototype.entries=function(){var e=this;return r.range(0,this.size).select(function(r){return[e._keys[r],e._values[r]]})},e.prototype.forEach=function(r,e){null==e&&(e=this);for(var t=0,n=this._keys,o=this._values,u=n.length;t<u;t++)r.call(e,o[t],n[t],this)},e.prototype.get=function(r){var e=this._keys.indexOf(r);return this._values[e]},e.prototype.has=function(r){return this._keys.indexOf(r)>-1},e.prototype.keys=function(){return this._keys.en()},e.prototype.set=function(r,e){var t=this._keys.indexOf(r);t>-1?this._values[t]=e:(this._keys.push(r),this._values.push(e),this.size++)},e.prototype.values=function(){return this._values.en()},e}();r.Map3=e,r.Enumerable.prototype.toMap=function(r,t){for(var n=new e,o=this.getEnumerator();o.moveNext();)n.set(r(o.current),t(o.current));return n},r.List&&(r.List.prototype.toMap=r.Enumerable.prototype.toMap)}(exjs||(exjs={})),function(r){r.Map||(r.Map=exjs.Map3)}("undefined"==typeof window?global:window);var exjs;!function(r){function e(e){var t=new r.Enumerable;return t.getEnumerator=function(){var r={current:void 0,moveNext:function(){return e(r)}};return r},t}r.anonymous=e}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n,o=1,u={current:void 0,moveNext:function(){if(o<2){if(t=t||r.getEnumerator(),t.moveNext())return u.current=t.current,!0;o++}return n=n||e.en().getEnumerator(),n.moveNext()?(u.current=n.current,!0):(u.current=void 0,!1)}};return u}r.Enumerable.prototype.append=function(){for(var t=this,n=[],o=0;o<arguments.length;o++)n[o]=arguments[o];var u=new r.Enumerable;return u.getEnumerator=function(){return e(t,n)},u},r.List&&(r.List.prototype.append=r.Enumerable.prototype.append)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),!!t.moveNext()&&(e(o.current=t.current,n),n++,!0)}};return o}r.Enumerable.prototype.apply=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.List&&(r.List.prototype.apply=r.Enumerable.prototype.apply)}(exjs||(exjs={}));var exjs;!function(r){function e(r){var e=r.length,t={moveNext:void 0,current:void 0},n=-1;return t.moveNext=function(){return n++,n>=e?(t.current=void 0,!1):(t.current=r[n],!0)},t}function t(){return this&&Array.isArray(this)?new n(this):new r.Enumerable}var n=function(r){function t(t){var n=r.call(this)||this;return n.getEnumerator=function(){return e(t)},n.toArray=function(){return t.slice(0)},n}return __extends(t,r),t}(r.Enumerable);try{Object.defineProperty(Array.prototype,"en",{value:t,enumerable:!1,writable:!1,configurable:!1})}catch(r){Array.prototype.en=t}}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=!1,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),o.current=void 0,t.moveNext()?(o.current=t.current,!0):!n&&(n=!0,t=e.getEnumerator(),!!t.moveNext()&&(o.current=t.current,!0))}};return o}r.Enumerable.prototype.concat=function(t){var n=this,o=t instanceof Array?t.en():t,u=new r.Enumerable;return u.getEnumerator=function(){return e(n,o)},u},r.List&&(r.List.prototype.concat=r.Enumerable.prototype.concat)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=[],o={current:void 0,moveNext:function(){if(t||(t=r.getEnumerator()),o.current=void 0,!e){for(;t.moveNext();)if(n.indexOf(t.current)<0)return n.push(o.current=t.current),!0;return!1}for(;t.moveNext();){for(var u=0,i=n.length,c=!1;u<i&&!c;u++)c=!!e(n[u],t.current);if(!c)return n.push(o.current=t.current),!0}return!1}};return o}r.Enumerable.prototype.distinct=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.List&&(r.List.prototype.distinct=r.Enumerable.prototype.distinct)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e,t){t=t||function(r,e){return r===e};var n,o={current:void 0,moveNext:function(){for(n||(n=r.getEnumerator()),o.current=void 0;n.moveNext();){for(var u=!1,i=e.getEnumerator();i.moveNext()&&!u;)u=t(n.current,i.current);if(!u)return o.current=n.current,!0}return!1}};return o}r.Enumerable.prototype.except=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.except=r.Enumerable.prototype.except)}(exjs||(exjs={})),Function.prototype.fromJson=function(r,e){function t(r,e){if(null==r)return r;if(e instanceof Function)return e(r);if(e instanceof Array){if(e=e[0],!(e instanceof Function&&r instanceof Array))return;for(var t=[],n=0;n<r.length;n++)t.push(e(r[n]));return t}}var n=new this;if(null==r)return n;var o=[];for(var u in e){var i=t(r[u],e[u]);void 0!==i&&(n[u]=i,o.push(u))}for(var u in this.$jsonMappings)if(!(o.indexOf(u)>-1)){var i=t(r[u],this.$jsonMappings[u]);void 0!==i&&(n[u]=i,o.push(u))}for(var u in r)o.indexOf(u)>-1||(n[u]=r[u]);return n};var exjs;!function(r){function e(r,e,n){var o,u=0,i={current:void 0,moveNext:function(){return o||(o=t(r,e,n)),i.current=void 0,!(u>=o.length)&&(i.current=o[u],u++,!0)}};return i}function t(r,e,t){t=t||function(r,e){return r===e};for(var o,u=[],i=[],c=r.getEnumerator();c.moveNext();){o=e(c.current);for(var a=-1,p=0,f=i.length;p<f;p++)if(t(o,i[p])){a=p;break}var s;a<0?(i.push(o),u.push(s=new n(o))):s=u[a],s._add(c.current)}return u}var n=function(r){function e(e){var t=r.call(this)||this;return t.key=e,t._arr=[],t.getEnumerator=function(){return t._arr.en().getEnumerator()},t}return __extends(e,r),e.prototype._add=function(r){this._arr.push(r)},e}(r.Enumerable);r.Enumerable.prototype.groupBy=function(t,n){var o=this,u=new r.Enumerable;return u.getEnumerator=function(){return e(o,t,n)},u},r.List&&(r.List.prototype.groupBy=r.Enumerable.prototype.groupBy)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t,n){n=n||function(r,e){return r===e};var o,u={current:void 0,moveNext:function(){for(o||(o=r.en(e).distinct().getEnumerator()),u.current=void 0;o.moveNext();){for(var i=!1,c=t.getEnumerator();c.moveNext()&&!i;)i=n(o.current,c.current);if(i)return u.current=o.current,!0}return!1}};return u}r.Enumerable.prototype.intersect=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.intersect=r.Enumerable.prototype.intersect)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t,n,o,u,i){i=i||function(r,e){return r===e};var c,a,p=0,f={current:void 0,moveNext:function(){if(f.current=void 0,!c){if(c=e.getEnumerator(),!c.moveNext())return!1;a=r.en(t).toArray()}var s;do{for(;p<a.length;p++)if(s=a[p],i(n(c.current),o(s)))return p++,f.current=u(c.current,s),!0;p=0}while(c.moveNext());return!1}};return f}r.Enumerable.prototype.join=function(t,n,o,u,i){var c=this,a=t instanceof Array?t.en():t,p=new r.Enumerable;return p.getEnumerator=function(){return e(c,a,n,o,u,i)},p},r.List&&(r.List.prototype.join=r.Enumerable.prototype.join)}(exjs||(exjs={}));var exjs;!function(r){function e(){this.constructor=t}r.Enumerable.prototype.toList=function(){for(var r=new t,e=this.getEnumerator();e.moveNext();)r.push(e.current);return r};var t=function(r){function e(){return null!==r&&r.apply(this,arguments)||this}return __extends(e,r),e.prototype.toString=function(){throw new Error("Not implemented")},e.prototype.toLocaleString=function(){throw new Error("Not implemented")},e.prototype.pop=function(){throw new Error("Not implemented")},e.prototype.push=function(){for(var r=[],e=0;e<arguments.length;e++)r[e]=arguments[e];throw new Error("Not implemented")},e.prototype.shift=function(){throw new Error("Not implemented")},e.prototype.slice=function(r,e){throw new Error("Not implemented")},e.prototype.sort=function(r){throw new Error("Not implemented")},e.prototype.splice=function(){throw new Error("Not implemented")},e.prototype.unshift=function(){for(var r=[],e=0;e<arguments.length;e++)r[e]=arguments[e];throw new Error("Not implemented")},e.prototype.indexOf=function(r,e){throw new Error("Not implemented")},e.prototype.lastIndexOf=function(r,e){throw new Error("Not implemented")},e.prototype.every=function(r,e){throw new Error("Not implemented")},e.prototype.some=function(r,e){throw new Error("Not implemented")},e.prototype.forEach=function(r,e){throw new Error("Not implemented")},e.prototype.map=function(r,e){throw new Error("Not implemented")},e.prototype.filter=function(r,e){throw new Error("Not implemented")},e.prototype.reduce=function(r,e){throw new Error("Not implemented")},e.prototype.reduceRight=function(r,e){throw new Error("Not implemented")},e.prototype.remove=function(r){throw new Error("Not implemented")},e.prototype.removeWhere=function(r){throw new Error("Not implemented")},e}(r.Enumerable);r.List=t;for(var n in Array)Array.hasOwnProperty(n)&&(t[n]=Array[n]);e.prototype=Array.prototype,t.prototype=new e;for(var o in r.Enumerable.prototype)"getEnumerator"!==o&&(t.prototype[o]=r.Enumerable.prototype[o]);t.prototype.getEnumerator=function(){var r=this,e=r.length,t={moveNext:void 0,current:void 0},n=-1;return t.moveNext=function(){return n++,n>=e?(t.current=void 0,!1):(t.current=r[n],!0)},t},t.prototype.remove=function(r){return this.removeWhere(function(e){return e===r}).any()},t.prototype.removeWhere=function(r){for(var e,t=[],n=this.length-1;n>=0;n--)e=this[n],r(e,n)===!0&&(this.splice(n,1),t.push(e));return t.en().reverse()}}(exjs||(exjs={}));var exjs;!function(r){function e(r,e,n,o){return new t(r,e,n,o)}var t=function(e){function t(r,t,n,o){var u=e.call(this)||this;u.Source=r,o=o||function(r,e){return r>e?1:r<e?-1:0};var i=n===!0?-1:1;return u.Sorter=function(r,e){return i*o(t(r),t(e))},u}return __extends(t,e),t.prototype.getEnumerator=function(){var e,t=this.Source,n=this.Sorter,o=0,u={current:void 0,moveNext:function(){return e||(e=r.en(t).toArray(),e.sort(n)),u.current=void 0,!(o>=e.length)&&(u.current=e[o],o++,!0)}};return u},t.prototype.thenBy=function(r,e){return new n(this,r,!1,e)},t.prototype.thenByDescending=function(r,e){return new n(this,r,!0,e)},t}(r.Enumerable),n=function(r){function e(e,t,n,o){var u=r.call(this,e,t,n,o)||this,i=e.Sorter,c=u.Sorter;return u.Sorter=function(r,e){return i(r,e)||c(r,e)},u}return __extends(e,r),e}(t),o=r.Enumerable.prototype;o.orderBy=function(r,t){return e(this,r,!1,t)},o.orderByDescending=function(r,t){return e(this,r,!0,t)},r.List&&(r.List.prototype.orderBy=r.Enumerable.prototype.orderBy,r.List.prototype.orderByDescending=r.Enumerable.prototype.orderByDescending)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n,o=1,u={current:void 0,moveNext:function(){if(o<2){if(t=t||e.en().getEnumerator(),t.moveNext())return u.current=t.current,!0;o++}return n=n||r.getEnumerator(),n.moveNext()?(u.current=n.current,!0):(u.current=void 0,!1)}};return u}r.Enumerable.prototype.prepend=function(){for(var t=this,n=[],o=0;o<arguments.length;o++)n[o]=arguments[o];var u=new r.Enumerable;return u.getEnumerator=function(){return e(t,n)},u},r.List&&(r.List.prototype.prepend=r.Enumerable.prototype.prepend)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e,t){var n=r-t,o={current:void 0,moveNext:function(){return n+=t,!(n>=e)&&(o.current=n,!0)}};return o}function t(t,n,o){if(t=t||0,n=n||0,t>n)throw new Error("Start cannot be greater than end.");null==o&&(o=1);var u=new r.Enumerable;return u.getEnumerator=function(){return e(t,n,o)},u}r.range=t}(exjs||(exjs={}));var exjs;!function(r){function e(e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.en(e).toArray(),n=t.length),n--,o.current=t[n],n>=0}};return o}r.Enumerable.prototype.reverse=function(){var t=this,n=new r.Enumerable;return n.getEnumerator=function(){return e(t)},n},r.List&&(r.List.prototype.reverse=r.Enumerable.prototype.reverse)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){if(e=e||0,0===e)return Math.round(r);var t=Math.pow(10,e);return Math.round(r*t)/t}r.round=e}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),!!t.moveNext()&&(o.current=e(t.current,n),n++,!0)}};return o}function t(e,t){var n,o,u={current:void 0,moveNext:function(){for(u.current=void 0,n||(n=e.getEnumerator());!o||!o.moveNext();){if(!n.moveNext())return!1;o=r.selectorEnumerator(t(n.current))}return u.current=o.current,!0}};return u}r.Enumerable.prototype.select=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.selectMany=function(e){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return t(n,e)},o},r.List&&(r.List.prototype.select=r.Enumerable.prototype.select,r.List.prototype.selectMany=r.Enumerable.prototype.selectMany)}(exjs||(exjs={}));var exjs;!function(r){function e(r){return Array.isArray(r)?r.en().getEnumerator():null!=r&&"function"==typeof r.getEnumerator?r.getEnumerator():null}r.selectorEnumerator=e}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n={current:void 0,moveNext:function(){if(!t){t=r.getEnumerator();for(var o=0;o<e;o++)if(!t.moveNext())return!1}return t.moveNext()?(n.current=t.current,!0):(n.current=void 0,!1)}};return n}function t(r,e){var t,n={current:void 0,moveNext:function(){if(!t){t=r.getEnumerator();for(var o=0;t.moveNext();o++)if(!e(n.current=t.current,o))return!0;return n.current=void 0,!1}return t.moveNext()?(n.current=t.current,!0):(n.current=void 0,!1)}};return n}r.Enumerable.prototype.skip=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.skipWhile=function(e){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return t(n,e)},o},r.List&&(r.List.prototype.skip=r.Enumerable.prototype.skip,r.List.prototype.skipWhile=r.Enumerable.prototype.skipWhile)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),n++,!(n>e)&&(o.current=void 0,!!t.moveNext()&&(o.current=t.current,!0))}};return o}function t(r,e){var t,n=0,o={current:void 0,moveNext:function(){return t||(t=r.getEnumerator()),t.moveNext()&&e(t.current,n)?(n++,o.current=t.current,!0):(o.current=void 0,!1)}};return o}r.Enumerable.prototype.take=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.takeWhile=function(e){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return t(n,e)},o},r.List&&(r.List.prototype.take=r.Enumerable.prototype.take,r.List.prototype.takeWhile=r.Enumerable.prototype.takeWhile)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t){var n,o=!1,u=[],i={current:void 0,moveNext:function(){if(o){if(null==n)return!1;u.push(n),n=r.selectorEnumerator(t(i.current))}else n=e.getEnumerator(),o=!0;for(;!(n&&n.moveNext()||u.length<1);)n=u.pop();return i.current=null==n?void 0:n.current,void 0!==i.current}};return i}function t(e,t,n){var o,u=!1,i=[],c={current:void 0,moveNext:function(){if(u){if(null==o)return!1;i.push(o),o=r.selectorEnumerator(t(c.current))}else o=e.getEnumerator(),u=!0;do{for(;!(o&&o.moveNext()||i.length<1);)o=i.pop();c.current=null==o?void 0:o.current}while(n(c.current));return void 0!==c.current}};return c}r.Enumerable.prototype.traverse=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.Enumerable.prototype.traverseUnique=function(e,n){var o=this,u=[],i=new r.Enumerable;return n?i.getEnumerator=function(){return t(o,e,function(r){return!!u.some(function(e){return n(r,e)})||(u.push(r),!1)})}:i.getEnumerator=function(){return t(o,e,function(r){return u.indexOf(r)>-1||(u.push(r),!1)})},i},r.List&&(r.List.prototype.traverse=r.Enumerable.prototype.traverse,r.List.prototype.traverseUnique=r.Enumerable.prototype.traverseUnique)}(exjs||(exjs={}));var exjs;!function(r){function e(e,t,n){n=n||function(r,e){return r===e};var o,u,i=[],c={current:void 0,moveNext:function(){if(o||(o=r.en(e).distinct().getEnumerator()),c.current=void 0,!u&&o.moveNext())return i.push(c.current=o.current),!0;for(u=u||r.en(t).distinct().getEnumerator();u.moveNext();){for(var a=0,p=!1,f=i.length;a<f&&!p;a++)p=n(i[a],u.current);if(!p)return c.current=u.current,!0}return!1}};return c}r.Enumerable.prototype.union=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.union=r.Enumerable.prototype.union)}(exjs||(exjs={}));var exjs;!function(r){function e(r,e){var t,n={current:void 0,moveNext:function(){t||(t=r.getEnumerator());for(var o;t.moveNext();)if(e(o=t.current))return n.current=o,!0;return!1}};return n}r.Enumerable.prototype.where=function(t){var n=this,o=new r.Enumerable;return o.getEnumerator=function(){return e(n,t)},o},r.List&&(r.List.prototype.where=r.Enumerable.prototype.where)}(exjs||(exjs={}));var exjs;!function(r){function e(e){var n=new r.Enumerable;return n.getEnumerator=function(){return t(e)},n}function t(r){var e=r.getEnumerator(),t={current:void 0,moveNext:void 0};return t.moveNext=function(){return e.moveNext()?(t.current=e.current,!0):(t.current=void 0,!1)},t}r.en=e}(exjs||(exjs={}));var ex=exjs.en,exjs;!function(r){function e(r,e,t){var n,o,u={current:void 0,moveNext:function(){return n||(n=r.getEnumerator()),o||(o=e.getEnumerator()),u.current=void 0,!(!n.moveNext()||!o.moveNext())&&(u.current=t(n.current,o.current),!0)}};return u}r.Enumerable.prototype.zip=function(t,n){var o=this,u=t instanceof Array?t.en():t,i=new r.Enumerable;return i.getEnumerator=function(){return e(o,u,n)},i},r.List&&(r.List.prototype.zip=r.Enumerable.prototype.zip)}(exjs||(exjs={}));
 //# sourceMappingURL=ex.es3.min.js.map
 
-// extensions v0.1.11 https://github.com/edsilv/extensions
-Array.prototype.clone||(Array.prototype.clone=function(){return this.slice(0)}),Array.prototype.contains||(Array.prototype.contains=function(val){return this.indexOf(val)!==-1}),Array.prototype.indexOf||(Array.prototype.indexOf=function(searchElement,fromIndex){var i=fromIndex||0,j=this.length;for(i;i<j;i++)if(this[i]===searchElement)return i;return-1}),Array.prototype.indexOfTest=function(test,fromIndex){var i=fromIndex||0,j=this.length;for(i;i<j;i++)if(test(this[i]))return i;return-1},Array.prototype.insert=function(item,index){this.splice(index,0,item)},Array.prototype.last||(Array.prototype.last=function(){return this[this.length-1]}),Array.prototype.map||(Array.prototype.map=function(callback,thisArg){var T,A,k;if(null==this)throw new TypeError(" this is null or not defined");var O=Object(this),len=O.length>>>0;if("function"!=typeof callback)throw new TypeError(callback+" is not a function");for(arguments.length>1&&(T=thisArg),A=new Array(len),k=0;k<len;){var kValue,mappedValue;k in O&&(kValue=O[k],mappedValue=callback.call(T,kValue,k,O),A[k]=mappedValue),k++}return A}),Array.prototype.move=function(fromIndex,toIndex){this.splice(toIndex,0,this.splice(fromIndex,1)[0])},Array.prototype.remove=function(item){var index=this.indexOf(item);index>-1&&this.splice(index,1)},Array.prototype.removeAt=function(index){this.splice(index,1)},Math.clamp=function(value,min,max){return Math.min(Math.max(value,min),max)},Math.constrain=function(value,low,high){return Math.clamp(value,low,high)},Math.degreesToRadians=function(degrees){return Math.TAU*(degrees/360)},Math.distanceBetween=function(x1,y1,x2,y2){return Math.sqrt(Math.sq(x2-x1)+Math.sq(y2-y1))},Math.lerp=function(start,stop,amount){return start+(stop-start)*amount},Math.mag=function(a,b,c){return Math.sqrt(a*a+b*b+c*c)},Math.map=function(value,start1,stop1,start2,stop2){return start2+(stop2-start2)*((value-start1)/(stop1-start1))},Math.median=function(values){values.sort(function(a,b){return a-b});var half=Math.floor(values.length/2);return values.length%2?values[half]:(values[half-1]+values[half])/2},Math.normalise=function(num,min,max){return(num-min)/(max-min)},Math.radiansToDegrees=function(radians){return 360*radians/Math.TAU},Math.randomBetween=function(low,high){return high||(high=low,low=0),low>=high?low:low+(high-low)*Math.random()},Math.roundToDecimalPlace=function(num,dec){return Math.round(num*Math.pow(10,dec))/Math.pow(10,dec)},Math.sq=function(n){return n*n},Math.TAU=2*Math.PI,Number.prototype.isInteger||(Number.prototype.isInteger=function(){return this%1===0}),"function"!=typeof Object.create&&(Object.create=function(o,props){function F(){}F.prototype=o;var result=new F;if("object"==typeof props)for(var prop in props)props.hasOwnProperty(prop)&&(result[prop]=props[prop].value);return result}),Object.keys||(Object.keys=function(){var hasOwnProperty=Object.prototype.hasOwnProperty,hasDontEnumBug=!{toString:null}.propertyIsEnumerable("toString"),dontEnums=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],dontEnumsLength=dontEnums.length;return function(obj){if("object"!=typeof obj&&"function"!=typeof obj||null===obj)throw new TypeError("Object.keys called on non-object");var result=[];for(var prop in obj)hasOwnProperty.call(obj,prop)&&result.push(prop);if(hasDontEnumBug)for(var i=0;i<dontEnumsLength;i++)hasOwnProperty.call(obj,dontEnums[i])&&result.push(dontEnums[i]);return result}}()),String.prototype.b64_to_utf8=function(){return decodeURIComponent(escape(window.atob(this)))},String.prototype.contains=function(str){return this.indexOf(str)!==-1},String.prototype.endsWith||(String.prototype.endsWith=function(str){return this.indexOf(str,this.length-str.length)!==-1}),String.format=function(){for(var s=arguments[0],i=0;i<arguments.length-1;i++){var reg=new RegExp("\\{"+i+"\\}","gm");s=s.replace(reg,arguments[i+1])}return s},String.prototype.hashCode=function(){var i,chr,len,hash=0;if(0===this.length)return hash.toString();for(i=0,len=this.length;i<len;i++)chr=this.charCodeAt(i),hash=(hash<<5)-hash+chr,hash|=0;return hash.toString()},String.prototype.isAlphanumeric=function(){return/^[a-zA-Z0-9]*$/.test(this)},String.prototype.ltrim=function(){return this.replace(/^\s+/,"")},String.prototype.rtrim=function(){return this.replace(/\s+$/,"")},String.prototype.startsWith||(String.prototype.startsWith=function(str){return 0==this.indexOf(str)}),String.prototype.toCssClass=function(){return this.replace(/[^a-z0-9]/g,function(s){var c=s.charCodeAt(0);return 32==c?"-":c>=65&&c<=90?"_"+s.toLowerCase():"__"+("000"+c.toString(16)).slice(-4)})},String.prototype.toFileName=function(){return this.replace(/[^a-z0-9]/gi,"_").toLowerCase()},String.prototype.trim||(String.prototype.trim=function(){return this.replace(/^\s\s*/,"").replace(/\s\s*$/,"")}),String.prototype.utf8_to_b64=function(){return window.btoa(unescape(encodeURIComponent(this)))};
+// http-status-codes v0.0.5 https://github.com/edsilv/http-status-codes
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.httpStatusCodes = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
 var HTTPStatusCode;
 (function (HTTPStatusCode) {
     HTTPStatusCode.CONTINUE = 100;
@@ -569,9 +672,19 @@ var HTTPStatusCode;
     HTTPStatusCode.NOT_EXTENDED = 510;
     HTTPStatusCode.NETWORK_AUTHENTICATION_REQUIRED = 511;
 })(HTTPStatusCode || (HTTPStatusCode = {}));
+(function (g) {
+    if (!g.HTTPStatusCode) {
+        g.HTTPStatusCode = HTTPStatusCode;
+    }
+})(global);
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}]},{},[1])(1)
+});
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.manifesto = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+///<reference path="../node_modules/typescript/lib/lib.es6.d.ts"/>   
+
 var Manifesto;
 (function (Manifesto) {
     var StringValue = (function () {
@@ -589,17 +702,22 @@ var Manifesto;
     Manifesto.StringValue = StringValue;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var AnnotationMotivation = (function (_super) {
         __extends(AnnotationMotivation, _super);
         function AnnotationMotivation() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         AnnotationMotivation.prototype.bookmarking = function () {
@@ -663,17 +781,22 @@ var Manifesto;
     Manifesto.AnnotationMotivation = AnnotationMotivation;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var ElementType = (function (_super) {
         __extends(ElementType, _super);
         function ElementType() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         ElementType.prototype.canvas = function () {
@@ -705,17 +828,22 @@ var Manifesto;
     Manifesto.ElementType = ElementType;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var IIIFResourceType = (function (_super) {
         __extends(IIIFResourceType, _super);
         function IIIFResourceType() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         IIIFResourceType.prototype.annotation = function () {
@@ -747,17 +875,22 @@ var Manifesto;
     Manifesto.IIIFResourceType = IIIFResourceType;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var ManifestType = (function (_super) {
         __extends(ManifestType, _super);
         function ManifestType() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         ManifestType.prototype.empty = function () {
@@ -777,17 +910,22 @@ var Manifesto;
     Manifesto.ManifestType = ManifestType;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var RenderingFormat = (function (_super) {
         __extends(RenderingFormat, _super);
         function RenderingFormat() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         RenderingFormat.prototype.pdf = function () {
@@ -807,43 +945,65 @@ var Manifesto;
     Manifesto.RenderingFormat = RenderingFormat;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
-    var ResourceFormat = (function (_super) {
-        __extends(ResourceFormat, _super);
-        function ResourceFormat() {
-            _super.apply(this, arguments);
+    var MediaType = (function (_super) {
+        __extends(MediaType, _super);
+        function MediaType() {
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
-        ResourceFormat.prototype.jpgimage = function () {
-            return new ResourceFormat(ResourceFormat.JPGIMAGE.toString());
+        MediaType.prototype.jpg = function () {
+            return new MediaType(MediaType.JPG.toString());
         };
-        ResourceFormat.prototype.pdf = function () {
-            return new ResourceFormat(ResourceFormat.PDF.toString());
+        MediaType.prototype.mp4 = function () {
+            return new MediaType(MediaType.MP4.toString());
         };
-        ResourceFormat.JPGIMAGE = new ResourceFormat("image/jpeg");
-        ResourceFormat.PDF = new ResourceFormat("application/pdf");
-        return ResourceFormat;
+        MediaType.prototype.pdf = function () {
+            return new MediaType(MediaType.PDF.toString());
+        };
+        MediaType.prototype.threejs = function () {
+            return new MediaType(MediaType.THREEJS.toString());
+        };
+        MediaType.prototype.webm = function () {
+            return new MediaType(MediaType.WEBM.toString());
+        };
+        MediaType.JPG = new MediaType("image/jpeg");
+        MediaType.MP4 = new MediaType("video/mp4");
+        MediaType.PDF = new MediaType("application/pdf");
+        MediaType.THREEJS = new MediaType("application/vnd.threejs+json");
+        MediaType.WEBM = new MediaType("video/webm");
+        return MediaType;
     }(Manifesto.StringValue));
-    Manifesto.ResourceFormat = ResourceFormat;
+    Manifesto.MediaType = MediaType;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var ResourceType = (function (_super) {
         __extends(ResourceType, _super);
         function ResourceType() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         ResourceType.prototype.image = function () {
@@ -855,19 +1015,42 @@ var Manifesto;
     Manifesto.ResourceType = ResourceType;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var ServiceProfile = (function (_super) {
         __extends(ServiceProfile, _super);
         function ServiceProfile() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
+        ServiceProfile.prototype.auth1Clickthrough = function () {
+            return new ServiceProfile(ServiceProfile.AUTH1CLICKTHROUGH.toString());
+        };
+        ServiceProfile.prototype.auth1External = function () {
+            return new ServiceProfile(ServiceProfile.AUTH1EXTERNAL.toString());
+        };
+        ServiceProfile.prototype.auth1Kiosk = function () {
+            return new ServiceProfile(ServiceProfile.AUTH1KIOSK.toString());
+        };
+        ServiceProfile.prototype.auth1Login = function () {
+            return new ServiceProfile(ServiceProfile.AUTH1LOGIN.toString());
+        };
+        ServiceProfile.prototype.auth1Logout = function () {
+            return new ServiceProfile(ServiceProfile.AUTH1LOGOUT.toString());
+        };
+        ServiceProfile.prototype.auth1Token = function () {
+            return new ServiceProfile(ServiceProfile.AUTH1TOKEN.toString());
+        };
         ServiceProfile.prototype.autoComplete = function () {
             return new ServiceProfile(ServiceProfile.AUTOCOMPLETE.toString());
         };
@@ -887,22 +1070,22 @@ var Manifesto;
             return new ServiceProfile(ServiceProfile.IXIF.toString());
         };
         ServiceProfile.prototype.login = function () {
-            return new ServiceProfile(ServiceProfile.LOGIN.toString());
+            return new ServiceProfile(ServiceProfile.AUTHLOGIN.toString());
         };
         ServiceProfile.prototype.clickThrough = function () {
-            return new ServiceProfile(ServiceProfile.CLICKTHROUGH.toString());
+            return new ServiceProfile(ServiceProfile.AUTHCLICKTHROUGH.toString());
         };
         ServiceProfile.prototype.restricted = function () {
-            return new ServiceProfile(ServiceProfile.RESTRICTED.toString());
+            return new ServiceProfile(ServiceProfile.AUTHRESTRICTED.toString());
         };
         ServiceProfile.prototype.logout = function () {
-            return new ServiceProfile(ServiceProfile.LOGOUT.toString());
+            return new ServiceProfile(ServiceProfile.AUTHLOGOUT.toString());
         };
         ServiceProfile.prototype.otherManifestations = function () {
             return new ServiceProfile(ServiceProfile.OTHERMANIFESTATIONS.toString());
         };
-        ServiceProfile.prototype.searchWithin = function () {
-            return new ServiceProfile(ServiceProfile.SEARCHWITHIN.toString());
+        ServiceProfile.prototype.search = function () {
+            return new ServiceProfile(ServiceProfile.SEARCH.toString());
         };
         ServiceProfile.prototype.stanfordIIIFImageCompliance1 = function () {
             return new ServiceProfile(ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString());
@@ -929,7 +1112,7 @@ var Manifesto;
             return new ServiceProfile(ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString());
         };
         ServiceProfile.prototype.token = function () {
-            return new ServiceProfile(ServiceProfile.TOKEN.toString());
+            return new ServiceProfile(ServiceProfile.AUTHTOKEN.toString());
         };
         ServiceProfile.prototype.trackingExtensions = function () {
             return new ServiceProfile(ServiceProfile.TRACKINGEXTENSIONS.toString());
@@ -943,7 +1126,7 @@ var Manifesto;
         ServiceProfile.prototype.shareExtensions = function () {
             return new ServiceProfile(ServiceProfile.SHAREEXTENSIONS.toString());
         };
-        ServiceProfile.AUTOCOMPLETE = new ServiceProfile("http://iiif.io/api/search/0/autocomplete");
+        // image api
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level0");
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level1");
         ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2 = new ServiceProfile("http://library.stanford.edu/iiif/image-api/compliance.html#level2");
@@ -968,34 +1151,50 @@ var Manifesto;
         ServiceProfile.IIIF2IMAGELEVEL1PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level1.json");
         ServiceProfile.IIIF2IMAGELEVEL2 = new ServiceProfile("http://iiif.io/api/image/2/level2.json");
         ServiceProfile.IIIF2IMAGELEVEL2PROFILE = new ServiceProfile("http://iiif.io/api/image/2/profiles/level2.json");
-        ServiceProfile.IXIF = new ServiceProfile("http://wellcomelibrary.org/ld/ixif/0/alpha.json");
-        ServiceProfile.LOGIN = new ServiceProfile("http://iiif.io/api/auth/0/login");
-        ServiceProfile.CLICKTHROUGH = new ServiceProfile("http://iiif.io/api/auth/0/login/clickthrough");
-        ServiceProfile.RESTRICTED = new ServiceProfile("http://iiif.io/api/auth/0/login/restricted");
-        ServiceProfile.LOGOUT = new ServiceProfile("http://iiif.io/api/auth/0/logout");
-        ServiceProfile.OTHERMANIFESTATIONS = new ServiceProfile("http://iiif.io/api/otherManifestations.json");
-        ServiceProfile.SEARCHWITHIN = new ServiceProfile("http://iiif.io/api/search/0/search");
-        ServiceProfile.TOKEN = new ServiceProfile("http://iiif.io/api/auth/0/token");
+        // auth api
+        ServiceProfile.AUTHCLICKTHROUGH = new ServiceProfile("http://iiif.io/api/auth/0/login/clickthrough");
+        ServiceProfile.AUTHLOGIN = new ServiceProfile("http://iiif.io/api/auth/0/login");
+        ServiceProfile.AUTHLOGOUT = new ServiceProfile("http://iiif.io/api/auth/0/logout");
+        ServiceProfile.AUTHRESTRICTED = new ServiceProfile("http://iiif.io/api/auth/0/login/restricted");
+        ServiceProfile.AUTHTOKEN = new ServiceProfile("http://iiif.io/api/auth/0/token");
+        ServiceProfile.AUTH1CLICKTHROUGH = new ServiceProfile("http://iiif.io/api/auth/1/clickthrough");
+        ServiceProfile.AUTH1EXTERNAL = new ServiceProfile("http://iiif.io/api/auth/1/external");
+        ServiceProfile.AUTH1KIOSK = new ServiceProfile("http://iiif.io/api/auth/1/kiosk");
+        ServiceProfile.AUTH1LOGIN = new ServiceProfile("http://iiif.io/api/auth/1/login");
+        ServiceProfile.AUTH1LOGOUT = new ServiceProfile("http://iiif.io/api/auth/1/logout");
+        ServiceProfile.AUTH1TOKEN = new ServiceProfile("http://iiif.io/api/auth/1/token");
+        // search api
+        ServiceProfile.AUTOCOMPLETE = new ServiceProfile("http://iiif.io/api/search/0/autocomplete");
+        ServiceProfile.SEARCH = new ServiceProfile("http://iiif.io/api/search/0/search");
+        // extensions
         ServiceProfile.TRACKINGEXTENSIONS = new ServiceProfile("http://universalviewer.io/tracking-extensions-profile");
         ServiceProfile.UIEXTENSIONS = new ServiceProfile("http://universalviewer.io/ui-extensions-profile");
         ServiceProfile.PRINTEXTENSIONS = new ServiceProfile("http://universalviewer.io/print-extensions-profile");
         ServiceProfile.SHAREEXTENSIONS = new ServiceProfile("http://universalviewer.io/share-extensions-profile");
+        // other
+        ServiceProfile.OTHERMANIFESTATIONS = new ServiceProfile("http://iiif.io/api/otherManifestations.json");
+        ServiceProfile.IXIF = new ServiceProfile("http://wellcomelibrary.org/ld/ixif/0/alpha.json");
         return ServiceProfile;
     }(Manifesto.StringValue));
     Manifesto.ServiceProfile = ServiceProfile;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var ViewingDirection = (function (_super) {
         __extends(ViewingDirection, _super);
         function ViewingDirection() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         ViewingDirection.prototype.leftToRight = function () {
@@ -1019,17 +1218,22 @@ var Manifesto;
     Manifesto.ViewingDirection = ViewingDirection;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var ViewingHint = (function (_super) {
         __extends(ViewingHint, _super);
         function ViewingHint() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         ViewingHint.prototype.continuous = function () {
@@ -1066,32 +1270,43 @@ var Manifesto;
     var JSONLDResource = (function () {
         function JSONLDResource(jsonld) {
             this.__jsonld = jsonld;
-            this.context = this.getProperty('@context');
-            this.id = this.getProperty('@id');
+            this.context = this.getProperty('context');
+            this.id = this.getProperty('id');
         }
         JSONLDResource.prototype.getProperty = function (name) {
+            var prop = null;
             if (this.__jsonld) {
-                return this.__jsonld[name];
+                prop = this.__jsonld[name];
+                if (!prop) {
+                    // property may have a prepended '@'
+                    prop = this.__jsonld['@' + name];
+                }
             }
-            return null;
+            return prop;
         };
         return JSONLDResource;
     }());
     Manifesto.JSONLDResource = JSONLDResource;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var ManifestResource = (function (_super) {
         __extends(ManifestResource, _super);
         function ManifestResource(jsonld, options) {
-            _super.call(this, jsonld);
-            this.options = options;
+            var _this = _super.call(this, jsonld) || this;
+            _this.options = options;
+            return _this;
         }
         ManifestResource.prototype.getIIIFResourceType = function () {
             return new Manifesto.IIIFResourceType(this.getProperty('@type'));
@@ -1115,7 +1330,7 @@ var Manifesto;
         ManifestResource.prototype.getRendering = function (format) {
             var renderings = this.getRenderings();
             // normalise format to string
-            if (typeof format !== 'string') {
+            if (typeof (format) !== 'string') {
                 format = format.toString();
             }
             for (var i = 0; i < renderings.length; i++) {
@@ -1140,7 +1355,7 @@ var Manifesto;
             if (!rendering)
                 return renderings;
             // coerce to array
-            if (!_isArray(rendering)) {
+            if (!Array.isArray(rendering)) {
                 rendering = [rendering];
             }
             for (var i = 0; i < rendering.length; i++) {
@@ -1178,17 +1393,22 @@ var Manifesto;
     Manifesto.ManifestResource = ManifestResource;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Element = (function (_super) {
         __extends(Element, _super);
         function Element(jsonld, options) {
-            _super.call(this, jsonld, options);
+            return _super.call(this, jsonld, options) || this;
         }
         Element.prototype.getResources = function () {
             var resources = [];
@@ -1202,45 +1422,50 @@ var Manifesto;
             return resources;
         };
         Element.prototype.getType = function () {
-            return new Manifesto.ElementType(this.getProperty('@type'));
+            return new Manifesto.ElementType(this.getProperty('type'));
         };
         return Element;
     }(Manifesto.ManifestResource));
     Manifesto.Element = Element;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var _endsWith = require("lodash.endswith");
-var _last = require("lodash.last");
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Canvas = (function (_super) {
         __extends(Canvas, _super);
         function Canvas(jsonld, options) {
-            _super.call(this, jsonld, options);
+            return _super.call(this, jsonld, options) || this;
         }
         // http://iiif.io/api/image/2.1/#canonical-uri-syntax
         Canvas.prototype.getCanonicalImageUri = function (w) {
-            var id;
+            var id = null;
             var region = 'full';
             var rotation = 0;
             var quality = 'default';
             var width = w;
             var size;
             // if an info.json has been loaded
-            if (this.externalResource && this.externalResource.data) {
+            if (this.externalResource && this.externalResource.data && this.externalResource.data['@id']) {
                 id = this.externalResource.data['@id'];
                 if (!width) {
                     width = this.externalResource.data.width;
                 }
-                if (this.externalResource.data['@context'].indexOf('/1.0/context.json') > -1 ||
-                    this.externalResource.data['@context'].indexOf('/1.1/context.json') > -1 ||
-                    this.externalResource.data['@context'].indexOf('/1/context.json') > -1) {
-                    quality = 'native';
+                if (this.externalResource.data['@context']) {
+                    if (this.externalResource.data['@context'].indexOf('/1.0/context.json') > -1 ||
+                        this.externalResource.data['@context'].indexOf('/1.1/context.json') > -1 ||
+                        this.externalResource.data['@context'].indexOf('/1/context.json') > -1) {
+                        quality = 'native';
+                    }
                 }
             }
             else {
@@ -1268,6 +1493,41 @@ var Manifesto;
             size = width + ',';
             var uri = [id, region, size, rotation, quality + '.jpg'].join('/');
             return uri;
+        };
+        Canvas.prototype.getMaxDimensions = function () {
+            var maxDimensions = null;
+            var profile;
+            if (this.externalResource.data && this.externalResource.data.profile) {
+                profile = this.externalResource.data.profile;
+                if (Array.isArray(profile)) {
+                    profile = profile.en().where(function (p) { return p["maxWidth" || "maxwidth"]; }).first();
+                    if (profile) {
+                        maxDimensions = new Manifesto.Size(profile.maxWidth, profile.maxHeight ? profile.maxHeight : profile.maxWidth);
+                    }
+                }
+            }
+            return maxDimensions;
+        };
+        // Presentation API 3.0
+        Canvas.prototype.getContent = function () {
+            var content = [];
+            if (!this.__jsonld.content)
+                return content;
+            // should be contained in an AnnotationPage
+            var annotationPage = null;
+            if (this.__jsonld.content.length) {
+                annotationPage = new Manifesto.AnnotationPage(this.__jsonld.content[0], this.options);
+            }
+            if (!annotationPage) {
+                return content;
+            }
+            var annotations = annotationPage.getItems();
+            for (var i = 0; i < annotations.length; i++) {
+                var a = annotations[i];
+                var annotation = new Manifesto.Annotation(a, this.options);
+                content.push(annotation);
+            }
+            return content;
         };
         Canvas.prototype.getImages = function () {
             var images = [];
@@ -1298,7 +1558,7 @@ var Manifesto;
         //        var resource: IResource = firstImage.getResource();
         //        var services: IService[] = resource.getServices();
         //
-        //        for (var i = 0; i < services.length; i++) {
+        //        for (let i = 0; i < services.length; i++) {
         //            var service: IService = services[i];
         //            var id = service.id;
         //
@@ -1326,27 +1586,32 @@ var Manifesto;
     Manifesto.Canvas = Canvas;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var _assign = require("lodash.assign");
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var IIIFResource = (function (_super) {
         __extends(IIIFResource, _super);
         function IIIFResource(jsonld, options) {
-            _super.call(this, jsonld, options);
-            this.index = -1;
-            this.isLoaded = false;
+            var _this = _super.call(this, jsonld, options) || this;
+            _this.index = -1;
+            _this.isLoaded = false;
             var defaultOptions = {
                 defaultLabel: '-',
                 locale: 'en-GB',
-                resource: this,
+                resource: _this,
                 pessimisticAccessControl: false
             };
-            this.options = _assign(defaultOptions, options);
+            _this.options = Object.assign(defaultOptions, options);
+            return _this;
         }
         IIIFResource.prototype.getAttribution = function () {
             var attribution = this.getProperty('attribution');
@@ -1363,13 +1628,18 @@ var Manifesto;
             return [];
         };
         IIIFResource.prototype.getIIIFResourceType = function () {
-            return new Manifesto.IIIFResourceType(this.getProperty('@type'));
+            var type = this.getProperty('type');
+            if (type) {
+                return new Manifesto.IIIFResourceType(type);
+            }
+            type = this.getProperty('@type');
+            return new Manifesto.IIIFResourceType(type);
         };
         IIIFResource.prototype.getLogo = function () {
             var logo = this.getProperty('logo');
             if (!logo)
                 return null;
-            if (_isString(logo))
+            if (typeof (logo) === 'string')
                 return logo;
             return logo['@id'];
         };
@@ -1398,10 +1668,22 @@ var Manifesto;
             return this.defaultTree;
         };
         IIIFResource.prototype.isCollection = function () {
-            return this.getIIIFResourceType().toString() === Manifesto.IIIFResourceType.COLLECTION.toString();
+            if (this.getIIIFResourceType().toString().toLowerCase() === 'collection') {
+                return true;
+            }
+            else if (this.getIIIFResourceType().toString() === Manifesto.IIIFResourceType.COLLECTION.toString()) {
+                return true;
+            }
+            return false;
         };
         IIIFResource.prototype.isManifest = function () {
-            return this.getIIIFResourceType().toString() === Manifesto.IIIFResourceType.MANIFEST.toString();
+            if (this.getIIIFResourceType().toString().toLowerCase() === 'manifest') {
+                return true;
+            }
+            else if (this.getIIIFResourceType().toString() === Manifesto.IIIFResourceType.MANIFEST.toString()) {
+                return true;
+            }
+            return false;
         };
         IIIFResource.prototype.load = function () {
             var that = this;
@@ -1410,13 +1692,17 @@ var Manifesto;
                     resolve(that);
                 }
                 else {
-                    var options = that.options;
-                    options.navDate = that.getNavDate();
-                    Manifesto.Utils.loadResource(that.__jsonld['@id']).then(function (data) {
-                        that.parentLabel = Manifesto.TranslationCollection.getValue(that.getLabel(), options.locale);
-                        var parsed = Manifesto.Deserialiser.parse(data, options);
-                        that = _assign(that, parsed);
-                        that.index = options.index;
+                    var options_1 = that.options;
+                    options_1.navDate = that.getNavDate();
+                    var id = that.__jsonld.id;
+                    if (!id) {
+                        id = that.__jsonld['@id'];
+                    }
+                    Manifesto.Utils.loadResource(id).then(function (data) {
+                        that.parentLabel = Manifesto.TranslationCollection.getValue(that.getLabel(), options_1.locale);
+                        var parsed = Manifesto.Deserialiser.parse(data, options_1);
+                        that = Object.assign(that, parsed);
+                        that.index = options_1.index;
                         resolve(that);
                     });
                 }
@@ -1427,30 +1713,34 @@ var Manifesto;
     Manifesto.IIIFResource = IIIFResource;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var _isArray = require("lodash.isarray");
-var _map = require("lodash.map");
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Manifest = (function (_super) {
         __extends(Manifest, _super);
         function Manifest(jsonld, options) {
-            _super.call(this, jsonld, options);
-            this.index = 0;
-            this._allRanges = null;
-            this._sequences = null;
-            this._topRanges = [];
-            if (this.__jsonld.structures && this.__jsonld.structures.length) {
-                var topRanges = this._getTopRanges();
+            var _this = _super.call(this, jsonld, options) || this;
+            _this.index = 0;
+            _this._allRanges = null;
+            _this._sequences = null;
+            _this._topRanges = [];
+            if (_this.__jsonld.structures && _this.__jsonld.structures.length) {
+                var topRanges = _this._getTopRanges();
                 for (var i = 0; i < topRanges.length; i++) {
                     var range = topRanges[i];
-                    this._parseRanges(range, String(i));
+                    _this._parseRanges(range, String(i));
                 }
             }
+            return _this;
         }
         Manifest.prototype.getDefaultTree = function () {
             _super.prototype.getDefaultTree.call(this);
@@ -1498,15 +1788,21 @@ var Manifesto;
             }
             return null;
         };
-        Manifest.prototype._parseRangeCanvas = function (json, range) {
-            // todo: currently this isn't needed
-            //var canvas: IJSONLDResource = new JSONLDResource(json);
-            //range.members.push(<IManifestResource>canvas);
-        };
+        //private _parseRangeCanvas(json: any, range: IRange): void {
+        // todo: currently this isn't needed
+        //var canvas: IJSONLDResource = new JSONLDResource(json);
+        //range.members.push(<IManifestResource>canvas);
+        //}
         Manifest.prototype._parseRanges = function (r, path, parentRange) {
             var range;
-            if (_isString(r)) {
-                r = this._getRangeById(r);
+            var id = null;
+            if (typeof (r) === 'string') {
+                id = r;
+                r = this._getRangeById(id);
+            }
+            if (!r) {
+                console.warn("Range:", id, "does not exist");
+                return;
             }
             range = new Manifesto.Range(r, this.options);
             range.parentRange = parentRange;
@@ -1523,7 +1819,7 @@ var Manifesto;
                 }
             }
             if (r.members) {
-                var _loop_1 = function(i) {
+                var _loop_1 = function (i) {
                     var child = r.members[i];
                     // only add to members if not already parsed from backwards-compatible ranges/canvases arrays
                     if (r.members.en().where(function (m) { return m.id === child.id; }).first()) {
@@ -1535,8 +1831,7 @@ var Manifesto;
                 };
                 var this_1 = this;
                 for (var i = 0; i < r.members.length; i++) {
-                    var state_1 = _loop_1(i);
-                    if (state_1 === "continue") continue;
+                    _loop_1(i);
                 }
             }
         };
@@ -1576,7 +1871,7 @@ var Manifesto;
             return null;
         };
         Manifest.prototype.getSequences = function () {
-            if (this._sequences != null)
+            if (this._sequences !== null)
                 return this._sequences;
             this._sequences = [];
             // if IxIF mediaSequences is present, use that. Otherwise fall back to IIIF sequences.
@@ -1613,6 +1908,9 @@ var Manifesto;
         Manifest.prototype.isMultiSequence = function () {
             return this.getTotalSequences() > 1;
         };
+        Manifest.prototype.isPagingEnabled = function () {
+            return this.getViewingHint().toString() === Manifesto.ViewingHint.PAGED.toString();
+        };
         Manifest.prototype.getViewingDirection = function () {
             if (this.getProperty('viewingDirection')) {
                 return new Manifesto.ViewingDirection(this.getProperty('viewingDirection'));
@@ -1630,21 +1928,27 @@ var Manifesto;
     Manifesto.Manifest = Manifest;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Collection = (function (_super) {
         __extends(Collection, _super);
         function Collection(jsonld, options) {
-            _super.call(this, jsonld, options);
-            this.members = [];
-            this._collections = null;
-            this._manifests = null;
-            jsonld.__collection = this;
+            var _this = _super.call(this, jsonld, options) || this;
+            _this.members = [];
+            _this._collections = null;
+            _this._manifests = null;
+            jsonld.__collection = _this;
+            return _this;
         }
         Collection.prototype.getCollections = function () {
             if (this._collections) {
@@ -1721,20 +2025,26 @@ var Manifesto;
     Manifesto.Collection = Collection;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Range = (function (_super) {
         __extends(Range, _super);
         function Range(jsonld, options) {
-            _super.call(this, jsonld, options);
-            this._canvases = null;
-            this._ranges = null;
-            this.members = [];
+            var _this = _super.call(this, jsonld, options) || this;
+            _this._canvases = null;
+            _this._ranges = null;
+            _this.members = [];
+            return _this;
         }
         Range.prototype.getCanvasIds = function () {
             if (this.__jsonld.canvases) {
@@ -1801,17 +2111,22 @@ var Manifesto;
     Manifesto.Range = Range;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Rendering = (function (_super) {
         __extends(Rendering, _super);
         function Rendering(jsonld, options) {
-            _super.call(this, jsonld, options);
+            return _super.call(this, jsonld, options) || this;
         }
         Rendering.prototype.getFormat = function () {
             return new Manifesto.RenderingFormat(this.getProperty('format'));
@@ -1821,19 +2136,24 @@ var Manifesto;
     Manifesto.Rendering = Rendering;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var _last = require("lodash.last");
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Sequence = (function (_super) {
         __extends(Sequence, _super);
         function Sequence(jsonld, options) {
-            _super.call(this, jsonld, options);
-            this.canvases = null;
+            var _this = _super.call(this, jsonld, options) || this;
+            _this.canvases = null;
+            return _this;
         }
         Sequence.prototype.getCanvases = function () {
             if (this.canvases != null)
@@ -1897,7 +2217,7 @@ var Manifesto;
                     continue;
                 regStr = "^" + labelPart1 + "\\D+" + labelPart2 + "$";
                 regExp = new RegExp(regStr);
-                if (regExp.test(canvas.getLabel())) {
+                if (regExp.test(canvas.getLabel().toString())) {
                     return i;
                 }
             }
@@ -1930,7 +2250,7 @@ var Manifesto;
                     index = indices[0] + 1;
                 }
                 else {
-                    index = _last(indices) + 1;
+                    index = indices[indices.length - 1] + 1;
                 }
             }
             else {
@@ -1967,7 +2287,7 @@ var Manifesto;
             if (pagingEnabled) {
                 var indices = this.getPagedIndices(canvasIndex);
                 if (this.getViewingDirection().toString() === Manifesto.ViewingDirection.RIGHTTOLEFT.toString()) {
-                    index = _last(indices) - 1;
+                    index = indices[indices.length - 1] - 1;
                 }
                 else {
                     index = indices[0] - 1;
@@ -2045,14 +2365,16 @@ var Manifesto;
     Manifesto.Sequence = Sequence;
 })(Manifesto || (Manifesto = {}));
 
-var _isString = require("lodash.isstring");
 var Manifesto;
 (function (Manifesto) {
     var Deserialiser = (function () {
         function Deserialiser() {
         }
         Deserialiser.parse = function (manifest, options) {
-            return this.parseJson(JSON.parse(manifest), options);
+            if (typeof manifest === 'string') {
+                manifest = JSON.parse(manifest);
+            }
+            return this.parseJson(manifest, options);
         };
         Deserialiser.parseJson = function (json, options) {
             var resource;
@@ -2062,15 +2384,30 @@ var Manifesto;
                     json.navDate = options.navDate.toString();
                 }
             }
-            switch (json['@type']) {
-                case 'sc:Collection':
-                    resource = this.parseCollection(json, options);
-                    break;
-                case 'sc:Manifest':
-                    resource = this.parseManifest(json, options);
-                    break;
-                default:
-                    return null;
+            if (json['@type']) {
+                switch (json['@type']) {
+                    case 'sc:Collection':
+                        resource = this.parseCollection(json, options);
+                        break;
+                    case 'sc:Manifest':
+                        resource = this.parseManifest(json, options);
+                        break;
+                    default:
+                        return null;
+                }
+            }
+            else {
+                // presentation 3
+                switch (json['type']) {
+                    case 'Collection':
+                        resource = this.parseCollection(json, options);
+                        break;
+                    case 'Manifest':
+                        resource = this.parseManifest(json, options);
+                        break;
+                    default:
+                        return null;
+                }
             }
             // Top-level resource was loaded from a URI, so flag it to prevent
             // unnecessary reload:
@@ -2120,12 +2457,23 @@ var Manifesto;
             }
         };
         Deserialiser.parseMember = function (json, options) {
-            if (json['@type'].toLowerCase() === 'sc:manifest') {
-                return this.parseManifest(json, options);
+            if (json['@type']) {
+                if (json['@type'].toLowerCase() === 'sc:manifest') {
+                    return this.parseManifest(json, options);
+                }
+                else if (json['@type'].toLowerCase() === 'sc:collection') {
+                    return this.parseCollection(json, options);
+                }
             }
-            else if (json['@type'].toLowerCase() === 'sc:collection') {
-                return this.parseCollection(json, options);
+            else if (json.type) {
+                if (json.type.toLowerCase() === 'manifest') {
+                    return this.parseManifest(json, options);
+                }
+                else if (json.type.toLowerCase() === 'collection') {
+                    return this.parseCollection(json, options);
+                }
             }
+            return null;
         };
         Deserialiser.parseMembers = function (collection, options) {
             var children = collection.__jsonld.members;
@@ -2135,6 +2483,8 @@ var Manifesto;
                         options.index = i;
                     }
                     var child = this.parseMember(children[i], options);
+                    if (!child)
+                        return;
                     // only add to members if not already parsed from backwards-compatible collections/manifests arrays
                     if (collection.members.en().where(function (m) { return m.id === child.id; }).first()) {
                         continue;
@@ -2160,36 +2510,54 @@ var Manifesto;
     Manifesto.Serialiser = Serialiser;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var _endsWith = require("lodash.endswith");
-var _isArray = require("lodash.isarray");
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Service = (function (_super) {
         __extends(Service, _super);
         function Service(jsonld, options) {
-            _super.call(this, jsonld, options);
+            return _super.call(this, jsonld, options) || this;
         }
         Service.prototype.getProfile = function () {
             var profile = this.getProperty('profile');
             if (!profile) {
                 profile = this.getProperty('dcterms:conformsTo');
             }
-            if (_isArray(profile)) {
+            if (Array.isArray(profile)) {
                 return new Manifesto.ServiceProfile(profile[0]);
             }
             return new Manifesto.ServiceProfile(profile);
         };
+        Service.prototype.getConfirmLabel = function () {
+            return Manifesto.Utils.getLocalisedValue(this.getProperty('confirmLabel'), this.options.locale);
+        };
         Service.prototype.getDescription = function () {
             return Manifesto.Utils.getLocalisedValue(this.getProperty('description'), this.options.locale);
         };
+        Service.prototype.getFailureDescription = function () {
+            return Manifesto.Utils.getLocalisedValue(this.getProperty('failureDescription'), this.options.locale);
+        };
+        Service.prototype.getFailureHeader = function () {
+            return Manifesto.Utils.getLocalisedValue(this.getProperty('failureHeader'), this.options.locale);
+        };
+        Service.prototype.getHeader = function () {
+            return Manifesto.Utils.getLocalisedValue(this.getProperty('header'), this.options.locale);
+        };
+        Service.prototype.getServiceLabel = function () {
+            return Manifesto.Utils.getLocalisedValue(this.getProperty('label'), this.options.locale);
+        };
         Service.prototype.getInfoUri = function () {
             var infoUri = this.id;
-            if (!_endsWith(infoUri, '/')) {
+            if (!infoUri.endsWith('/')) {
                 infoUri += '/';
             }
             infoUri += 'info.json';
@@ -2199,7 +2567,6 @@ var Manifesto;
     }(Manifesto.ManifestResource));
     Manifesto.Service = Service;
 })(Manifesto || (Manifesto = {}));
-
 
 
 var Manifesto;
@@ -2223,7 +2590,6 @@ var Manifesto;
     }());
     Manifesto.Thumb = Thumb;
 })(Manifesto || (Manifesto = {}));
-
 
 
 var Manifesto;
@@ -2252,17 +2618,22 @@ var Manifesto;
     Manifesto.TreeNode = TreeNode;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var TreeNodeType = (function (_super) {
         __extends(TreeNodeType, _super);
         function TreeNodeType() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
         TreeNodeType.prototype.collection = function () {
@@ -2282,6 +2653,41 @@ var Manifesto;
     Manifesto.TreeNodeType = TreeNodeType;
 })(Manifesto || (Manifesto = {}));
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var http = require("http");
 var https = require("https");
 var url = require("url");
@@ -2290,6 +2696,11 @@ var Manifesto;
     var Utils = (function () {
         function Utils() {
         }
+        Utils.getMediaType = function (type) {
+            type = type.toLowerCase();
+            type = type.split(';')[0];
+            return type.trim();
+        };
         Utils.getImageQuality = function (profile) {
             var p = profile.toString();
             if (p === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString() ||
@@ -2316,15 +2727,15 @@ var Manifesto;
         };
         Utils.getLocalisedValue = function (resource, locale) {
             // if the resource is not an array of translations, return the string.
-            if (!_isArray(resource)) {
+            if (!Array.isArray(resource)) {
                 return resource;
             }
             // test for exact match
             for (var i = 0; i < resource.length; i++) {
-                var value = resource[i];
-                var language = value['@language'];
-                if (locale === language) {
-                    return value['@value'];
+                var value_1 = resource[i];
+                var language_1 = value_1['@language'];
+                if (locale === language_1) {
+                    return value_1['@value'];
                 }
             }
             // test for inexact match
@@ -2353,70 +2764,75 @@ var Manifesto;
                 Utils.generateTreeNodeIds(n, i);
             }
         };
+        Utils.normalisedUrlsMatch = function (url1, url2) {
+            var url1norm = url1.substr(url1.indexOf('://'));
+            var url2norm = url1.substr(url1.indexOf('://'));
+            return url1norm === url2norm;
+        };
         Utils.isImageProfile = function (profile) {
-            if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
+            if (Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString())) {
                 return true;
             }
             return false;
         };
         Utils.isLevel0ImageProfile = function (profile) {
-            if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString()) {
+            if (Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL0PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL0.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL0PROFILE.toString())) {
                 return true;
             }
             return false;
         };
         Utils.isLevel1ImageProfile = function (profile) {
-            if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString()) {
+            if (Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL1PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL1.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL1PROFILE.toString())) {
                 return true;
             }
             return false;
         };
         Utils.isLevel2ImageProfile = function (profile) {
-            if (profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString() ||
-                profile.toString() === Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString()) {
+            if (Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECOMPLIANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECOMPLIANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIFIMAGECONFORMANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.STANFORDIIIF1IMAGECONFORMANCE2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF1IMAGELEVEL2PROFILE.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL2.toString()) ||
+                Utils.normalisedUrlsMatch(profile.toString(), Manifesto.ServiceProfile.IIIF2IMAGELEVEL2PROFILE.toString())) {
                 return true;
             }
             return false;
@@ -2460,7 +2876,177 @@ var Manifesto;
                 request.end();
             });
         };
-        Utils.loadExternalResource = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+        Utils.loadExternalResourcesAuth1 = function (resources, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages) {
+            return new Promise(function (resolve, reject) {
+                var promises = resources.map(function (resource) {
+                    return Utils.loadExternalResourceAuth1(resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages);
+                });
+                Promise.all(promises)
+                    .then(function () {
+                    resolve(resources);
+                })["catch"](function (error) {
+                    reject(error);
+                });
+            });
+        };
+        Utils.loadExternalResourceAuth1 = function (resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, resource.getData()];
+                        case 1:
+                            _a.sent();
+                            if (!(resource.status === HTTPStatusCode.MOVED_TEMPORARILY || resource.status === HTTPStatusCode.UNAUTHORIZED)) return [3 /*break*/, 3];
+                            return [4 /*yield*/, Utils.doAuthChain(resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages)];
+                        case 2:
+                            _a.sent();
+                            _a.label = 3;
+                        case 3:
+                            if (resource.status === HTTPStatusCode.OK || resource.status === HTTPStatusCode.MOVED_TEMPORARILY) {
+                                return [2 /*return*/, resource];
+                            }
+                            throw Utils.createAuthorizationFailedError();
+                    }
+                });
+            });
+        };
+        Utils.doAuthChain = function (resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages) {
+            return __awaiter(this, void 0, void 0, function () {
+                var serviceToTry, lastAttempted, kioskInteraction, contentProviderInteraction, contentProviderInteraction;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            // This function enters the flowchart at the < External? > junction
+                            // http://iiif.io/api/auth/1.0/#workflow-from-the-browser-client-perspective
+                            if (!resource.isAccessControlled()) {
+                                return [2 /*return*/, resource]; // no services found
+                            }
+                            if (!(!resource.isResponseHandled && resource.status === HTTPStatusCode.MOVED_TEMPORARILY)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, handleMovedTemporarily(resource)];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/, resource];
+                        case 2:
+                            serviceToTry = null;
+                            lastAttempted = null;
+                            // repetition of logic is left in these steps for clarity:
+                            // Looking for external pattern
+                            serviceToTry = resource.externalService;
+                            if (!serviceToTry) return [3 /*break*/, 4];
+                            serviceToTry.options = resource.options;
+                            lastAttempted = serviceToTry;
+                            return [4 /*yield*/, Utils.attemptResourceWithToken(resource, openTokenService, serviceToTry)];
+                        case 3:
+                            _a.sent();
+                            return [2 /*return*/, resource];
+                        case 4:
+                            // Looking for kiosk pattern
+                            serviceToTry = resource.kioskService;
+                            if (!serviceToTry) return [3 /*break*/, 7];
+                            serviceToTry.options = resource.options;
+                            lastAttempted = serviceToTry;
+                            kioskInteraction = openContentProviderInteraction(serviceToTry);
+                            if (!kioskInteraction) return [3 /*break*/, 7];
+                            return [4 /*yield*/, userInteractedWithContentProvider(kioskInteraction)];
+                        case 5:
+                            _a.sent();
+                            return [4 /*yield*/, Utils.attemptResourceWithToken(resource, openTokenService, serviceToTry)];
+                        case 6:
+                            _a.sent();
+                            return [2 /*return*/, resource];
+                        case 7:
+                            // The code for the next two patterns is identical (other than the profile name).
+                            // The difference is in the expected behaviour of
+                            //
+                            //    await userInteractedWithContentProvider(contentProviderInteraction);
+                            // 
+                            // For clickthrough the opened window should close immediately having established
+                            // a session, whereas for login the user might spend some time entering credentials etc.
+                            // Looking for clickthrough pattern
+                            serviceToTry = resource.clickThroughService;
+                            if (!serviceToTry) return [3 /*break*/, 11];
+                            serviceToTry.options = resource.options;
+                            lastAttempted = serviceToTry;
+                            return [4 /*yield*/, getContentProviderInteraction(resource, serviceToTry)];
+                        case 8:
+                            contentProviderInteraction = _a.sent();
+                            if (!contentProviderInteraction) return [3 /*break*/, 11];
+                            // should close immediately
+                            return [4 /*yield*/, userInteractedWithContentProvider(contentProviderInteraction)];
+                        case 9:
+                            // should close immediately
+                            _a.sent();
+                            return [4 /*yield*/, Utils.attemptResourceWithToken(resource, openTokenService, serviceToTry)];
+                        case 10:
+                            _a.sent();
+                            return [2 /*return*/, resource];
+                        case 11:
+                            // Looking for login pattern
+                            serviceToTry = resource.loginService;
+                            if (!serviceToTry) return [3 /*break*/, 15];
+                            serviceToTry.options = resource.options;
+                            lastAttempted = serviceToTry;
+                            return [4 /*yield*/, getContentProviderInteraction(resource, serviceToTry)];
+                        case 12:
+                            contentProviderInteraction = _a.sent();
+                            if (!contentProviderInteraction) return [3 /*break*/, 15];
+                            // we expect the user to spend some time interacting
+                            return [4 /*yield*/, userInteractedWithContentProvider(contentProviderInteraction)];
+                        case 13:
+                            // we expect the user to spend some time interacting
+                            _a.sent();
+                            return [4 /*yield*/, Utils.attemptResourceWithToken(resource, openTokenService, serviceToTry)];
+                        case 14:
+                            _a.sent();
+                            return [2 /*return*/, resource];
+                        case 15:
+                            // nothing worked! Use the most recently tried service as the source of
+                            // messages to show to the user.
+                            if (lastAttempted) {
+                                showOutOfOptionsMessages(lastAttempted);
+                            }
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        Utils.attemptResourceWithToken = function (resource, openTokenService, authService) {
+            return __awaiter(this, void 0, void 0, function () {
+                var tokenService, tokenMessage;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            tokenService = authService.getService(Manifesto.ServiceProfile.AUTH1TOKEN.toString());
+                            if (!tokenService) return [3 /*break*/, 3];
+                            return [4 /*yield*/, openTokenService(tokenService)];
+                        case 1:
+                            tokenMessage = _a.sent();
+                            if (!(tokenMessage && tokenMessage.accessToken)) return [3 /*break*/, 3];
+                            return [4 /*yield*/, resource.getData(tokenMessage)];
+                        case 2:
+                            _a.sent();
+                            return [2 /*return*/, resource];
+                        case 3: return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        Utils.loadExternalResourcesAuth09 = function (resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
+            return new Promise(function (resolve, reject) {
+                var promises = resources.map(function (resource) {
+                    return Utils.loadExternalResourceAuth09(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
+                });
+                Promise.all(promises)
+                    .then(function () {
+                    resolve(resources);
+                })["catch"](function (error) {
+                    reject(error);
+                });
+            });
+        };
+        // IIIF auth api pre v1.0
+        // Keeping this around for now until the auth 1.0 implementation is stable
+        Utils.loadExternalResourceAuth09 = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
             return new Promise(function (resolve, reject) {
                 if (options && options.pessimisticAccessControl) {
                     // pessimistic: access control cookies may have been deleted.
@@ -2471,8 +3057,7 @@ var Manifesto;
                             // if the resource has a click through service, use that.
                             if (resource.clickThroughService) {
                                 resolve(clickThrough(resource));
-                            }
-                            else if (resource.restrictedService) {
+                                //} else if(resource.restrictedService) {
                                 resolve(restricted(resource));
                             }
                             else {
@@ -2519,12 +3104,11 @@ var Manifesto;
                                     Utils.authorize(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken).then(function () {
                                         resolve(handleResourceResponse(resource));
                                     })["catch"](function (error) {
-                                        if (resource.restrictedService) {
-                                            reject(Utils.createRestrictedError());
-                                        }
-                                        else {
-                                            reject(Utils.createAuthorizationFailedError());
-                                        }
+                                        // if (resource.restrictedService){
+                                        //     reject(Utils.createRestrictedError());
+                                        // } else {
+                                        reject(Utils.createAuthorizationFailedError());
+                                        //}
                                     });
                                 }
                             })["catch"](function (error) {
@@ -2558,19 +3142,6 @@ var Manifesto;
         };
         Utils.createInternalServerError = function (message) {
             return Utils.createError(manifesto.StatusCodes.INTERNAL_SERVER_ERROR.toString(), message);
-        };
-        Utils.loadExternalResources = function (resources, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options) {
-            return new Promise(function (resolve, reject) {
-                var promises = _map(resources, function (resource) {
-                    return Utils.loadExternalResource(resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken, handleResourceResponse, options);
-                });
-                Promise.all(promises)
-                    .then(function () {
-                    resolve(resources);
-                })["catch"](function (error) {
-                    reject(error);
-                });
-            });
         };
         Utils.authorize = function (resource, tokenStorageStrategy, clickThrough, restricted, login, getAccessToken, storeAccessToken, getStoredAccessToken) {
             return new Promise(function (resolve, reject) {
@@ -2637,9 +3208,9 @@ var Manifesto;
                 // if the client wishes to trigger a login, set resource.isResponseHandled to true
                 // and call loadExternalResources() again passing the resource.
                 resolve(resource);
-            }
-            else if (resource.restrictedService) {
-                resolve(restricted(resource));
+                // } else if (resource.restrictedService) {
+                //     resolve(restricted(resource));
+                //     // TODO: move to next etc
             }
             else if (resource.clickThroughService && !resource.isResponseHandled) {
                 // if the resource has a click through service, use that.
@@ -2682,7 +3253,7 @@ var Manifesto;
         Utils.getService = function (resource, profile) {
             var services = this.getServices(resource);
             // coerce profile to string
-            if (typeof profile !== 'string') {
+            if (typeof (profile) !== 'string') {
                 profile = profile.toString();
             }
             for (var i = 0; i < services.length; i++) {
@@ -2703,7 +3274,7 @@ var Manifesto;
                 return all;
             for (var key in obj) {
                 var val = obj[key];
-                if (_isArray(val)) {
+                if (Array.isArray(val)) {
                     all = all.concat(val);
                 }
             }
@@ -2723,12 +3294,12 @@ var Manifesto;
             if (!service)
                 return services;
             // coerce to array
-            if (!_isArray(service)) {
+            if (!Array.isArray(service)) {
                 service = [service];
             }
             for (var i = 0; i < service.length; i++) {
                 var s = service[i];
-                if (_isString(s)) {
+                if (typeof (s) === 'string') {
                     var r = this.getResourceById(resource.options.resource, s);
                     if (r) {
                         services.push(new Manifesto.Service(r.__jsonld || r, resource.options));
@@ -2807,17 +3378,22 @@ var Manifesto;
     Manifesto.Translation = Translation;
 })(Manifesto || (Manifesto = {}));
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var TranslationCollection = (function (_super) {
         __extends(TranslationCollection, _super);
         function TranslationCollection() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         TranslationCollection.parse = function (translation, defaultLocale) {
             var tc = [];
@@ -2825,10 +3401,10 @@ var Manifesto;
             if (!translation) {
                 return tc;
             }
-            else if (_isArray(translation)) {
+            else if (Array.isArray(translation)) {
                 for (var i = 0; i < translation.length; i++) {
                     var value = translation[i];
-                    if (_isString(value)) {
+                    if (typeof (value) === 'string') {
                         t = new Manifesto.Translation(value, defaultLocale);
                     }
                     else {
@@ -2837,7 +3413,7 @@ var Manifesto;
                     tc.push(t);
                 }
             }
-            else if (_isString(translation)) {
+            else if (typeof (translation) === 'string') {
                 // if it's just a single string value, create one translation in the configured locale
                 t = new Manifesto.Translation(translation, defaultLocale);
                 tc.push(t);
@@ -2869,16 +3445,29 @@ var Manifesto;
     Manifesto.TranslationCollection = TranslationCollection;
 })(Manifesto || (Manifesto = {}));
 
+var Manifesto;
+(function (Manifesto) {
+    var Size = (function () {
+        function Size(width, height) {
+            this.width = width;
+            this.height = height;
+        }
+        return Size;
+    }());
+    Manifesto.Size = Size;
+})(Manifesto || (Manifesto = {}));
+
 global.manifesto = global.Manifesto = module.exports = {
     AnnotationMotivation: new Manifesto.AnnotationMotivation(),
     ElementType: new Manifesto.ElementType(),
     IIIFResourceType: new Manifesto.IIIFResourceType(),
     ManifestType: new Manifesto.ManifestType(),
+    MediaType: new Manifesto.MediaType(),
     MetadataItem: Manifesto.MetadataItem,
     RenderingFormat: new Manifesto.RenderingFormat(),
-    ResourceFormat: new Manifesto.ResourceFormat(),
     ResourceType: new Manifesto.ResourceType(),
     ServiceProfile: new Manifesto.ServiceProfile(),
+    Size: Manifesto.Size,
     Translation: Manifesto.Translation,
     TranslationCollection: Manifesto.TranslationCollection,
     TreeNode: Manifesto.TreeNode,
@@ -2900,52 +3489,39 @@ global.manifesto = global.Manifesto = module.exports = {
     }
 };
 
-/// <reference path="./StringValue.ts" />
-/// <reference path="./AnnotationMotivation.ts" />
-/// <reference path="./ElementType.ts" />
-/// <reference path="./IIIFResourceType.ts" />
-/// <reference path="./ManifestType.ts" />
-/// <reference path="./RenderingFormat.ts" />
-/// <reference path="./ResourceFormat.ts" />
-/// <reference path="./ResourceType.ts" />
-/// <reference path="./ServiceProfile.ts" />
-/// <reference path="./ViewingDirection.ts" />
-/// <reference path="./ViewingHint.ts" />
-/// <reference path="./JSONLDResource.ts" />
-/// <reference path="./ManifestResource.ts" />
-/// <reference path="./Element.ts" />
-/// <reference path="./Canvas.ts" />
-/// <reference path="./IIIFResource.ts" />
-/// <reference path="./Manifest.ts" />
-/// <reference path="./Collection.ts" />
-/// <reference path="./Range.ts" />
-/// <reference path="./Rendering.ts" />
-/// <reference path="./Sequence.ts" />
-/// <reference path="./Serialisation.ts" />
-/// <reference path="./Service.ts" />
-/// <reference path="./IThumb.ts" />
-/// <reference path="./Thumb.ts" />
-/// <reference path="./ITreeNode.ts" />
-/// <reference path="./TreeNode.ts" />
-/// <reference path="./TreeNodeType.ts" />
-/// <reference path="./Utils.ts" />
-/// <reference path="./MetadataItem.ts" />
-/// <reference path="./Translation.ts" />
-/// <reference path="./TranslationCollection.ts" />
-/// <reference path="./Manifesto.ts" /> 
-
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Annotation = (function (_super) {
         __extends(Annotation, _super);
         function Annotation(jsonld, options) {
-            _super.call(this, jsonld, options);
+            return _super.call(this, jsonld, options) || this;
         }
+        Annotation.prototype.getBody = function () {
+            var bodies = [];
+            var body = this.getProperty('body');
+            if (body) {
+                if (body.items) {
+                    for (var i = 0; i < body.items.length; i++) {
+                        var b = body.items[i];
+                        bodies.push(new Manifesto.AnnotationBody(b, this.options));
+                    }
+                }
+                else {
+                    bodies.push(new Manifesto.AnnotationBody(body, this.options));
+                }
+            }
+            return bodies;
+        };
         Annotation.prototype.getMotivation = function () {
             var motivation = this.getProperty('motivation');
             if (motivation) {
@@ -2953,8 +3529,12 @@ var Manifesto;
             }
             return null;
         };
+        // open annotation
         Annotation.prototype.getOn = function () {
             return this.getProperty('on');
+        };
+        Annotation.prototype.getTarget = function () {
+            return this.getProperty('target');
         };
         Annotation.prototype.getResource = function () {
             return new Manifesto.Resource(this.getProperty('resource'), this.options);
@@ -2962,6 +3542,67 @@ var Manifesto;
         return Annotation;
     }(Manifesto.ManifestResource));
     Manifesto.Annotation = Annotation;
+})(Manifesto || (Manifesto = {}));
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var Manifesto;
+(function (Manifesto) {
+    var AnnotationBody = (function (_super) {
+        __extends(AnnotationBody, _super);
+        function AnnotationBody(jsonld, options) {
+            return _super.call(this, jsonld, options) || this;
+        }
+        AnnotationBody.prototype.getFormat = function () {
+            var format = this.getProperty('format');
+            if (format) {
+                return new Manifesto.MediaType(Manifesto.Utils.getMediaType(format));
+            }
+            return null;
+        };
+        AnnotationBody.prototype.getType = function () {
+            var type = this.getProperty('type');
+            if (type) {
+                return new Manifesto.ResourceType(type.toLowerCase());
+            }
+            return null;
+        };
+        return AnnotationBody;
+    }(Manifesto.ManifestResource));
+    Manifesto.AnnotationBody = AnnotationBody;
+})(Manifesto || (Manifesto = {}));
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var Manifesto;
+(function (Manifesto) {
+    var AnnotationPage = (function (_super) {
+        __extends(AnnotationPage, _super);
+        function AnnotationPage(jsonld, options) {
+            return _super.call(this, jsonld, options) || this;
+        }
+        AnnotationPage.prototype.getItems = function () {
+            return this.getProperty('items');
+        };
+        return AnnotationPage;
+    }(Manifesto.ManifestResource));
+    Manifesto.AnnotationPage = AnnotationPage;
 })(Manifesto || (Manifesto = {}));
 
 
@@ -2984,43 +3625,32 @@ var Manifesto;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Manifesto;
 (function (Manifesto) {
     var Resource = (function (_super) {
         __extends(Resource, _super);
         function Resource(jsonld, options) {
-            _super.call(this, jsonld, options);
+            return _super.call(this, jsonld, options) || this;
         }
         Resource.prototype.getFormat = function () {
             var format = this.getProperty('format');
             if (format) {
-                return new Manifesto.ResourceFormat(format.toLowerCase());
+                return new Manifesto.MediaType(format.toLowerCase());
             }
             return null;
         };
         Resource.prototype.getType = function () {
-            var type = this.getProperty('@type');
+            var type = this.getProperty('type');
             if (type) {
                 return new Manifesto.ResourceType(type.toLowerCase());
             }
@@ -3042,6 +3672,7 @@ var Manifesto;
             if (!maxHeight) {
                 return this.getMaxWidth();
             }
+            return null;
         };
         return Resource;
     }(Manifesto.ManifestResource));
@@ -3049,7 +3680,7 @@ var Manifesto;
 })(Manifesto || (Manifesto = {}));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"http":49,"https":9,"lodash.assign":25,"lodash.endswith":26,"lodash.isarray":28,"lodash.isstring":29,"lodash.last":32,"lodash.map":33,"url":55}],2:[function(require,module,exports){
+},{"http":30,"https":8,"url":35}],2:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -3085,22 +3716,22 @@ function placeHoldersCount (b64) {
 
 function byteLength (b64) {
   // base64 is 4/3 + up to two characters of the original data
-  return b64.length * 3 / 4 - placeHoldersCount(b64)
+  return (b64.length * 3 / 4) - placeHoldersCount(b64)
 }
 
 function toByteArray (b64) {
-  var i, j, l, tmp, placeHolders, arr
+  var i, l, tmp, placeHolders, arr
   var len = b64.length
   placeHolders = placeHoldersCount(b64)
 
-  arr = new Arr(len * 3 / 4 - placeHolders)
+  arr = new Arr((len * 3 / 4) - placeHolders)
 
   // if there are placeholders, only get up to the last complete 4 chars
   l = placeHolders > 0 ? len - 4 : len
 
   var L = 0
 
-  for (i = 0, j = 0; i < l; i += 4, j += 3) {
+  for (i = 0; i < l; i += 4) {
     tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
     arr[L++] = (tmp >> 16) & 0xFF
     arr[L++] = (tmp >> 8) & 0xFF
@@ -3168,118 +3799,6 @@ function fromByteArray (uint8) {
 },{}],3:[function(require,module,exports){
 
 },{}],4:[function(require,module,exports){
-(function (global){
-'use strict';
-
-var buffer = require('buffer');
-var Buffer = buffer.Buffer;
-var SlowBuffer = buffer.SlowBuffer;
-var MAX_LEN = buffer.kMaxLength || 2147483647;
-exports.alloc = function alloc(size, fill, encoding) {
-  if (typeof Buffer.alloc === 'function') {
-    return Buffer.alloc(size, fill, encoding);
-  }
-  if (typeof encoding === 'number') {
-    throw new TypeError('encoding must not be number');
-  }
-  if (typeof size !== 'number') {
-    throw new TypeError('size must be a number');
-  }
-  if (size > MAX_LEN) {
-    throw new RangeError('size is too large');
-  }
-  var enc = encoding;
-  var _fill = fill;
-  if (_fill === undefined) {
-    enc = undefined;
-    _fill = 0;
-  }
-  var buf = new Buffer(size);
-  if (typeof _fill === 'string') {
-    var fillBuf = new Buffer(_fill, enc);
-    var flen = fillBuf.length;
-    var i = -1;
-    while (++i < size) {
-      buf[i] = fillBuf[i % flen];
-    }
-  } else {
-    buf.fill(_fill);
-  }
-  return buf;
-}
-exports.allocUnsafe = function allocUnsafe(size) {
-  if (typeof Buffer.allocUnsafe === 'function') {
-    return Buffer.allocUnsafe(size);
-  }
-  if (typeof size !== 'number') {
-    throw new TypeError('size must be a number');
-  }
-  if (size > MAX_LEN) {
-    throw new RangeError('size is too large');
-  }
-  return new Buffer(size);
-}
-exports.from = function from(value, encodingOrOffset, length) {
-  if (typeof Buffer.from === 'function' && (!global.Uint8Array || Uint8Array.from !== Buffer.from)) {
-    return Buffer.from(value, encodingOrOffset, length);
-  }
-  if (typeof value === 'number') {
-    throw new TypeError('"value" argument must not be a number');
-  }
-  if (typeof value === 'string') {
-    return new Buffer(value, encodingOrOffset);
-  }
-  if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
-    var offset = encodingOrOffset;
-    if (arguments.length === 1) {
-      return new Buffer(value);
-    }
-    if (typeof offset === 'undefined') {
-      offset = 0;
-    }
-    var len = length;
-    if (typeof len === 'undefined') {
-      len = value.byteLength - offset;
-    }
-    if (offset >= value.byteLength) {
-      throw new RangeError('\'offset\' is out of bounds');
-    }
-    if (len > value.byteLength - offset) {
-      throw new RangeError('\'length\' is out of bounds');
-    }
-    return new Buffer(value.slice(offset, offset + len));
-  }
-  if (Buffer.isBuffer(value)) {
-    var out = new Buffer(value.length);
-    value.copy(out, 0, 0, value.length);
-    return out;
-  }
-  if (value) {
-    if (Array.isArray(value) || (typeof ArrayBuffer !== 'undefined' && value.buffer instanceof ArrayBuffer) || 'length' in value) {
-      return new Buffer(value);
-    }
-    if (value.type === 'Buffer' && Array.isArray(value.data)) {
-      return new Buffer(value.data);
-    }
-  }
-
-  throw new TypeError('First argument must be a string, Buffer, ' + 'ArrayBuffer, Array, or array-like object.');
-}
-exports.allocUnsafeSlow = function allocUnsafeSlow(size) {
-  if (typeof Buffer.allocUnsafeSlow === 'function') {
-    return Buffer.allocUnsafeSlow(size);
-  }
-  if (typeof size !== 'number') {
-    throw new TypeError('size must be a number');
-  }
-  if (size >= MAX_LEN) {
-    throw new RangeError('size is too large');
-  }
-  return new SlowBuffer(size);
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"buffer":5}],5:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -5072,7 +5591,7 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":2,"ieee754":10,"isarray":13}],6:[function(require,module,exports){
+},{"base64-js":2,"ieee754":9,"isarray":12}],5:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -5123,6 +5642,7 @@ module.exports = {
   "428": "Precondition Required",
   "429": "Too Many Requests",
   "431": "Request Header Fields Too Large",
+  "451": "Unavailable For Legal Reasons",
   "500": "Internal Server Error",
   "501": "Not Implemented",
   "502": "Bad Gateway",
@@ -5137,7 +5657,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5248,7 +5768,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":12}],8:[function(require,module,exports){
+},{"../../is-buffer/index.js":11}],7:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5552,7 +6072,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -5568,7 +6088,7 @@ https.request = function (params, cb) {
     return http.request.call(this, params, cb);
 }
 
-},{"http":49}],10:[function(require,module,exports){
+},{"http":30}],9:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5654,7 +6174,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5679,7 +6199,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -5702,3104 +6222,14 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],14:[function(require,module,exports){
-/**
- * lodash 3.0.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.7.0 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/**
- * A specialized version of `_.map` for arrays without support for callback
- * shorthands or `this` binding.
- *
- * @private
- * @param {Array} array The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
- */
-function arrayMap(array, iteratee) {
-  var index = -1,
-      length = array.length,
-      result = Array(length);
-
-  while (++index < length) {
-    result[index] = iteratee(array[index], index, array);
-  }
-  return result;
-}
-
-module.exports = arrayMap;
-
-},{}],15:[function(require,module,exports){
-/**
- * lodash 3.2.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var baseCopy = require('lodash._basecopy'),
-    keys = require('lodash.keys');
-
-/**
- * The base implementation of `_.assign` without support for argument juggling,
- * multiple sources, and `customizer` functions.
- *
- * @private
- * @param {Object} object The destination object.
- * @param {Object} source The source object.
- * @returns {Object} Returns `object`.
- */
-function baseAssign(object, source) {
-  return source == null
-    ? object
-    : baseCopy(source, keys(source), object);
-}
-
-module.exports = baseAssign;
-
-},{"lodash._basecopy":17,"lodash.keys":31}],16:[function(require,module,exports){
-/**
- * lodash 3.3.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var baseIsEqual = require('lodash._baseisequal'),
-    bindCallback = require('lodash._bindcallback'),
-    isArray = require('lodash.isarray'),
-    pairs = require('lodash.pairs');
-
-/** Used to match property names within property paths. */
-var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\n\\]|\\.)*?\1)\]/,
-    reIsPlainProp = /^\w*$/,
-    rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?)\2)\]/g;
-
-/** Used to match backslashes in property paths. */
-var reEscapeChar = /\\(\\)?/g;
-
-/**
- * Converts `value` to a string if it's not one. An empty string is returned
- * for `null` or `undefined` values.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
- */
-function baseToString(value) {
-  return value == null ? '' : (value + '');
-}
-
-/**
- * The base implementation of `_.callback` which supports specifying the
- * number of arguments to provide to `func`.
- *
- * @private
- * @param {*} [func=_.identity] The value to convert to a callback.
- * @param {*} [thisArg] The `this` binding of `func`.
- * @param {number} [argCount] The number of arguments to provide to `func`.
- * @returns {Function} Returns the callback.
- */
-function baseCallback(func, thisArg, argCount) {
-  var type = typeof func;
-  if (type == 'function') {
-    return thisArg === undefined
-      ? func
-      : bindCallback(func, thisArg, argCount);
-  }
-  if (func == null) {
-    return identity;
-  }
-  if (type == 'object') {
-    return baseMatches(func);
-  }
-  return thisArg === undefined
-    ? property(func)
-    : baseMatchesProperty(func, thisArg);
-}
-
-/**
- * The base implementation of `get` without support for string paths
- * and default values.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {Array} path The path of the property to get.
- * @param {string} [pathKey] The key representation of path.
- * @returns {*} Returns the resolved value.
- */
-function baseGet(object, path, pathKey) {
-  if (object == null) {
-    return;
-  }
-  if (pathKey !== undefined && pathKey in toObject(object)) {
-    path = [pathKey];
-  }
-  var index = 0,
-      length = path.length;
-
-  while (object != null && index < length) {
-    object = object[path[index++]];
-  }
-  return (index && index == length) ? object : undefined;
-}
-
-/**
- * The base implementation of `_.isMatch` without support for callback
- * shorthands and `this` binding.
- *
- * @private
- * @param {Object} object The object to inspect.
- * @param {Array} matchData The propery names, values, and compare flags to match.
- * @param {Function} [customizer] The function to customize comparing objects.
- * @returns {boolean} Returns `true` if `object` is a match, else `false`.
- */
-function baseIsMatch(object, matchData, customizer) {
-  var index = matchData.length,
-      length = index,
-      noCustomizer = !customizer;
-
-  if (object == null) {
-    return !length;
-  }
-  object = toObject(object);
-  while (index--) {
-    var data = matchData[index];
-    if ((noCustomizer && data[2])
-          ? data[1] !== object[data[0]]
-          : !(data[0] in object)
-        ) {
-      return false;
-    }
-  }
-  while (++index < length) {
-    data = matchData[index];
-    var key = data[0],
-        objValue = object[key],
-        srcValue = data[1];
-
-    if (noCustomizer && data[2]) {
-      if (objValue === undefined && !(key in object)) {
-        return false;
-      }
-    } else {
-      var result = customizer ? customizer(objValue, srcValue, key) : undefined;
-      if (!(result === undefined ? baseIsEqual(srcValue, objValue, customizer, true) : result)) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-/**
- * The base implementation of `_.matches` which does not clone `source`.
- *
- * @private
- * @param {Object} source The object of property values to match.
- * @returns {Function} Returns the new function.
- */
-function baseMatches(source) {
-  var matchData = getMatchData(source);
-  if (matchData.length == 1 && matchData[0][2]) {
-    var key = matchData[0][0],
-        value = matchData[0][1];
-
-    return function(object) {
-      if (object == null) {
-        return false;
-      }
-      return object[key] === value && (value !== undefined || (key in toObject(object)));
-    };
-  }
-  return function(object) {
-    return baseIsMatch(object, matchData);
-  };
-}
-
-/**
- * The base implementation of `_.matchesProperty` which does not clone `srcValue`.
- *
- * @private
- * @param {string} path The path of the property to get.
- * @param {*} srcValue The value to compare.
- * @returns {Function} Returns the new function.
- */
-function baseMatchesProperty(path, srcValue) {
-  var isArr = isArray(path),
-      isCommon = isKey(path) && isStrictComparable(srcValue),
-      pathKey = (path + '');
-
-  path = toPath(path);
-  return function(object) {
-    if (object == null) {
-      return false;
-    }
-    var key = pathKey;
-    object = toObject(object);
-    if ((isArr || !isCommon) && !(key in object)) {
-      object = path.length == 1 ? object : baseGet(object, baseSlice(path, 0, -1));
-      if (object == null) {
-        return false;
-      }
-      key = last(path);
-      object = toObject(object);
-    }
-    return object[key] === srcValue
-      ? (srcValue !== undefined || (key in object))
-      : baseIsEqual(srcValue, object[key], undefined, true);
-  };
-}
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * A specialized version of `baseProperty` which supports deep paths.
- *
- * @private
- * @param {Array|string} path The path of the property to get.
- * @returns {Function} Returns the new function.
- */
-function basePropertyDeep(path) {
-  var pathKey = (path + '');
-  path = toPath(path);
-  return function(object) {
-    return baseGet(object, path, pathKey);
-  };
-}
-
-/**
- * The base implementation of `_.slice` without an iteratee call guard.
- *
- * @private
- * @param {Array} array The array to slice.
- * @param {number} [start=0] The start position.
- * @param {number} [end=array.length] The end position.
- * @returns {Array} Returns the slice of `array`.
- */
-function baseSlice(array, start, end) {
-  var index = -1,
-      length = array.length;
-
-  start = start == null ? 0 : (+start || 0);
-  if (start < 0) {
-    start = -start > length ? 0 : (length + start);
-  }
-  end = (end === undefined || end > length) ? length : (+end || 0);
-  if (end < 0) {
-    end += length;
-  }
-  length = start > end ? 0 : ((end - start) >>> 0);
-  start >>>= 0;
-
-  var result = Array(length);
-  while (++index < length) {
-    result[index] = array[index + start];
-  }
-  return result;
-}
-
-/**
- * Gets the propery names, values, and compare flags of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the match data of `object`.
- */
-function getMatchData(object) {
-  var result = pairs(object),
-      length = result.length;
-
-  while (length--) {
-    result[length][2] = isStrictComparable(result[length][1]);
-  }
-  return result;
-}
-
-/**
- * Checks if `value` is a property name and not a property path.
- *
- * @private
- * @param {*} value The value to check.
- * @param {Object} [object] The object to query keys on.
- * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
- */
-function isKey(value, object) {
-  var type = typeof value;
-  if ((type == 'string' && reIsPlainProp.test(value)) || type == 'number') {
-    return true;
-  }
-  if (isArray(value)) {
-    return false;
-  }
-  var result = !reIsDeepProp.test(value);
-  return result || (object != null && value in toObject(object));
-}
-
-/**
- * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` if suitable for strict
- *  equality comparisons, else `false`.
- */
-function isStrictComparable(value) {
-  return value === value && !isObject(value);
-}
-
-/**
- * Converts `value` to an object if it's not one.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {Object} Returns the object.
- */
-function toObject(value) {
-  return isObject(value) ? value : Object(value);
-}
-
-/**
- * Converts `value` to property path array if it's not one.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {Array} Returns the property path array.
- */
-function toPath(value) {
-  if (isArray(value)) {
-    return value;
-  }
-  var result = [];
-  baseToString(value).replace(rePropName, function(match, number, quote, string) {
-    result.push(quote ? string.replace(reEscapeChar, '$1') : (number || match));
-  });
-  return result;
-}
-
-/**
- * Gets the last element of `array`.
- *
- * @static
- * @memberOf _
- * @category Array
- * @param {Array} array The array to query.
- * @returns {*} Returns the last element of `array`.
- * @example
- *
- * _.last([1, 2, 3]);
- * // => 3
- */
-function last(array) {
-  var length = array ? array.length : 0;
-  return length ? array[length - 1] : undefined;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * This method returns the first argument provided to it.
- *
- * @static
- * @memberOf _
- * @category Utility
- * @param {*} value Any value.
- * @returns {*} Returns `value`.
- * @example
- *
- * var object = { 'user': 'fred' };
- *
- * _.identity(object) === object;
- * // => true
- */
-function identity(value) {
-  return value;
-}
-
-/**
- * Creates a function that returns the property value at `path` on a
- * given object.
- *
- * @static
- * @memberOf _
- * @category Utility
- * @param {Array|string} path The path of the property to get.
- * @returns {Function} Returns the new function.
- * @example
- *
- * var objects = [
- *   { 'a': { 'b': { 'c': 2 } } },
- *   { 'a': { 'b': { 'c': 1 } } }
- * ];
- *
- * _.map(objects, _.property('a.b.c'));
- * // => [2, 1]
- *
- * _.pluck(_.sortBy(objects, _.property(['a', 'b', 'c'])), 'a.b.c');
- * // => [1, 2]
- */
-function property(path) {
-  return isKey(path) ? baseProperty(path) : basePropertyDeep(path);
-}
-
-module.exports = baseCallback;
-
-},{"lodash._baseisequal":19,"lodash._bindcallback":20,"lodash.isarray":28,"lodash.pairs":34}],17:[function(require,module,exports){
-/**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/**
- * Copies properties of `source` to `object`.
- *
- * @private
- * @param {Object} source The object to copy properties from.
- * @param {Array} props The property names to copy.
- * @param {Object} [object={}] The object to copy properties to.
- * @returns {Object} Returns `object`.
- */
-function baseCopy(source, props, object) {
-  object || (object = {});
-
-  var index = -1,
-      length = props.length;
-
-  while (++index < length) {
-    var key = props[index];
-    object[key] = source[key];
-  }
-  return object;
-}
-
-module.exports = baseCopy;
-
-},{}],18:[function(require,module,exports){
-/**
- * lodash 3.0.4 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var keys = require('lodash.keys');
-
-/**
- * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * The base implementation of `_.forEach` without support for callback
- * shorthands and `this` binding.
- *
- * @private
- * @param {Array|Object|string} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array|Object|string} Returns `collection`.
- */
-var baseEach = createBaseEach(baseForOwn);
-
-/**
- * The base implementation of `baseForIn` and `baseForOwn` which iterates
- * over `object` properties returned by `keysFunc` invoking `iteratee` for
- * each property. Iteratee functions may exit iteration early by explicitly
- * returning `false`.
- *
- * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {Function} keysFunc The function to get the keys of `object`.
- * @returns {Object} Returns `object`.
- */
-var baseFor = createBaseFor();
-
-/**
- * The base implementation of `_.forOwn` without support for callback
- * shorthands and `this` binding.
- *
- * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Object} Returns `object`.
- */
-function baseForOwn(object, iteratee) {
-  return baseFor(object, iteratee, keys);
-}
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Creates a `baseEach` or `baseEachRight` function.
- *
- * @private
- * @param {Function} eachFunc The function to iterate over a collection.
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
- */
-function createBaseEach(eachFunc, fromRight) {
-  return function(collection, iteratee) {
-    var length = collection ? getLength(collection) : 0;
-    if (!isLength(length)) {
-      return eachFunc(collection, iteratee);
-    }
-    var index = fromRight ? length : -1,
-        iterable = toObject(collection);
-
-    while ((fromRight ? index-- : ++index < length)) {
-      if (iteratee(iterable[index], index, iterable) === false) {
-        break;
-      }
-    }
-    return collection;
-  };
-}
-
-/**
- * Creates a base function for `_.forIn` or `_.forInRight`.
- *
- * @private
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
- */
-function createBaseFor(fromRight) {
-  return function(object, iteratee, keysFunc) {
-    var iterable = toObject(object),
-        props = keysFunc(object),
-        length = props.length,
-        index = fromRight ? length : -1;
-
-    while ((fromRight ? index-- : ++index < length)) {
-      var key = props[index];
-      if (iteratee(iterable[key], key, iterable) === false) {
-        break;
-      }
-    }
-    return object;
-  };
-}
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Converts `value` to an object if it's not one.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {Object} Returns the object.
- */
-function toObject(value) {
-  return isObject(value) ? value : Object(value);
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-module.exports = baseEach;
-
-},{"lodash.keys":31}],19:[function(require,module,exports){
-/**
- * lodash 3.0.7 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var isArray = require('lodash.isarray'),
-    isTypedArray = require('lodash.istypedarray'),
-    keys = require('lodash.keys');
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]',
-    arrayTag = '[object Array]',
-    boolTag = '[object Boolean]',
-    dateTag = '[object Date]',
-    errorTag = '[object Error]',
-    numberTag = '[object Number]',
-    objectTag = '[object Object]',
-    regexpTag = '[object RegExp]',
-    stringTag = '[object String]';
-
-/**
- * Checks if `value` is object-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/**
- * A specialized version of `_.some` for arrays without support for callback
- * shorthands and `this` binding.
- *
- * @private
- * @param {Array} array The array to iterate over.
- * @param {Function} predicate The function invoked per iteration.
- * @returns {boolean} Returns `true` if any element passes the predicate check,
- *  else `false`.
- */
-function arraySome(array, predicate) {
-  var index = -1,
-      length = array.length;
-
-  while (++index < length) {
-    if (predicate(array[index], index, array)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * The base implementation of `_.isEqual` without support for `this` binding
- * `customizer` functions.
- *
- * @private
- * @param {*} value The value to compare.
- * @param {*} other The other value to compare.
- * @param {Function} [customizer] The function to customize comparing values.
- * @param {boolean} [isLoose] Specify performing partial comparisons.
- * @param {Array} [stackA] Tracks traversed `value` objects.
- * @param {Array} [stackB] Tracks traversed `other` objects.
- * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
- */
-function baseIsEqual(value, other, customizer, isLoose, stackA, stackB) {
-  if (value === other) {
-    return true;
-  }
-  if (value == null || other == null || (!isObject(value) && !isObjectLike(other))) {
-    return value !== value && other !== other;
-  }
-  return baseIsEqualDeep(value, other, baseIsEqual, customizer, isLoose, stackA, stackB);
-}
-
-/**
- * A specialized version of `baseIsEqual` for arrays and objects which performs
- * deep comparisons and tracks traversed objects enabling objects with circular
- * references to be compared.
- *
- * @private
- * @param {Object} object The object to compare.
- * @param {Object} other The other object to compare.
- * @param {Function} equalFunc The function to determine equivalents of values.
- * @param {Function} [customizer] The function to customize comparing objects.
- * @param {boolean} [isLoose] Specify performing partial comparisons.
- * @param {Array} [stackA=[]] Tracks traversed `value` objects.
- * @param {Array} [stackB=[]] Tracks traversed `other` objects.
- * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
- */
-function baseIsEqualDeep(object, other, equalFunc, customizer, isLoose, stackA, stackB) {
-  var objIsArr = isArray(object),
-      othIsArr = isArray(other),
-      objTag = arrayTag,
-      othTag = arrayTag;
-
-  if (!objIsArr) {
-    objTag = objToString.call(object);
-    if (objTag == argsTag) {
-      objTag = objectTag;
-    } else if (objTag != objectTag) {
-      objIsArr = isTypedArray(object);
-    }
-  }
-  if (!othIsArr) {
-    othTag = objToString.call(other);
-    if (othTag == argsTag) {
-      othTag = objectTag;
-    } else if (othTag != objectTag) {
-      othIsArr = isTypedArray(other);
-    }
-  }
-  var objIsObj = objTag == objectTag,
-      othIsObj = othTag == objectTag,
-      isSameTag = objTag == othTag;
-
-  if (isSameTag && !(objIsArr || objIsObj)) {
-    return equalByTag(object, other, objTag);
-  }
-  if (!isLoose) {
-    var objIsWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
-        othIsWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
-
-    if (objIsWrapped || othIsWrapped) {
-      return equalFunc(objIsWrapped ? object.value() : object, othIsWrapped ? other.value() : other, customizer, isLoose, stackA, stackB);
-    }
-  }
-  if (!isSameTag) {
-    return false;
-  }
-  // Assume cyclic values are equal.
-  // For more information on detecting circular references see https://es5.github.io/#JO.
-  stackA || (stackA = []);
-  stackB || (stackB = []);
-
-  var length = stackA.length;
-  while (length--) {
-    if (stackA[length] == object) {
-      return stackB[length] == other;
-    }
-  }
-  // Add `object` and `other` to the stack of traversed objects.
-  stackA.push(object);
-  stackB.push(other);
-
-  var result = (objIsArr ? equalArrays : equalObjects)(object, other, equalFunc, customizer, isLoose, stackA, stackB);
-
-  stackA.pop();
-  stackB.pop();
-
-  return result;
-}
-
-/**
- * A specialized version of `baseIsEqualDeep` for arrays with support for
- * partial deep comparisons.
- *
- * @private
- * @param {Array} array The array to compare.
- * @param {Array} other The other array to compare.
- * @param {Function} equalFunc The function to determine equivalents of values.
- * @param {Function} [customizer] The function to customize comparing arrays.
- * @param {boolean} [isLoose] Specify performing partial comparisons.
- * @param {Array} [stackA] Tracks traversed `value` objects.
- * @param {Array} [stackB] Tracks traversed `other` objects.
- * @returns {boolean} Returns `true` if the arrays are equivalent, else `false`.
- */
-function equalArrays(array, other, equalFunc, customizer, isLoose, stackA, stackB) {
-  var index = -1,
-      arrLength = array.length,
-      othLength = other.length;
-
-  if (arrLength != othLength && !(isLoose && othLength > arrLength)) {
-    return false;
-  }
-  // Ignore non-index properties.
-  while (++index < arrLength) {
-    var arrValue = array[index],
-        othValue = other[index],
-        result = customizer ? customizer(isLoose ? othValue : arrValue, isLoose ? arrValue : othValue, index) : undefined;
-
-    if (result !== undefined) {
-      if (result) {
-        continue;
-      }
-      return false;
-    }
-    // Recursively compare arrays (susceptible to call stack limits).
-    if (isLoose) {
-      if (!arraySome(other, function(othValue) {
-            return arrValue === othValue || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB);
-          })) {
-        return false;
-      }
-    } else if (!(arrValue === othValue || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB))) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * A specialized version of `baseIsEqualDeep` for comparing objects of
- * the same `toStringTag`.
- *
- * **Note:** This function only supports comparing values with tags of
- * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
- *
- * @private
- * @param {Object} value The object to compare.
- * @param {Object} other The other object to compare.
- * @param {string} tag The `toStringTag` of the objects to compare.
- * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
- */
-function equalByTag(object, other, tag) {
-  switch (tag) {
-    case boolTag:
-    case dateTag:
-      // Coerce dates and booleans to numbers, dates to milliseconds and booleans
-      // to `1` or `0` treating invalid dates coerced to `NaN` as not equal.
-      return +object == +other;
-
-    case errorTag:
-      return object.name == other.name && object.message == other.message;
-
-    case numberTag:
-      // Treat `NaN` vs. `NaN` as equal.
-      return (object != +object)
-        ? other != +other
-        : object == +other;
-
-    case regexpTag:
-    case stringTag:
-      // Coerce regexes to strings and treat strings primitives and string
-      // objects as equal. See https://es5.github.io/#x15.10.6.4 for more details.
-      return object == (other + '');
-  }
-  return false;
-}
-
-/**
- * A specialized version of `baseIsEqualDeep` for objects with support for
- * partial deep comparisons.
- *
- * @private
- * @param {Object} object The object to compare.
- * @param {Object} other The other object to compare.
- * @param {Function} equalFunc The function to determine equivalents of values.
- * @param {Function} [customizer] The function to customize comparing values.
- * @param {boolean} [isLoose] Specify performing partial comparisons.
- * @param {Array} [stackA] Tracks traversed `value` objects.
- * @param {Array} [stackB] Tracks traversed `other` objects.
- * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
- */
-function equalObjects(object, other, equalFunc, customizer, isLoose, stackA, stackB) {
-  var objProps = keys(object),
-      objLength = objProps.length,
-      othProps = keys(other),
-      othLength = othProps.length;
-
-  if (objLength != othLength && !isLoose) {
-    return false;
-  }
-  var index = objLength;
-  while (index--) {
-    var key = objProps[index];
-    if (!(isLoose ? key in other : hasOwnProperty.call(other, key))) {
-      return false;
-    }
-  }
-  var skipCtor = isLoose;
-  while (++index < objLength) {
-    key = objProps[index];
-    var objValue = object[key],
-        othValue = other[key],
-        result = customizer ? customizer(isLoose ? othValue : objValue, isLoose? objValue : othValue, key) : undefined;
-
-    // Recursively compare objects (susceptible to call stack limits).
-    if (!(result === undefined ? equalFunc(objValue, othValue, customizer, isLoose, stackA, stackB) : result)) {
-      return false;
-    }
-    skipCtor || (skipCtor = key == 'constructor');
-  }
-  if (!skipCtor) {
-    var objCtor = object.constructor,
-        othCtor = other.constructor;
-
-    // Non `Object` object instances with different constructors are not equal.
-    if (objCtor != othCtor &&
-        ('constructor' in object && 'constructor' in other) &&
-        !(typeof objCtor == 'function' && objCtor instanceof objCtor &&
-          typeof othCtor == 'function' && othCtor instanceof othCtor)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-module.exports = baseIsEqual;
-
-},{"lodash.isarray":28,"lodash.istypedarray":30,"lodash.keys":31}],20:[function(require,module,exports){
-/**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/**
- * A specialized version of `baseCallback` which only supports `this` binding
- * and specifying the number of arguments to provide to `func`.
- *
- * @private
- * @param {Function} func The function to bind.
- * @param {*} thisArg The `this` binding of `func`.
- * @param {number} [argCount] The number of arguments to provide to `func`.
- * @returns {Function} Returns the callback.
- */
-function bindCallback(func, thisArg, argCount) {
-  if (typeof func != 'function') {
-    return identity;
-  }
-  if (thisArg === undefined) {
-    return func;
-  }
-  switch (argCount) {
-    case 1: return function(value) {
-      return func.call(thisArg, value);
-    };
-    case 3: return function(value, index, collection) {
-      return func.call(thisArg, value, index, collection);
-    };
-    case 4: return function(accumulator, value, index, collection) {
-      return func.call(thisArg, accumulator, value, index, collection);
-    };
-    case 5: return function(value, other, key, object, source) {
-      return func.call(thisArg, value, other, key, object, source);
-    };
-  }
-  return function() {
-    return func.apply(thisArg, arguments);
-  };
-}
-
-/**
- * This method returns the first argument provided to it.
- *
- * @static
- * @memberOf _
- * @category Utility
- * @param {*} value Any value.
- * @returns {*} Returns `value`.
- * @example
- *
- * var object = { 'user': 'fred' };
- *
- * _.identity(object) === object;
- * // => true
- */
-function identity(value) {
-  return value;
-}
-
-module.exports = bindCallback;
-
-},{}],21:[function(require,module,exports){
-/**
- * lodash 3.1.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var bindCallback = require('lodash._bindcallback'),
-    isIterateeCall = require('lodash._isiterateecall'),
-    restParam = require('lodash.restparam');
-
-/**
- * Creates a function that assigns properties of source object(s) to a given
- * destination object.
- *
- * **Note:** This function is used to create `_.assign`, `_.defaults`, and `_.merge`.
- *
- * @private
- * @param {Function} assigner The function to assign values.
- * @returns {Function} Returns the new assigner function.
- */
-function createAssigner(assigner) {
-  return restParam(function(object, sources) {
-    var index = -1,
-        length = object == null ? 0 : sources.length,
-        customizer = length > 2 ? sources[length - 2] : undefined,
-        guard = length > 2 ? sources[2] : undefined,
-        thisArg = length > 1 ? sources[length - 1] : undefined;
-
-    if (typeof customizer == 'function') {
-      customizer = bindCallback(customizer, thisArg, 5);
-      length -= 2;
-    } else {
-      customizer = typeof thisArg == 'function' ? thisArg : undefined;
-      length -= (customizer ? 1 : 0);
-    }
-    if (guard && isIterateeCall(sources[0], sources[1], guard)) {
-      customizer = length < 3 ? undefined : customizer;
-      length = 1;
-    }
-    while (++index < length) {
-      var source = sources[index];
-      if (source) {
-        assigner(object, source, customizer);
-      }
-    }
-    return object;
-  });
-}
-
-module.exports = createAssigner;
-
-},{"lodash._bindcallback":20,"lodash._isiterateecall":23,"lodash.restparam":35}],22:[function(require,module,exports){
-/**
- * lodash 3.9.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** `Object#toString` result references. */
-var funcTag = '[object Function]';
-
-/** Used to detect host constructors (Safari > 5). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/**
- * Checks if `value` is object-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var fnToString = Function.prototype.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/**
- * Gets the native function at `key` of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
- */
-function getNative(object, key) {
-  var value = object == null ? undefined : object[key];
-  return isNative(value) ? value : undefined;
-}
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in older versions of Chrome and Safari which return 'function' for regexes
-  // and Safari 8 equivalents which return 'object' for typed array constructors.
-  return isObject(value) && objToString.call(value) == funcTag;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is a native function.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
- * @example
- *
- * _.isNative(Array.prototype.push);
- * // => true
- *
- * _.isNative(_);
- * // => false
- */
-function isNative(value) {
-  if (value == null) {
-    return false;
-  }
-  if (isFunction(value)) {
-    return reIsNative.test(fnToString.call(value));
-  }
-  return isObjectLike(value) && reIsHostCtor.test(value);
-}
-
-module.exports = getNative;
-
-},{}],23:[function(require,module,exports){
-/**
- * lodash 3.0.9 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** Used to detect unsigned integer values. */
-var reIsUint = /^\d+$/;
-
-/**
- * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-/**
- * Checks if `value` is array-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- */
-function isArrayLike(value) {
-  return value != null && isLength(getLength(value));
-}
-
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */
-function isIndex(value, length) {
-  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
-  length = length == null ? MAX_SAFE_INTEGER : length;
-  return value > -1 && value % 1 == 0 && value < length;
-}
-
-/**
- * Checks if the provided arguments are from an iteratee call.
- *
- * @private
- * @param {*} value The potential iteratee value argument.
- * @param {*} index The potential iteratee index or key argument.
- * @param {*} object The potential iteratee object argument.
- * @returns {boolean} Returns `true` if the arguments are from an iteratee call, else `false`.
- */
-function isIterateeCall(value, index, object) {
-  if (!isObject(object)) {
-    return false;
-  }
-  var type = typeof index;
-  if (type == 'number'
-      ? (isArrayLike(object) && isIndex(index, object.length))
-      : (type == 'string' && index in object)) {
-    var other = object[index];
-    return value === value ? (value === other) : (other !== other);
-  }
-  return false;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-module.exports = isIterateeCall;
-
-},{}],24:[function(require,module,exports){
-(function (global){
-/**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** Used to determine if values are of the language type `Object`. */
-var objectTypes = {
-  'function': true,
-  'object': true
-};
-
-/** Detect free variable `exports`. */
-var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType)
-  ? exports
-  : undefined;
-
-/** Detect free variable `module`. */
-var freeModule = (objectTypes[typeof module] && module && !module.nodeType)
-  ? module
-  : undefined;
-
-/** Detect free variable `global` from Node.js. */
-var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
-
-/** Detect free variable `self`. */
-var freeSelf = checkGlobal(objectTypes[typeof self] && self);
-
-/** Detect free variable `window`. */
-var freeWindow = checkGlobal(objectTypes[typeof window] && window);
-
-/** Detect `this` as the global object. */
-var thisGlobal = checkGlobal(objectTypes[typeof this] && this);
-
-/**
- * Used as a reference to the global object.
- *
- * The `this` value is used if it's the global object to avoid Greasemonkey's
- * restricted `window` object, otherwise the `window` object is used.
- */
-var root = freeGlobal ||
-  ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) ||
-    freeSelf || thisGlobal || Function('return this')();
-
-/**
- * Checks if `value` is a global object.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {null|Object} Returns `value` if it's a global object, else `null`.
- */
-function checkGlobal(value) {
-  return (value && value.Object === Object) ? value : null;
-}
-
-module.exports = root;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],25:[function(require,module,exports){
-/**
- * lodash 3.2.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var baseAssign = require('lodash._baseassign'),
-    createAssigner = require('lodash._createassigner'),
-    keys = require('lodash.keys');
-
-/**
- * A specialized version of `_.assign` for customizing assigned values without
- * support for argument juggling, multiple sources, and `this` binding `customizer`
- * functions.
- *
- * @private
- * @param {Object} object The destination object.
- * @param {Object} source The source object.
- * @param {Function} customizer The function to customize assigned values.
- * @returns {Object} Returns `object`.
- */
-function assignWith(object, source, customizer) {
-  var index = -1,
-      props = keys(source),
-      length = props.length;
-
-  while (++index < length) {
-    var key = props[index],
-        value = object[key],
-        result = customizer(value, source[key], key, object, source);
-
-    if ((result === result ? (result !== value) : (value === value)) ||
-        (value === undefined && !(key in object))) {
-      object[key] = result;
-    }
-  }
-  return object;
-}
-
-/**
- * Assigns own enumerable properties of source object(s) to the destination
- * object. Subsequent sources overwrite property assignments of previous sources.
- * If `customizer` is provided it is invoked to produce the assigned values.
- * The `customizer` is bound to `thisArg` and invoked with five arguments:
- * (objectValue, sourceValue, key, object, source).
- *
- * **Note:** This method mutates `object` and is based on
- * [`Object.assign`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.assign).
- *
- * @static
- * @memberOf _
- * @alias extend
- * @category Object
- * @param {Object} object The destination object.
- * @param {...Object} [sources] The source objects.
- * @param {Function} [customizer] The function to customize assigned values.
- * @param {*} [thisArg] The `this` binding of `customizer`.
- * @returns {Object} Returns `object`.
- * @example
- *
- * _.assign({ 'user': 'barney' }, { 'age': 40 }, { 'user': 'fred' });
- * // => { 'user': 'fred', 'age': 40 }
- *
- * // using a customizer callback
- * var defaults = _.partialRight(_.assign, function(value, other) {
- *   return _.isUndefined(value) ? other : value;
- * });
- *
- * defaults({ 'user': 'barney' }, { 'age': 36 }, { 'user': 'fred' });
- * // => { 'user': 'barney', 'age': 36 }
- */
-var assign = createAssigner(function(object, source, customizer) {
-  return customizer
-    ? assignWith(object, source, customizer)
-    : baseAssign(object, source);
-});
-
-module.exports = assign;
-
-},{"lodash._baseassign":15,"lodash._createassigner":21,"lodash.keys":31}],26:[function(require,module,exports){
-/**
- * lodash 3.2.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var root = require('lodash._root');
-
-/** Used as references for various `Number` constants. */
-var INFINITY = 1 / 0,
-    MAX_INTEGER = 1.7976931348623157e+308,
-    NAN = 0 / 0;
-
-/** `Object#toString` result references. */
-var funcTag = '[object Function]',
-    genTag = '[object GeneratorFunction]',
-    symbolTag = '[object Symbol]';
-
-/** Used to match leading and trailing whitespace. */
-var reTrim = /^\s+|\s+$/g;
-
-/** Used to detect bad signed hexadecimal string values. */
-var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
-
-/** Used to detect binary string values. */
-var reIsBinary = /^0b[01]+$/i;
-
-/** Used to detect octal string values. */
-var reIsOctal = /^0o[0-7]+$/i;
-
-/** Built-in method references without a dependency on `root`. */
-var freeParseInt = parseInt;
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objectToString = objectProto.toString;
-
-/** Built-in value references. */
-var Symbol = root.Symbol;
-
-/** Used to convert symbols to primitives and strings. */
-var symbolProto = Symbol ? Symbol.prototype : undefined,
-    symbolToString = Symbol ? symbolProto.toString : undefined;
-
-/**
- * The base implementation of `_.clamp` which doesn't coerce arguments to numbers.
- *
- * @private
- * @param {number} number The number to clamp.
- * @param {number} [lower] The lower bound.
- * @param {number} upper The upper bound.
- * @returns {number} Returns the clamped number.
- */
-function baseClamp(number, lower, upper) {
-  if (number === number) {
-    if (upper !== undefined) {
-      number = number <= upper ? number : upper;
-    }
-    if (lower !== undefined) {
-      number = number >= lower ? number : lower;
-    }
-  }
-  return number;
-}
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in Safari 8 which returns 'object' for typed array constructors, and
-  // PhantomJS 1.9 which returns 'function' for `NodeList` instances.
-  var tag = isObject(value) ? objectToString.call(value) : '';
-  return tag == funcTag || tag == genTag;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/**
- * Checks if `value` is classified as a `Symbol` primitive or object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isSymbol(Symbol.iterator);
- * // => true
- *
- * _.isSymbol('abc');
- * // => false
- */
-function isSymbol(value) {
-  return typeof value == 'symbol' ||
-    (isObjectLike(value) && objectToString.call(value) == symbolTag);
-}
-
-/**
- * Converts `value` to an integer.
- *
- * **Note:** This function is loosely based on [`ToInteger`](http://www.ecma-international.org/ecma-262/6.0/#sec-tointeger).
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {number} Returns the converted integer.
- * @example
- *
- * _.toInteger(3);
- * // => 3
- *
- * _.toInteger(Number.MIN_VALUE);
- * // => 0
- *
- * _.toInteger(Infinity);
- * // => 1.7976931348623157e+308
- *
- * _.toInteger('3');
- * // => 3
- */
-function toInteger(value) {
-  if (!value) {
-    return value === 0 ? value : 0;
-  }
-  value = toNumber(value);
-  if (value === INFINITY || value === -INFINITY) {
-    var sign = (value < 0 ? -1 : 1);
-    return sign * MAX_INTEGER;
-  }
-  var remainder = value % 1;
-  return value === value ? (remainder ? value - remainder : value) : 0;
-}
-
-/**
- * Converts `value` to a number.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to process.
- * @returns {number} Returns the number.
- * @example
- *
- * _.toNumber(3);
- * // => 3
- *
- * _.toNumber(Number.MIN_VALUE);
- * // => 5e-324
- *
- * _.toNumber(Infinity);
- * // => Infinity
- *
- * _.toNumber('3');
- * // => 3
- */
-function toNumber(value) {
-  if (isObject(value)) {
-    var other = isFunction(value.valueOf) ? value.valueOf() : value;
-    value = isObject(other) ? (other + '') : other;
-  }
-  if (typeof value != 'string') {
-    return value === 0 ? value : +value;
-  }
-  value = value.replace(reTrim, '');
-  var isBinary = reIsBinary.test(value);
-  return (isBinary || reIsOctal.test(value))
-    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
-    : (reIsBadHex.test(value) ? NAN : +value);
-}
-
-/**
- * Converts `value` to a string if it's not one. An empty string is returned
- * for `null` and `undefined` values. The sign of `-0` is preserved.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
- * @example
- *
- * _.toString(null);
- * // => ''
- *
- * _.toString(-0);
- * // => '-0'
- *
- * _.toString([1, 2, 3]);
- * // => '1,2,3'
- */
-function toString(value) {
-  // Exit early for strings to avoid a performance hit in some environments.
-  if (typeof value == 'string') {
-    return value;
-  }
-  if (value == null) {
-    return '';
-  }
-  if (isSymbol(value)) {
-    return Symbol ? symbolToString.call(value) : '';
-  }
-  var result = (value + '');
-  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
-}
-
-/**
- * Checks if `string` ends with the given target string.
- *
- * @static
- * @memberOf _
- * @category String
- * @param {string} [string=''] The string to search.
- * @param {string} [target] The string to search for.
- * @param {number} [position=string.length] The position to search from.
- * @returns {boolean} Returns `true` if `string` ends with `target`, else `false`.
- * @example
- *
- * _.endsWith('abc', 'c');
- * // => true
- *
- * _.endsWith('abc', 'b');
- * // => false
- *
- * _.endsWith('abc', 'b', 2);
- * // => true
- */
-function endsWith(string, target, position) {
-  string = toString(string);
-  target = typeof target == 'string' ? target : (target + '');
-
-  var length = string.length;
-  position = position === undefined
-    ? length
-    : baseClamp(toInteger(position), 0, length);
-
-  position -= target.length;
-  return position >= 0 && string.indexOf(target, position) == position;
-}
-
-module.exports = endsWith;
-
-},{"lodash._root":24}],27:[function(require,module,exports){
-/**
- * lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright jQuery Foundation and other contributors <https://jquery.org/>
- * Released under MIT license <https://lodash.com/license>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- */
-
-/** Used as references for various `Number` constants. */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]',
-    funcTag = '[object Function]',
-    genTag = '[object GeneratorFunction]';
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objectToString = objectProto.toString;
-
-/** Built-in value references. */
-var propertyIsEnumerable = objectProto.propertyIsEnumerable;
-
-/**
- * Checks if `value` is likely an `arguments` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
- *  else `false`.
- * @example
- *
- * _.isArguments(function() { return arguments; }());
- * // => true
- *
- * _.isArguments([1, 2, 3]);
- * // => false
- */
-function isArguments(value) {
-  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
-    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
-}
-
-/**
- * Checks if `value` is array-like. A value is considered array-like if it's
- * not a function and has a `value.length` that's an integer greater than or
- * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- * @example
- *
- * _.isArrayLike([1, 2, 3]);
- * // => true
- *
- * _.isArrayLike(document.body.children);
- * // => true
- *
- * _.isArrayLike('abc');
- * // => true
- *
- * _.isArrayLike(_.noop);
- * // => false
- */
-function isArrayLike(value) {
-  return value != null && isLength(value.length) && !isFunction(value);
-}
-
-/**
- * This method is like `_.isArrayLike` except that it also checks if `value`
- * is an object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array-like object,
- *  else `false`.
- * @example
- *
- * _.isArrayLikeObject([1, 2, 3]);
- * // => true
- *
- * _.isArrayLikeObject(document.body.children);
- * // => true
- *
- * _.isArrayLikeObject('abc');
- * // => false
- *
- * _.isArrayLikeObject(_.noop);
- * // => false
- */
-function isArrayLikeObject(value) {
-  return isObjectLike(value) && isArrayLike(value);
-}
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a function, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in Safari 8-9 which returns 'object' for typed array and other constructors.
-  var tag = isObject(value) ? objectToString.call(value) : '';
-  return tag == funcTag || tag == genTag;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This method is loosely based on
- * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- * @example
- *
- * _.isLength(3);
- * // => true
- *
- * _.isLength(Number.MIN_VALUE);
- * // => false
- *
- * _.isLength(Infinity);
- * // => false
- *
- * _.isLength('3');
- * // => false
- */
-function isLength(value) {
-  return typeof value == 'number' &&
-    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-module.exports = isArguments;
-
-},{}],28:[function(require,module,exports){
-/**
- * lodash 3.0.4 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** `Object#toString` result references. */
-var arrayTag = '[object Array]',
-    funcTag = '[object Function]';
-
-/** Used to detect host constructors (Safari > 5). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/**
- * Checks if `value` is object-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var fnToString = Function.prototype.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeIsArray = getNative(Array, 'isArray');
-
-/**
- * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * Gets the native function at `key` of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
- */
-function getNative(object, key) {
-  var value = object == null ? undefined : object[key];
-  return isNative(value) ? value : undefined;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is classified as an `Array` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(function() { return arguments; }());
- * // => false
- */
-var isArray = nativeIsArray || function(value) {
-  return isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag;
-};
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in older versions of Chrome and Safari which return 'function' for regexes
-  // and Safari 8 equivalents which return 'object' for typed array constructors.
-  return isObject(value) && objToString.call(value) == funcTag;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is a native function.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
- * @example
- *
- * _.isNative(Array.prototype.push);
- * // => true
- *
- * _.isNative(_);
- * // => false
- */
-function isNative(value) {
-  if (value == null) {
-    return false;
-  }
-  if (isFunction(value)) {
-    return reIsNative.test(fnToString.call(value));
-  }
-  return isObjectLike(value) && reIsHostCtor.test(value);
-}
-
-module.exports = isArray;
-
-},{}],29:[function(require,module,exports){
-/**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.2 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** `Object#toString` result references. */
-var stringTag = '[object String]';
-
-/**
- * Checks if `value` is object-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/**
- * Checks if `value` is classified as a `String` primitive or object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isString('abc');
- * // => true
- *
- * _.isString(1);
- * // => false
- */
-function isString(value) {
-  return typeof value == 'string' || (isObjectLike(value) && objToString.call(value) == stringTag);
-}
-
-module.exports = isString;
-
-},{}],30:[function(require,module,exports){
-/**
- * lodash 3.0.6 (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright jQuery Foundation and other contributors <https://jquery.org/>
- * Released under MIT license <https://lodash.com/license>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- */
-
-/** Used as references for various `Number` constants. */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]',
-    arrayTag = '[object Array]',
-    boolTag = '[object Boolean]',
-    dateTag = '[object Date]',
-    errorTag = '[object Error]',
-    funcTag = '[object Function]',
-    mapTag = '[object Map]',
-    numberTag = '[object Number]',
-    objectTag = '[object Object]',
-    regexpTag = '[object RegExp]',
-    setTag = '[object Set]',
-    stringTag = '[object String]',
-    weakMapTag = '[object WeakMap]';
-
-var arrayBufferTag = '[object ArrayBuffer]',
-    dataViewTag = '[object DataView]',
-    float32Tag = '[object Float32Array]',
-    float64Tag = '[object Float64Array]',
-    int8Tag = '[object Int8Array]',
-    int16Tag = '[object Int16Array]',
-    int32Tag = '[object Int32Array]',
-    uint8Tag = '[object Uint8Array]',
-    uint8ClampedTag = '[object Uint8ClampedArray]',
-    uint16Tag = '[object Uint16Array]',
-    uint32Tag = '[object Uint32Array]';
-
-/** Used to identify `toStringTag` values of typed arrays. */
-var typedArrayTags = {};
-typedArrayTags[float32Tag] = typedArrayTags[float64Tag] =
-typedArrayTags[int8Tag] = typedArrayTags[int16Tag] =
-typedArrayTags[int32Tag] = typedArrayTags[uint8Tag] =
-typedArrayTags[uint8ClampedTag] = typedArrayTags[uint16Tag] =
-typedArrayTags[uint32Tag] = true;
-typedArrayTags[argsTag] = typedArrayTags[arrayTag] =
-typedArrayTags[arrayBufferTag] = typedArrayTags[boolTag] =
-typedArrayTags[dataViewTag] = typedArrayTags[dateTag] =
-typedArrayTags[errorTag] = typedArrayTags[funcTag] =
-typedArrayTags[mapTag] = typedArrayTags[numberTag] =
-typedArrayTags[objectTag] = typedArrayTags[regexpTag] =
-typedArrayTags[setTag] = typedArrayTags[stringTag] =
-typedArrayTags[weakMapTag] = false;
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objectToString = objectProto.toString;
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is loosely based on
- * [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length,
- *  else `false`.
- * @example
- *
- * _.isLength(3);
- * // => true
- *
- * _.isLength(Number.MIN_VALUE);
- * // => false
- *
- * _.isLength(Infinity);
- * // => false
- *
- * _.isLength('3');
- * // => false
- */
-function isLength(value) {
-  return typeof value == 'number' &&
-    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/**
- * Checks if `value` is classified as a typed array.
- *
- * @static
- * @memberOf _
- * @since 3.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified,
- *  else `false`.
- * @example
- *
- * _.isTypedArray(new Uint8Array);
- * // => true
- *
- * _.isTypedArray([]);
- * // => false
- */
-function isTypedArray(value) {
-  return isObjectLike(value) &&
-    isLength(value.length) && !!typedArrayTags[objectToString.call(value)];
-}
-
-module.exports = isTypedArray;
-
-},{}],31:[function(require,module,exports){
-/**
- * lodash 3.1.2 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var getNative = require('lodash._getnative'),
-    isArguments = require('lodash.isarguments'),
-    isArray = require('lodash.isarray');
-
-/** Used to detect unsigned integer values. */
-var reIsUint = /^\d+$/;
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeKeys = getNative(Object, 'keys');
-
-/**
- * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-/**
- * Checks if `value` is array-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- */
-function isArrayLike(value) {
-  return value != null && isLength(getLength(value));
-}
-
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */
-function isIndex(value, length) {
-  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
-  length = length == null ? MAX_SAFE_INTEGER : length;
-  return value > -1 && value % 1 == 0 && value < length;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * A fallback implementation of `Object.keys` which creates an array of the
- * own enumerable property names of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function shimKeys(object) {
-  var props = keysIn(object),
-      propsLength = props.length,
-      length = propsLength && object.length;
-
-  var allowIndexes = !!length && isLength(length) &&
-    (isArray(object) || isArguments(object));
-
-  var index = -1,
-      result = [];
-
-  while (++index < propsLength) {
-    var key = props[index];
-    if ((allowIndexes && isIndex(key, length)) || hasOwnProperty.call(object, key)) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Creates an array of the own enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects. See the
- * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
- * for more details.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keys(new Foo);
- * // => ['a', 'b'] (iteration order is not guaranteed)
- *
- * _.keys('hi');
- * // => ['0', '1']
- */
-var keys = !nativeKeys ? shimKeys : function(object) {
-  var Ctor = object == null ? undefined : object.constructor;
-  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
-      (typeof object != 'function' && isArrayLike(object))) {
-    return shimKeys(object);
-  }
-  return isObject(object) ? nativeKeys(object) : [];
-};
-
-/**
- * Creates an array of the own and inherited enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keysIn(new Foo);
- * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
- */
-function keysIn(object) {
-  if (object == null) {
-    return [];
-  }
-  if (!isObject(object)) {
-    object = Object(object);
-  }
-  var length = object.length;
-  length = (length && isLength(length) &&
-    (isArray(object) || isArguments(object)) && length) || 0;
-
-  var Ctor = object.constructor,
-      index = -1,
-      isProto = typeof Ctor == 'function' && Ctor.prototype === object,
-      result = Array(length),
-      skipIndexes = length > 0;
-
-  while (++index < length) {
-    result[index] = (index + '');
-  }
-  for (var key in object) {
-    if (!(skipIndexes && isIndex(key, length)) &&
-        !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-module.exports = keys;
-
-},{"lodash._getnative":22,"lodash.isarguments":27,"lodash.isarray":28}],32:[function(require,module,exports){
-/**
- * lodash 3.0.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.7.0 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/**
- * Gets the last element of `array`.
- *
- * @static
- * @memberOf _
- * @category Array
- * @param {Array} array The array to query.
- * @returns {*} Returns the last element of `array`.
- * @example
- *
- * _.last([1, 2, 3]);
- * // => 3
- */
-function last(array) {
-  var length = array ? array.length : 0;
-  return length ? array[length - 1] : undefined;
-}
-
-module.exports = last;
-
-},{}],33:[function(require,module,exports){
-/**
- * lodash 3.1.4 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var arrayMap = require('lodash._arraymap'),
-    baseCallback = require('lodash._basecallback'),
-    baseEach = require('lodash._baseeach'),
-    isArray = require('lodash.isarray');
-
-/**
- * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * The base implementation of `_.map` without support for callback shorthands
- * and `this` binding.
- *
- * @private
- * @param {Array|Object|string} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
- */
-function baseMap(collection, iteratee) {
-  var index = -1,
-      result = isArrayLike(collection) ? Array(collection.length) : [];
-
-  baseEach(collection, function(value, key, collection) {
-    result[++index] = iteratee(value, key, collection);
-  });
-  return result;
-}
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-/**
- * Checks if `value` is array-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- */
-function isArrayLike(value) {
-  return value != null && isLength(getLength(value));
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Creates an array of values by running each element in `collection` through
- * `iteratee`. The `iteratee` is bound to `thisArg` and invoked with three
- * arguments: (value, index|key, collection).
- *
- * If a property name is provided for `iteratee` the created `_.property`
- * style callback returns the property value of the given element.
- *
- * If a value is also provided for `thisArg` the created `_.matchesProperty`
- * style callback returns `true` for elements that have a matching property
- * value, else `false`.
- *
- * If an object is provided for `iteratee` the created `_.matches` style
- * callback returns `true` for elements that have the properties of the given
- * object, else `false`.
- *
- * Many lodash methods are guarded to work as iteratees for methods like
- * `_.every`, `_.filter`, `_.map`, `_.mapValues`, `_.reject`, and `_.some`.
- *
- * The guarded methods are:
- * `ary`, `callback`, `chunk`, `clone`, `create`, `curry`, `curryRight`,
- * `drop`, `dropRight`, `every`, `fill`, `flatten`, `invert`, `max`, `min`,
- * `parseInt`, `slice`, `sortBy`, `take`, `takeRight`, `template`, `trim`,
- * `trimLeft`, `trimRight`, `trunc`, `random`, `range`, `sample`, `some`,
- * `sum`, `uniq`, and `words`
- *
- * @static
- * @memberOf _
- * @alias collect
- * @category Collection
- * @param {Array|Object|string} collection The collection to iterate over.
- * @param {Function|Object|string} [iteratee=_.identity] The function invoked
- *  per iteration.
- * @param {*} [thisArg] The `this` binding of `iteratee`.
- * @returns {Array} Returns the new mapped array.
- * @example
- *
- * function timesThree(n) {
- *   return n * 3;
- * }
- *
- * _.map([1, 2], timesThree);
- * // => [3, 6]
- *
- * _.map({ 'a': 1, 'b': 2 }, timesThree);
- * // => [3, 6] (iteration order is not guaranteed)
- *
- * var users = [
- *   { 'user': 'barney' },
- *   { 'user': 'fred' }
- * ];
- *
- * // using the `_.property` callback shorthand
- * _.map(users, 'user');
- * // => ['barney', 'fred']
- */
-function map(collection, iteratee, thisArg) {
-  var func = isArray(collection) ? arrayMap : baseMap;
-  iteratee = baseCallback(iteratee, thisArg, 3);
-  return func(collection, iteratee);
-}
-
-module.exports = map;
-
-},{"lodash._arraymap":14,"lodash._basecallback":16,"lodash._baseeach":18,"lodash.isarray":28}],34:[function(require,module,exports){
-/**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var keys = require('lodash.keys');
-
-/**
- * Converts `value` to an object if it's not one.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {Object} Returns the object.
- */
-function toObject(value) {
-  return isObject(value) ? value : Object(value);
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Creates a two dimensional array of the key-value pairs for `object`,
- * e.g. `[[key1, value1], [key2, value2]]`.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the new array of key-value pairs.
- * @example
- *
- * _.pairs({ 'barney': 36, 'fred': 40 });
- * // => [['barney', 36], ['fred', 40]] (iteration order is not guaranteed)
- */
-function pairs(object) {
-  object = toObject(object);
-
-  var index = -1,
-      props = keys(object),
-      length = props.length,
-      result = Array(length);
-
-  while (++index < length) {
-    var key = props[index];
-    result[index] = [key, object[key]];
-  }
-  return result;
-}
-
-module.exports = pairs;
-
-},{"lodash.keys":31}],35:[function(require,module,exports){
-/**
- * lodash 3.6.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** Used as the `TypeError` message for "Functions" methods. */
-var FUNC_ERROR_TEXT = 'Expected a function';
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeMax = Math.max;
-
-/**
- * Creates a function that invokes `func` with the `this` binding of the
- * created function and arguments from `start` and beyond provided as an array.
- *
- * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters).
- *
- * @static
- * @memberOf _
- * @category Function
- * @param {Function} func The function to apply a rest parameter to.
- * @param {number} [start=func.length-1] The start position of the rest parameter.
- * @returns {Function} Returns the new function.
- * @example
- *
- * var say = _.restParam(function(what, names) {
- *   return what + ' ' + _.initial(names).join(', ') +
- *     (_.size(names) > 1 ? ', & ' : '') + _.last(names);
- * });
- *
- * say('hello', 'fred', 'barney', 'pebbles');
- * // => 'hello fred, barney, & pebbles'
- */
-function restParam(func, start) {
-  if (typeof func != 'function') {
-    throw new TypeError(FUNC_ERROR_TEXT);
-  }
-  start = nativeMax(start === undefined ? (func.length - 1) : (+start || 0), 0);
-  return function() {
-    var args = arguments,
-        index = -1,
-        length = nativeMax(args.length - start, 0),
-        rest = Array(length);
-
-    while (++index < length) {
-      rest[index] = args[start + index];
-    }
-    switch (start) {
-      case 0: return func.call(this, rest);
-      case 1: return func.call(this, args[0], rest);
-      case 2: return func.call(this, args[0], args[1], rest);
-    }
-    var otherArgs = Array(start + 1);
-    index = -1;
-    while (++index < start) {
-      otherArgs[index] = args[index];
-    }
-    otherArgs[start] = rest;
-    return func.apply(this, otherArgs);
-  };
-}
-
-module.exports = restParam;
-
-},{}],36:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -8846,7 +6276,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,require('_process'))
-},{"_process":37}],37:[function(require,module,exports){
+},{"_process":14}],14:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -9017,6 +6447,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -9028,7 +6462,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],38:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -9565,7 +6999,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9651,7 +7085,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],40:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9738,13 +7172,34 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],41:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":39,"./encode":40}],42:[function(require,module,exports){
+},{"./decode":16,"./encode":17}],19:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -9754,6 +7209,10 @@ exports.encode = exports.stringify = require('./encode');
 
 /*<replacement>*/
 
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
+/*<replacement>*/
 var objectKeys = Object.keys || function (obj) {
   var keys = [];
   for (var key in obj) {
@@ -9763,10 +7222,6 @@ var objectKeys = Object.keys || function (obj) {
 /*</replacement>*/
 
 module.exports = Duplex;
-
-/*<replacement>*/
-var processNextTick = require('process-nextick-args');
-/*</replacement>*/
 
 /*<replacement>*/
 var util = require('core-util-is');
@@ -9815,12 +7270,61 @@ function onEndNT(self) {
   self.end();
 }
 
+Object.defineProperty(Duplex.prototype, 'destroyed', {
+  get: function () {
+    if (this._readableState === undefined || this._writableState === undefined) {
+      return false;
+    }
+    return this._readableState.destroyed && this._writableState.destroyed;
+  },
+  set: function (value) {
+    // we ignore the value if the stream
+    // has not been initialized yet
+    if (this._readableState === undefined || this._writableState === undefined) {
+      return;
+    }
+
+    // backward compatibility, the user is explicitly
+    // managing destroyed
+    this._readableState.destroyed = value;
+    this._writableState.destroyed = value;
+  }
+});
+
+Duplex.prototype._destroy = function (err, cb) {
+  this.push(null);
+  this.end();
+
+  processNextTick(cb, err);
+};
+
 function forEach(xs, f) {
   for (var i = 0, l = xs.length; i < l; i++) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":44,"./_stream_writable":46,"core-util-is":7,"inherits":11,"process-nextick-args":36}],43:[function(require,module,exports){
+},{"./_stream_readable":21,"./_stream_writable":23,"core-util-is":6,"inherits":10,"process-nextick-args":13}],20:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -9847,18 +7351,44 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":45,"core-util-is":7,"inherits":11}],44:[function(require,module,exports){
-(function (process){
+},{"./_stream_transform":22,"core-util-is":6,"inherits":10}],21:[function(require,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 'use strict';
+
+/*<replacement>*/
+
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
 
 module.exports = Readable;
 
 /*<replacement>*/
-var processNextTick = require('process-nextick-args');
+var isArray = require('isarray');
 /*</replacement>*/
 
 /*<replacement>*/
-var isArray = require('isarray');
+var Duplex;
 /*</replacement>*/
 
 Readable.ReadableState = ReadableState;
@@ -9872,19 +7402,20 @@ var EElistenerCount = function (emitter, type) {
 /*</replacement>*/
 
 /*<replacement>*/
-var Stream;
-(function () {
-  try {
-    Stream = require('st' + 'ream');
-  } catch (_) {} finally {
-    if (!Stream) Stream = require('events').EventEmitter;
-  }
-})();
+var Stream = require('./internal/streams/stream');
 /*</replacement>*/
 
-var Buffer = require('buffer').Buffer;
+// TODO(bmeurer): Change this back to const once hole checks are
+// properly optimized away early in Ignition+TurboFan.
 /*<replacement>*/
-var bufferShim = require('buffer-shims');
+var Buffer = require('safe-buffer').Buffer;
+var OurUint8Array = global.Uint8Array || function () {};
+function _uint8ArrayToBuffer(chunk) {
+  return Buffer.from(chunk);
+}
+function _isUint8Array(obj) {
+  return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
+}
 /*</replacement>*/
 
 /*<replacement>*/
@@ -9903,11 +7434,16 @@ if (debugUtil && debugUtil.debuglog) {
 /*</replacement>*/
 
 var BufferList = require('./internal/streams/BufferList');
+var destroyImpl = require('./internal/streams/destroy');
 var StringDecoder;
 
 util.inherits(Readable, Stream);
 
+var kProxyEvents = ['error', 'close', 'destroy', 'pause', 'resume'];
+
 function prependListener(emitter, event, fn) {
+  // Sadly this is not cacheable as some libraries bundle their own
+  // event emitter implementation with them.
   if (typeof emitter.prependListener === 'function') {
     return emitter.prependListener(event, fn);
   } else {
@@ -9919,7 +7455,6 @@ function prependListener(emitter, event, fn) {
   }
 }
 
-var Duplex;
 function ReadableState(options, stream) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -9938,7 +7473,7 @@ function ReadableState(options, stream) {
   this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
 
   // cast to ints.
-  this.highWaterMark = ~ ~this.highWaterMark;
+  this.highWaterMark = Math.floor(this.highWaterMark);
 
   // A linked list is used to store data chunks instead of an array because the
   // linked list can remove elements from the beginning faster than
@@ -9952,10 +7487,10 @@ function ReadableState(options, stream) {
   this.endEmitted = false;
   this.reading = false;
 
-  // a flag to be able to tell if the onwrite cb is called immediately,
-  // or on a later tick.  We set this to true at first, because any
-  // actions that shouldn't happen until "later" should generally also
-  // not happen before the first write call.
+  // a flag to be able to tell if the event 'readable'/'data' is emitted
+  // immediately, or on a later tick.  We set this to true at first, because
+  // any actions that shouldn't happen until "later" should generally also
+  // not happen before the first read call.
   this.sync = true;
 
   // whenever we return null, then we set a flag to say
@@ -9965,14 +7500,13 @@ function ReadableState(options, stream) {
   this.readableListening = false;
   this.resumeScheduled = false;
 
+  // has it been destroyed
+  this.destroyed = false;
+
   // Crypto is kind of old and crusty.  Historically, its default string
   // encoding is 'binary' so we have to make this configurable.
   // Everything else in the universe uses 'utf8', though.
   this.defaultEncoding = options.defaultEncoding || 'utf8';
-
-  // when piping, we only care about 'readable' events that happen
-  // after read()ing all the bytes and not getting any pushback.
-  this.ranOut = false;
 
   // the number of writers that are awaiting a drain event in .pipe()s
   this.awaitDrain = 0;
@@ -9989,7 +7523,6 @@ function ReadableState(options, stream) {
   }
 }
 
-var Duplex;
 function Readable(options) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -10000,10 +7533,41 @@ function Readable(options) {
   // legacy
   this.readable = true;
 
-  if (options && typeof options.read === 'function') this._read = options.read;
+  if (options) {
+    if (typeof options.read === 'function') this._read = options.read;
+
+    if (typeof options.destroy === 'function') this._destroy = options.destroy;
+  }
 
   Stream.call(this);
 }
+
+Object.defineProperty(Readable.prototype, 'destroyed', {
+  get: function () {
+    if (this._readableState === undefined) {
+      return false;
+    }
+    return this._readableState.destroyed;
+  },
+  set: function (value) {
+    // we ignore the value if the stream
+    // has not been initialized yet
+    if (!this._readableState) {
+      return;
+    }
+
+    // backward compatibility, the user is explicitly
+    // managing destroyed
+    this._readableState.destroyed = value;
+  }
+});
+
+Readable.prototype.destroy = destroyImpl.destroy;
+Readable.prototype._undestroy = destroyImpl.undestroy;
+Readable.prototype._destroy = function (err, cb) {
+  this.push(null);
+  cb(err);
+};
 
 // Manually shove something into the read() buffer.
 // This returns true if the highWaterMark has not been hit yet,
@@ -10011,74 +7575,85 @@ function Readable(options) {
 // write() some more.
 Readable.prototype.push = function (chunk, encoding) {
   var state = this._readableState;
+  var skipChunkCheck;
 
-  if (!state.objectMode && typeof chunk === 'string') {
-    encoding = encoding || state.defaultEncoding;
-    if (encoding !== state.encoding) {
-      chunk = bufferShim.from(chunk, encoding);
-      encoding = '';
+  if (!state.objectMode) {
+    if (typeof chunk === 'string') {
+      encoding = encoding || state.defaultEncoding;
+      if (encoding !== state.encoding) {
+        chunk = Buffer.from(chunk, encoding);
+        encoding = '';
+      }
+      skipChunkCheck = true;
     }
+  } else {
+    skipChunkCheck = true;
   }
 
-  return readableAddChunk(this, state, chunk, encoding, false);
+  return readableAddChunk(this, chunk, encoding, false, skipChunkCheck);
 };
 
 // Unshift should *always* be something directly out of read()
 Readable.prototype.unshift = function (chunk) {
-  var state = this._readableState;
-  return readableAddChunk(this, state, chunk, '', true);
+  return readableAddChunk(this, chunk, null, true, false);
 };
 
-Readable.prototype.isPaused = function () {
-  return this._readableState.flowing === false;
-};
-
-function readableAddChunk(stream, state, chunk, encoding, addToFront) {
-  var er = chunkInvalid(state, chunk);
-  if (er) {
-    stream.emit('error', er);
-  } else if (chunk === null) {
+function readableAddChunk(stream, chunk, encoding, addToFront, skipChunkCheck) {
+  var state = stream._readableState;
+  if (chunk === null) {
     state.reading = false;
     onEofChunk(stream, state);
-  } else if (state.objectMode || chunk && chunk.length > 0) {
-    if (state.ended && !addToFront) {
-      var e = new Error('stream.push() after EOF');
-      stream.emit('error', e);
-    } else if (state.endEmitted && addToFront) {
-      var _e = new Error('stream.unshift() after end event');
-      stream.emit('error', _e);
-    } else {
-      var skipAdd;
-      if (state.decoder && !addToFront && !encoding) {
-        chunk = state.decoder.write(chunk);
-        skipAdd = !state.objectMode && chunk.length === 0;
+  } else {
+    var er;
+    if (!skipChunkCheck) er = chunkInvalid(state, chunk);
+    if (er) {
+      stream.emit('error', er);
+    } else if (state.objectMode || chunk && chunk.length > 0) {
+      if (typeof chunk !== 'string' && !state.objectMode && Object.getPrototypeOf(chunk) !== Buffer.prototype) {
+        chunk = _uint8ArrayToBuffer(chunk);
       }
 
-      if (!addToFront) state.reading = false;
-
-      // Don't add to the buffer if we've decoded to an empty string chunk and
-      // we're not in object mode
-      if (!skipAdd) {
-        // if we want the data now, just emit it.
-        if (state.flowing && state.length === 0 && !state.sync) {
-          stream.emit('data', chunk);
-          stream.read(0);
+      if (addToFront) {
+        if (state.endEmitted) stream.emit('error', new Error('stream.unshift() after end event'));else addChunk(stream, state, chunk, true);
+      } else if (state.ended) {
+        stream.emit('error', new Error('stream.push() after EOF'));
+      } else {
+        state.reading = false;
+        if (state.decoder && !encoding) {
+          chunk = state.decoder.write(chunk);
+          if (state.objectMode || chunk.length !== 0) addChunk(stream, state, chunk, false);else maybeReadMore(stream, state);
         } else {
-          // update the buffer info.
-          state.length += state.objectMode ? 1 : chunk.length;
-          if (addToFront) state.buffer.unshift(chunk);else state.buffer.push(chunk);
-
-          if (state.needReadable) emitReadable(stream);
+          addChunk(stream, state, chunk, false);
         }
       }
-
-      maybeReadMore(stream, state);
+    } else if (!addToFront) {
+      state.reading = false;
     }
-  } else if (!addToFront) {
-    state.reading = false;
   }
 
   return needMoreData(state);
+}
+
+function addChunk(stream, state, chunk, addToFront) {
+  if (state.flowing && state.length === 0 && !state.sync) {
+    stream.emit('data', chunk);
+    stream.read(0);
+  } else {
+    // update the buffer info.
+    state.length += state.objectMode ? 1 : chunk.length;
+    if (addToFront) state.buffer.unshift(chunk);else state.buffer.push(chunk);
+
+    if (state.needReadable) emitReadable(stream);
+  }
+  maybeReadMore(stream, state);
+}
+
+function chunkInvalid(state, chunk) {
+  var er;
+  if (!_isUint8Array(chunk) && typeof chunk !== 'string' && chunk !== undefined && !state.objectMode) {
+    er = new TypeError('Invalid non-string/buffer chunk');
+  }
+  return er;
 }
 
 // if it's past the high water mark, we can push in some more.
@@ -10091,6 +7666,10 @@ function readableAddChunk(stream, state, chunk, encoding, addToFront) {
 function needMoreData(state) {
   return !state.ended && (state.needReadable || state.length < state.highWaterMark || state.length === 0);
 }
+
+Readable.prototype.isPaused = function () {
+  return this._readableState.flowing === false;
+};
 
 // backwards compatibility.
 Readable.prototype.setEncoding = function (enc) {
@@ -10240,14 +7819,6 @@ Readable.prototype.read = function (n) {
   return ret;
 };
 
-function chunkInvalid(state, chunk) {
-  var er = null;
-  if (!Buffer.isBuffer(chunk) && typeof chunk !== 'string' && chunk !== null && chunk !== undefined && !state.objectMode) {
-    er = new TypeError('Invalid non-string/buffer chunk');
-  }
-  return er;
-}
-
 function onEofChunk(stream, state) {
   if (state.ended) return;
   if (state.decoder) {
@@ -10312,7 +7883,7 @@ function maybeReadMore_(stream, state) {
 // for virtual (non-string, non-buffer) streams, "length" is somewhat
 // arbitrary, and perhaps not very meaningful.
 Readable.prototype._read = function (n) {
-  this.emit('error', new Error('not implemented'));
+  this.emit('error', new Error('_read() is not implemented'));
 };
 
 Readable.prototype.pipe = function (dest, pipeOpts) {
@@ -10335,14 +7906,17 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
 
   var doEnd = (!pipeOpts || pipeOpts.end !== false) && dest !== process.stdout && dest !== process.stderr;
 
-  var endFn = doEnd ? onend : cleanup;
+  var endFn = doEnd ? onend : unpipe;
   if (state.endEmitted) processNextTick(endFn);else src.once('end', endFn);
 
   dest.on('unpipe', onunpipe);
-  function onunpipe(readable) {
+  function onunpipe(readable, unpipeInfo) {
     debug('onunpipe');
     if (readable === src) {
-      cleanup();
+      if (unpipeInfo && unpipeInfo.hasUnpiped === false) {
+        unpipeInfo.hasUnpiped = true;
+        cleanup();
+      }
     }
   }
 
@@ -10368,7 +7942,7 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
     dest.removeListener('error', onerror);
     dest.removeListener('unpipe', onunpipe);
     src.removeListener('end', onend);
-    src.removeListener('end', cleanup);
+    src.removeListener('end', unpipe);
     src.removeListener('data', ondata);
 
     cleanedUp = true;
@@ -10461,6 +8035,7 @@ function pipeOnDrain(src) {
 
 Readable.prototype.unpipe = function (dest) {
   var state = this._readableState;
+  var unpipeInfo = { hasUnpiped: false };
 
   // if we're not piping anywhere, then do nothing.
   if (state.pipesCount === 0) return this;
@@ -10476,7 +8051,7 @@ Readable.prototype.unpipe = function (dest) {
     state.pipes = null;
     state.pipesCount = 0;
     state.flowing = false;
-    if (dest) dest.emit('unpipe', this);
+    if (dest) dest.emit('unpipe', this, unpipeInfo);
     return this;
   }
 
@@ -10490,20 +8065,20 @@ Readable.prototype.unpipe = function (dest) {
     state.pipesCount = 0;
     state.flowing = false;
 
-    for (var _i = 0; _i < len; _i++) {
-      dests[_i].emit('unpipe', this);
+    for (var i = 0; i < len; i++) {
+      dests[i].emit('unpipe', this, unpipeInfo);
     }return this;
   }
 
   // try to find the right one.
-  var i = indexOf(state.pipes, dest);
-  if (i === -1) return this;
+  var index = indexOf(state.pipes, dest);
+  if (index === -1) return this;
 
-  state.pipes.splice(i, 1);
+  state.pipes.splice(index, 1);
   state.pipesCount -= 1;
   if (state.pipesCount === 1) state.pipes = state.pipes[0];
 
-  dest.emit('unpipe', this);
+  dest.emit('unpipe', this, unpipeInfo);
 
   return this;
 };
@@ -10524,7 +8099,7 @@ Readable.prototype.on = function (ev, fn) {
       if (!state.reading) {
         processNextTick(nReadingNextTick, this);
       } else if (state.length) {
-        emitReadable(this, state);
+        emitReadable(this);
       }
     }
   }
@@ -10631,10 +8206,9 @@ Readable.prototype.wrap = function (stream) {
   }
 
   // proxy certain important events.
-  var events = ['error', 'close', 'destroy', 'pause', 'resume'];
-  forEach(events, function (ev) {
-    stream.on(ev, self.emit.bind(self, ev));
-  });
+  for (var n = 0; n < kProxyEvents.length; n++) {
+    stream.on(kProxyEvents[n], self.emit.bind(self, kProxyEvents[n]));
+  }
 
   // when we try to consume some more bytes, simply unpause the
   // underlying stream.
@@ -10726,7 +8300,7 @@ function copyFromBufferString(n, list) {
 // This function is designed to be inlinable, so please take care when making
 // changes to the function body.
 function copyFromBuffer(n, list) {
-  var ret = bufferShim.allocUnsafe(n);
+  var ret = Buffer.allocUnsafe(n);
   var p = list.head;
   var c = 1;
   p.data.copy(ret);
@@ -10786,8 +8360,29 @@ function indexOf(xs, x) {
   }
   return -1;
 }
-}).call(this,require('_process'))
-},{"./_stream_duplex":42,"./internal/streams/BufferList":47,"_process":37,"buffer":5,"buffer-shims":4,"core-util-is":7,"events":8,"inherits":11,"isarray":13,"process-nextick-args":36,"string_decoder/":53,"util":3}],45:[function(require,module,exports){
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./_stream_duplex":19,"./internal/streams/BufferList":24,"./internal/streams/destroy":25,"./internal/streams/stream":26,"_process":14,"core-util-is":6,"events":7,"inherits":10,"isarray":12,"process-nextick-args":13,"safe-buffer":29,"string_decoder/":27,"util":3}],22:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -10861,7 +8456,9 @@ function afterTransform(stream, er, data) {
 
   var cb = ts.writecb;
 
-  if (!cb) return stream.emit('error', new Error('no writecb in Transform class'));
+  if (!cb) {
+    return stream.emit('error', new Error('write callback called multiple times'));
+  }
 
   ts.writechunk = null;
   ts.writecb = null;
@@ -10884,7 +8481,6 @@ function Transform(options) {
 
   this._transformState = new TransformState(this);
 
-  // when the writable side finishes, then flush out anything remaining.
   var stream = this;
 
   // start out asking for a readable event once data is transformed.
@@ -10901,9 +8497,10 @@ function Transform(options) {
     if (typeof options.flush === 'function') this._flush = options.flush;
   }
 
+  // When the writable side finishes, then flush out anything remaining.
   this.once('prefinish', function () {
-    if (typeof this._flush === 'function') this._flush(function (er) {
-      done(stream, er);
+    if (typeof this._flush === 'function') this._flush(function (er, data) {
+      done(stream, er, data);
     });else done(stream);
   });
 }
@@ -10924,7 +8521,7 @@ Transform.prototype.push = function (chunk, encoding) {
 // an error, then that'll put the hurt on the whole operation.  If you
 // never call cb(), then you'll never get another chunk.
 Transform.prototype._transform = function (chunk, encoding, cb) {
-  throw new Error('Not implemented');
+  throw new Error('_transform() is not implemented');
 };
 
 Transform.prototype._write = function (chunk, encoding, cb) {
@@ -10954,8 +8551,19 @@ Transform.prototype._read = function (n) {
   }
 };
 
-function done(stream, er) {
+Transform.prototype._destroy = function (err, cb) {
+  var _this = this;
+
+  Duplex.prototype._destroy.call(this, err, function (err2) {
+    cb(err2);
+    _this.emit('close');
+  });
+};
+
+function done(stream, er, data) {
   if (er) return stream.emit('error', er);
+
+  if (data !== null && data !== undefined) stream.push(data);
 
   // if there's nothing in the write buffer, then that means
   // that nothing more will ever be provided
@@ -10968,22 +8576,69 @@ function done(stream, er) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":42,"core-util-is":7,"inherits":11}],46:[function(require,module,exports){
-(function (process){
+},{"./_stream_duplex":19,"core-util-is":6,"inherits":10}],23:[function(require,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 
 'use strict';
 
-module.exports = Writable;
-
 /*<replacement>*/
+
 var processNextTick = require('process-nextick-args');
 /*</replacement>*/
 
+module.exports = Writable;
+
+/* <replacement> */
+function WriteReq(chunk, encoding, cb) {
+  this.chunk = chunk;
+  this.encoding = encoding;
+  this.callback = cb;
+  this.next = null;
+}
+
+// It seems a linked list but it is not
+// there will be only 2 of these for each stream
+function CorkedRequest(state) {
+  var _this = this;
+
+  this.next = null;
+  this.entry = null;
+  this.finish = function () {
+    onCorkedFinish(_this, state);
+  };
+}
+/* </replacement> */
+
 /*<replacement>*/
 var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+/*</replacement>*/
+
+/*<replacement>*/
+var Duplex;
 /*</replacement>*/
 
 Writable.WritableState = WritableState;
@@ -11000,33 +8655,26 @@ var internalUtil = {
 /*</replacement>*/
 
 /*<replacement>*/
-var Stream;
-(function () {
-  try {
-    Stream = require('st' + 'ream');
-  } catch (_) {} finally {
-    if (!Stream) Stream = require('events').EventEmitter;
-  }
-})();
+var Stream = require('./internal/streams/stream');
 /*</replacement>*/
 
-var Buffer = require('buffer').Buffer;
 /*<replacement>*/
-var bufferShim = require('buffer-shims');
+var Buffer = require('safe-buffer').Buffer;
+var OurUint8Array = global.Uint8Array || function () {};
+function _uint8ArrayToBuffer(chunk) {
+  return Buffer.from(chunk);
+}
+function _isUint8Array(obj) {
+  return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
+}
 /*</replacement>*/
+
+var destroyImpl = require('./internal/streams/destroy');
 
 util.inherits(Writable, Stream);
 
 function nop() {}
 
-function WriteReq(chunk, encoding, cb) {
-  this.chunk = chunk;
-  this.encoding = encoding;
-  this.callback = cb;
-  this.next = null;
-}
-
-var Duplex;
 function WritableState(options, stream) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -11046,8 +8694,12 @@ function WritableState(options, stream) {
   this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
 
   // cast to ints.
-  this.highWaterMark = ~ ~this.highWaterMark;
+  this.highWaterMark = Math.floor(this.highWaterMark);
 
+  // if _final has been called
+  this.finalCalled = false;
+
+  // drain event flag.
   this.needDrain = false;
   // at the start of calling end()
   this.ending = false;
@@ -11055,6 +8707,9 @@ function WritableState(options, stream) {
   this.ended = false;
   // when 'finish' is emitted
   this.finished = false;
+
+  // has it been destroyed
+  this.destroyed = false;
 
   // should we decode strings into buffers before passing to _write?
   // this is here so that some node-core streams can optimize string
@@ -11122,7 +8777,7 @@ function WritableState(options, stream) {
   this.corkedRequestsFree = new CorkedRequest(this);
 }
 
-WritableState.prototype.getBuffer = function writableStateGetBuffer() {
+WritableState.prototype.getBuffer = function getBuffer() {
   var current = this.bufferedRequest;
   var out = [];
   while (current) {
@@ -11137,18 +8792,42 @@ WritableState.prototype.getBuffer = function writableStateGetBuffer() {
     Object.defineProperty(WritableState.prototype, 'buffer', {
       get: internalUtil.deprecate(function () {
         return this.getBuffer();
-      }, '_writableState.buffer is deprecated. Use _writableState.getBuffer ' + 'instead.')
+      }, '_writableState.buffer is deprecated. Use _writableState.getBuffer ' + 'instead.', 'DEP0003')
     });
   } catch (_) {}
 })();
 
-var Duplex;
+// Test _writableState for inheritance to account for Duplex streams,
+// whose prototype chain only points to Readable.
+var realHasInstance;
+if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.prototype[Symbol.hasInstance] === 'function') {
+  realHasInstance = Function.prototype[Symbol.hasInstance];
+  Object.defineProperty(Writable, Symbol.hasInstance, {
+    value: function (object) {
+      if (realHasInstance.call(this, object)) return true;
+
+      return object && object._writableState instanceof WritableState;
+    }
+  });
+} else {
+  realHasInstance = function (object) {
+    return object instanceof this;
+  };
+}
+
 function Writable(options) {
   Duplex = Duplex || require('./_stream_duplex');
 
-  // Writable ctor is applied to Duplexes, though they're not
-  // instanceof Writable, they're instanceof Readable.
-  if (!(this instanceof Writable) && !(this instanceof Duplex)) return new Writable(options);
+  // Writable ctor is applied to Duplexes, too.
+  // `realHasInstance` is necessary because using plain `instanceof`
+  // would return false, as no `_writableState` property is attached.
+
+  // Trying to use the custom `instanceof` for Writable here will also break the
+  // Node.js LazyTransform implementation, which has a non-trivial getter for
+  // `_writableState` that would lead to infinite recursion.
+  if (!realHasInstance.call(Writable, this) && !(this instanceof Duplex)) {
+    return new Writable(options);
+  }
 
   this._writableState = new WritableState(options, this);
 
@@ -11159,6 +8838,10 @@ function Writable(options) {
     if (typeof options.write === 'function') this._write = options.write;
 
     if (typeof options.writev === 'function') this._writev = options.writev;
+
+    if (typeof options.destroy === 'function') this._destroy = options.destroy;
+
+    if (typeof options.final === 'function') this._final = options.final;
   }
 
   Stream.call(this);
@@ -11176,20 +8859,16 @@ function writeAfterEnd(stream, cb) {
   processNextTick(cb, er);
 }
 
-// If we get something that is not a buffer, string, null, or undefined,
-// and we're not in objectMode, then that's an error.
-// Otherwise stream chunks are all considered to be of length=1, and the
-// watermarks determine how many objects to keep in the buffer, rather than
-// how many bytes or characters.
+// Checks that a user-supplied chunk is valid, especially for the particular
+// mode the stream is in. Currently this means that `null` is never accepted
+// and undefined/non-string values are only allowed in object mode.
 function validChunk(stream, state, chunk, cb) {
   var valid = true;
   var er = false;
-  // Always throw error if a null is written
-  // if we are not in object mode then throw
-  // if it is not a buffer, string, or undefined.
+
   if (chunk === null) {
     er = new TypeError('May not write null values to stream');
-  } else if (!Buffer.isBuffer(chunk) && typeof chunk !== 'string' && chunk !== undefined && !state.objectMode) {
+  } else if (typeof chunk !== 'string' && chunk !== undefined && !state.objectMode) {
     er = new TypeError('Invalid non-string/buffer chunk');
   }
   if (er) {
@@ -11203,19 +8882,24 @@ function validChunk(stream, state, chunk, cb) {
 Writable.prototype.write = function (chunk, encoding, cb) {
   var state = this._writableState;
   var ret = false;
+  var isBuf = _isUint8Array(chunk) && !state.objectMode;
+
+  if (isBuf && !Buffer.isBuffer(chunk)) {
+    chunk = _uint8ArrayToBuffer(chunk);
+  }
 
   if (typeof encoding === 'function') {
     cb = encoding;
     encoding = null;
   }
 
-  if (Buffer.isBuffer(chunk)) encoding = 'buffer';else if (!encoding) encoding = state.defaultEncoding;
+  if (isBuf) encoding = 'buffer';else if (!encoding) encoding = state.defaultEncoding;
 
   if (typeof cb !== 'function') cb = nop;
 
-  if (state.ended) writeAfterEnd(this, cb);else if (validChunk(this, state, chunk, cb)) {
+  if (state.ended) writeAfterEnd(this, cb);else if (isBuf || validChunk(this, state, chunk, cb)) {
     state.pendingcb++;
-    ret = writeOrBuffer(this, state, chunk, encoding, cb);
+    ret = writeOrBuffer(this, state, isBuf, chunk, encoding, cb);
   }
 
   return ret;
@@ -11247,7 +8931,7 @@ Writable.prototype.setDefaultEncoding = function setDefaultEncoding(encoding) {
 
 function decodeChunk(state, chunk, encoding) {
   if (!state.objectMode && state.decodeStrings !== false && typeof chunk === 'string') {
-    chunk = bufferShim.from(chunk, encoding);
+    chunk = Buffer.from(chunk, encoding);
   }
   return chunk;
 }
@@ -11255,10 +8939,15 @@ function decodeChunk(state, chunk, encoding) {
 // if we're already writing something, then just put this
 // in the queue, and wait our turn.  Otherwise, call _write
 // If we return false, then we need a drain event, so set that flag.
-function writeOrBuffer(stream, state, chunk, encoding, cb) {
-  chunk = decodeChunk(state, chunk, encoding);
-
-  if (Buffer.isBuffer(chunk)) encoding = 'buffer';
+function writeOrBuffer(stream, state, isBuf, chunk, encoding, cb) {
+  if (!isBuf) {
+    var newChunk = decodeChunk(state, chunk, encoding);
+    if (chunk !== newChunk) {
+      isBuf = true;
+      encoding = 'buffer';
+      chunk = newChunk;
+    }
+  }
   var len = state.objectMode ? 1 : chunk.length;
 
   state.length += len;
@@ -11269,7 +8958,13 @@ function writeOrBuffer(stream, state, chunk, encoding, cb) {
 
   if (state.writing || state.corked) {
     var last = state.lastBufferedRequest;
-    state.lastBufferedRequest = new WriteReq(chunk, encoding, cb);
+    state.lastBufferedRequest = {
+      chunk: chunk,
+      encoding: encoding,
+      isBuf: isBuf,
+      callback: cb,
+      next: null
+    };
     if (last) {
       last.next = state.lastBufferedRequest;
     } else {
@@ -11294,10 +8989,26 @@ function doWrite(stream, state, writev, len, chunk, encoding, cb) {
 
 function onwriteError(stream, state, sync, er, cb) {
   --state.pendingcb;
-  if (sync) processNextTick(cb, er);else cb(er);
 
-  stream._writableState.errorEmitted = true;
-  stream.emit('error', er);
+  if (sync) {
+    // defer the callback if we are being called synchronously
+    // to avoid piling up things on the stack
+    processNextTick(cb, er);
+    // this can emit finish, and it will always happen
+    // after error
+    processNextTick(finishMaybe, stream, state);
+    stream._writableState.errorEmitted = true;
+    stream.emit('error', er);
+  } else {
+    // the caller expect this to happen before if
+    // it is async
+    cb(er);
+    stream._writableState.errorEmitted = true;
+    stream.emit('error', er);
+    // this can emit finish, but finish must
+    // always follow error
+    finishMaybe(stream, state);
+  }
 }
 
 function onwriteStateUpdate(state) {
@@ -11327,8 +9038,8 @@ function onwrite(stream, er) {
       asyncWrite(afterWrite, stream, state, finished, cb);
       /*</replacement>*/
     } else {
-        afterWrite(stream, state, finished, cb);
-      }
+      afterWrite(stream, state, finished, cb);
+    }
   }
 }
 
@@ -11362,11 +9073,14 @@ function clearBuffer(stream, state) {
     holder.entry = entry;
 
     var count = 0;
+    var allBuffers = true;
     while (entry) {
       buffer[count] = entry;
+      if (!entry.isBuf) allBuffers = false;
       entry = entry.next;
       count += 1;
     }
+    buffer.allBuffers = allBuffers;
 
     doWrite(stream, state, true, state.length, buffer, '', holder.finish);
 
@@ -11408,7 +9122,7 @@ function clearBuffer(stream, state) {
 }
 
 Writable.prototype._write = function (chunk, encoding, cb) {
-  cb(new Error('not implemented'));
+  cb(new Error('_write() is not implemented'));
 };
 
 Writable.prototype._writev = null;
@@ -11440,23 +9154,37 @@ Writable.prototype.end = function (chunk, encoding, cb) {
 function needFinish(state) {
   return state.ending && state.length === 0 && state.bufferedRequest === null && !state.finished && !state.writing;
 }
-
-function prefinish(stream, state) {
-  if (!state.prefinished) {
+function callFinal(stream, state) {
+  stream._final(function (err) {
+    state.pendingcb--;
+    if (err) {
+      stream.emit('error', err);
+    }
     state.prefinished = true;
     stream.emit('prefinish');
+    finishMaybe(stream, state);
+  });
+}
+function prefinish(stream, state) {
+  if (!state.prefinished && !state.finalCalled) {
+    if (typeof stream._final === 'function') {
+      state.pendingcb++;
+      state.finalCalled = true;
+      processNextTick(callFinal, stream, state);
+    } else {
+      state.prefinished = true;
+      stream.emit('prefinish');
+    }
   }
 }
 
 function finishMaybe(stream, state) {
   var need = needFinish(state);
   if (need) {
+    prefinish(stream, state);
     if (state.pendingcb === 0) {
-      prefinish(stream, state);
       state.finished = true;
       stream.emit('finish');
-    } else {
-      prefinish(stream, state);
     }
   }
   return need;
@@ -11472,117 +9200,547 @@ function endWritable(stream, state, cb) {
   stream.writable = false;
 }
 
-// It seems a linked list but it is not
-// there will be only 2 of these for each stream
-function CorkedRequest(state) {
-  var _this = this;
-
-  this.next = null;
-  this.entry = null;
-
-  this.finish = function (err) {
-    var entry = _this.entry;
-    _this.entry = null;
-    while (entry) {
-      var cb = entry.callback;
-      state.pendingcb--;
-      cb(err);
-      entry = entry.next;
-    }
-    if (state.corkedRequestsFree) {
-      state.corkedRequestsFree.next = _this;
-    } else {
-      state.corkedRequestsFree = _this;
-    }
-  };
+function onCorkedFinish(corkReq, state, err) {
+  var entry = corkReq.entry;
+  corkReq.entry = null;
+  while (entry) {
+    var cb = entry.callback;
+    state.pendingcb--;
+    cb(err);
+    entry = entry.next;
+  }
+  if (state.corkedRequestsFree) {
+    state.corkedRequestsFree.next = corkReq;
+  } else {
+    state.corkedRequestsFree = corkReq;
+  }
 }
-}).call(this,require('_process'))
-},{"./_stream_duplex":42,"_process":37,"buffer":5,"buffer-shims":4,"core-util-is":7,"events":8,"inherits":11,"process-nextick-args":36,"util-deprecate":57}],47:[function(require,module,exports){
+
+Object.defineProperty(Writable.prototype, 'destroyed', {
+  get: function () {
+    if (this._writableState === undefined) {
+      return false;
+    }
+    return this._writableState.destroyed;
+  },
+  set: function (value) {
+    // we ignore the value if the stream
+    // has not been initialized yet
+    if (!this._writableState) {
+      return;
+    }
+
+    // backward compatibility, the user is explicitly
+    // managing destroyed
+    this._writableState.destroyed = value;
+  }
+});
+
+Writable.prototype.destroy = destroyImpl.destroy;
+Writable.prototype._undestroy = destroyImpl.undestroy;
+Writable.prototype._destroy = function (err, cb) {
+  this.end();
+  cb(err);
+};
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./_stream_duplex":19,"./internal/streams/destroy":25,"./internal/streams/stream":26,"_process":14,"core-util-is":6,"inherits":10,"process-nextick-args":13,"safe-buffer":29,"util-deprecate":37}],24:[function(require,module,exports){
 'use strict';
 
-var Buffer = require('buffer').Buffer;
 /*<replacement>*/
-var bufferShim = require('buffer-shims');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Buffer = require('safe-buffer').Buffer;
 /*</replacement>*/
 
-module.exports = BufferList;
-
-function BufferList() {
-  this.head = null;
-  this.tail = null;
-  this.length = 0;
+function copyBuffer(src, target, offset) {
+  src.copy(target, offset);
 }
 
-BufferList.prototype.push = function (v) {
-  var entry = { data: v, next: null };
-  if (this.length > 0) this.tail.next = entry;else this.head = entry;
-  this.tail = entry;
-  ++this.length;
-};
+module.exports = function () {
+  function BufferList() {
+    _classCallCheck(this, BufferList);
 
-BufferList.prototype.unshift = function (v) {
-  var entry = { data: v, next: this.head };
-  if (this.length === 0) this.tail = entry;
-  this.head = entry;
-  ++this.length;
-};
-
-BufferList.prototype.shift = function () {
-  if (this.length === 0) return;
-  var ret = this.head.data;
-  if (this.length === 1) this.head = this.tail = null;else this.head = this.head.next;
-  --this.length;
-  return ret;
-};
-
-BufferList.prototype.clear = function () {
-  this.head = this.tail = null;
-  this.length = 0;
-};
-
-BufferList.prototype.join = function (s) {
-  if (this.length === 0) return '';
-  var p = this.head;
-  var ret = '' + p.data;
-  while (p = p.next) {
-    ret += s + p.data;
-  }return ret;
-};
-
-BufferList.prototype.concat = function (n) {
-  if (this.length === 0) return bufferShim.alloc(0);
-  if (this.length === 1) return this.head.data;
-  var ret = bufferShim.allocUnsafe(n >>> 0);
-  var p = this.head;
-  var i = 0;
-  while (p) {
-    p.data.copy(ret, i);
-    i += p.data.length;
-    p = p.next;
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
   }
-  return ret;
+
+  BufferList.prototype.push = function push(v) {
+    var entry = { data: v, next: null };
+    if (this.length > 0) this.tail.next = entry;else this.head = entry;
+    this.tail = entry;
+    ++this.length;
+  };
+
+  BufferList.prototype.unshift = function unshift(v) {
+    var entry = { data: v, next: this.head };
+    if (this.length === 0) this.tail = entry;
+    this.head = entry;
+    ++this.length;
+  };
+
+  BufferList.prototype.shift = function shift() {
+    if (this.length === 0) return;
+    var ret = this.head.data;
+    if (this.length === 1) this.head = this.tail = null;else this.head = this.head.next;
+    --this.length;
+    return ret;
+  };
+
+  BufferList.prototype.clear = function clear() {
+    this.head = this.tail = null;
+    this.length = 0;
+  };
+
+  BufferList.prototype.join = function join(s) {
+    if (this.length === 0) return '';
+    var p = this.head;
+    var ret = '' + p.data;
+    while (p = p.next) {
+      ret += s + p.data;
+    }return ret;
+  };
+
+  BufferList.prototype.concat = function concat(n) {
+    if (this.length === 0) return Buffer.alloc(0);
+    if (this.length === 1) return this.head.data;
+    var ret = Buffer.allocUnsafe(n >>> 0);
+    var p = this.head;
+    var i = 0;
+    while (p) {
+      copyBuffer(p.data, ret, i);
+      i += p.data.length;
+      p = p.next;
+    }
+    return ret;
+  };
+
+  return BufferList;
+}();
+},{"safe-buffer":29}],25:[function(require,module,exports){
+'use strict';
+
+/*<replacement>*/
+
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
+// undocumented cb() API, needed for core, not for public API
+function destroy(err, cb) {
+  var _this = this;
+
+  var readableDestroyed = this._readableState && this._readableState.destroyed;
+  var writableDestroyed = this._writableState && this._writableState.destroyed;
+
+  if (readableDestroyed || writableDestroyed) {
+    if (cb) {
+      cb(err);
+    } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
+      processNextTick(emitErrorNT, this, err);
+    }
+    return;
+  }
+
+  // we set destroyed to true before firing error callbacks in order
+  // to make it re-entrance safe in case destroy() is called within callbacks
+
+  if (this._readableState) {
+    this._readableState.destroyed = true;
+  }
+
+  // if this is a duplex stream mark the writable part as destroyed as well
+  if (this._writableState) {
+    this._writableState.destroyed = true;
+  }
+
+  this._destroy(err || null, function (err) {
+    if (!cb && err) {
+      processNextTick(emitErrorNT, _this, err);
+      if (_this._writableState) {
+        _this._writableState.errorEmitted = true;
+      }
+    } else if (cb) {
+      cb(err);
+    }
+  });
+}
+
+function undestroy() {
+  if (this._readableState) {
+    this._readableState.destroyed = false;
+    this._readableState.reading = false;
+    this._readableState.ended = false;
+    this._readableState.endEmitted = false;
+  }
+
+  if (this._writableState) {
+    this._writableState.destroyed = false;
+    this._writableState.ended = false;
+    this._writableState.ending = false;
+    this._writableState.finished = false;
+    this._writableState.errorEmitted = false;
+  }
+}
+
+function emitErrorNT(self, err) {
+  self.emit('error', err);
+}
+
+module.exports = {
+  destroy: destroy,
+  undestroy: undestroy
 };
-},{"buffer":5,"buffer-shims":4}],48:[function(require,module,exports){
-(function (process){
-var Stream = (function (){
-  try {
-    return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
-  } catch(_){}
-}());
+},{"process-nextick-args":13}],26:[function(require,module,exports){
+module.exports = require('events').EventEmitter;
+
+},{"events":7}],27:[function(require,module,exports){
+'use strict';
+
+var Buffer = require('safe-buffer').Buffer;
+
+var isEncoding = Buffer.isEncoding || function (encoding) {
+  encoding = '' + encoding;
+  switch (encoding && encoding.toLowerCase()) {
+    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
+      return true;
+    default:
+      return false;
+  }
+};
+
+function _normalizeEncoding(enc) {
+  if (!enc) return 'utf8';
+  var retried;
+  while (true) {
+    switch (enc) {
+      case 'utf8':
+      case 'utf-8':
+        return 'utf8';
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return 'utf16le';
+      case 'latin1':
+      case 'binary':
+        return 'latin1';
+      case 'base64':
+      case 'ascii':
+      case 'hex':
+        return enc;
+      default:
+        if (retried) return; // undefined
+        enc = ('' + enc).toLowerCase();
+        retried = true;
+    }
+  }
+};
+
+// Do not cache `Buffer.isEncoding` when checking encoding names as some
+// modules monkey-patch it to support additional encodings
+function normalizeEncoding(enc) {
+  var nenc = _normalizeEncoding(enc);
+  if (typeof nenc !== 'string' && (Buffer.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
+  return nenc || enc;
+}
+
+// StringDecoder provides an interface for efficiently splitting a series of
+// buffers into a series of JS strings without breaking apart multi-byte
+// characters.
+exports.StringDecoder = StringDecoder;
+function StringDecoder(encoding) {
+  this.encoding = normalizeEncoding(encoding);
+  var nb;
+  switch (this.encoding) {
+    case 'utf16le':
+      this.text = utf16Text;
+      this.end = utf16End;
+      nb = 4;
+      break;
+    case 'utf8':
+      this.fillLast = utf8FillLast;
+      nb = 4;
+      break;
+    case 'base64':
+      this.text = base64Text;
+      this.end = base64End;
+      nb = 3;
+      break;
+    default:
+      this.write = simpleWrite;
+      this.end = simpleEnd;
+      return;
+  }
+  this.lastNeed = 0;
+  this.lastTotal = 0;
+  this.lastChar = Buffer.allocUnsafe(nb);
+}
+
+StringDecoder.prototype.write = function (buf) {
+  if (buf.length === 0) return '';
+  var r;
+  var i;
+  if (this.lastNeed) {
+    r = this.fillLast(buf);
+    if (r === undefined) return '';
+    i = this.lastNeed;
+    this.lastNeed = 0;
+  } else {
+    i = 0;
+  }
+  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
+  return r || '';
+};
+
+StringDecoder.prototype.end = utf8End;
+
+// Returns only complete characters in a Buffer
+StringDecoder.prototype.text = utf8Text;
+
+// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
+StringDecoder.prototype.fillLast = function (buf) {
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
+  this.lastNeed -= buf.length;
+};
+
+// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
+// continuation byte.
+function utf8CheckByte(byte) {
+  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
+  return -1;
+}
+
+// Checks at most 3 bytes at the end of a Buffer in order to detect an
+// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
+// needed to complete the UTF-8 character (if applicable) are returned.
+function utf8CheckIncomplete(self, buf, i) {
+  var j = buf.length - 1;
+  if (j < i) return 0;
+  var nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 1;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 2;
+    return nb;
+  }
+  if (--j < i) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) {
+      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
+    }
+    return nb;
+  }
+  return 0;
+}
+
+// Validates as many continuation bytes for a multi-byte UTF-8 character as
+// needed or are available. If we see a non-continuation byte where we expect
+// one, we "replace" the validated continuation bytes we've seen so far with
+// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
+// behavior. The continuation byte check is included three times in the case
+// where all of the continuation bytes for a character exist in the same buffer.
+// It is also done this way as a slight performance increase instead of using a
+// loop.
+function utf8CheckExtraBytes(self, buf, p) {
+  if ((buf[0] & 0xC0) !== 0x80) {
+    self.lastNeed = 0;
+    return '\ufffd'.repeat(p);
+  }
+  if (self.lastNeed > 1 && buf.length > 1) {
+    if ((buf[1] & 0xC0) !== 0x80) {
+      self.lastNeed = 1;
+      return '\ufffd'.repeat(p + 1);
+    }
+    if (self.lastNeed > 2 && buf.length > 2) {
+      if ((buf[2] & 0xC0) !== 0x80) {
+        self.lastNeed = 2;
+        return '\ufffd'.repeat(p + 2);
+      }
+    }
+  }
+}
+
+// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
+function utf8FillLast(buf) {
+  var p = this.lastTotal - this.lastNeed;
+  var r = utf8CheckExtraBytes(this, buf, p);
+  if (r !== undefined) return r;
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, p, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, p, 0, buf.length);
+  this.lastNeed -= buf.length;
+}
+
+// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
+// partial character, the character's bytes are buffered until the required
+// number of bytes are available.
+function utf8Text(buf, i) {
+  var total = utf8CheckIncomplete(this, buf, i);
+  if (!this.lastNeed) return buf.toString('utf8', i);
+  this.lastTotal = total;
+  var end = buf.length - (total - this.lastNeed);
+  buf.copy(this.lastChar, 0, end);
+  return buf.toString('utf8', i, end);
+}
+
+// For UTF-8, a replacement character for each buffered byte of a (partial)
+// character needs to be added to the output.
+function utf8End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
+  return r;
+}
+
+// UTF-16LE typically needs two bytes per character, but even if we have an even
+// number of bytes available, we need to check if we end on a leading/high
+// surrogate. In that case, we need to wait for the next two bytes in order to
+// decode the last character properly.
+function utf16Text(buf, i) {
+  if ((buf.length - i) % 2 === 0) {
+    var r = buf.toString('utf16le', i);
+    if (r) {
+      var c = r.charCodeAt(r.length - 1);
+      if (c >= 0xD800 && c <= 0xDBFF) {
+        this.lastNeed = 2;
+        this.lastTotal = 4;
+        this.lastChar[0] = buf[buf.length - 2];
+        this.lastChar[1] = buf[buf.length - 1];
+        return r.slice(0, -1);
+      }
+    }
+    return r;
+  }
+  this.lastNeed = 1;
+  this.lastTotal = 2;
+  this.lastChar[0] = buf[buf.length - 1];
+  return buf.toString('utf16le', i, buf.length - 1);
+}
+
+// For UTF-16LE we do not explicitly append special replacement characters if we
+// end on a partial character, we simply let v8 handle that.
+function utf16End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) {
+    var end = this.lastTotal - this.lastNeed;
+    return r + this.lastChar.toString('utf16le', 0, end);
+  }
+  return r;
+}
+
+function base64Text(buf, i) {
+  var n = (buf.length - i) % 3;
+  if (n === 0) return buf.toString('base64', i);
+  this.lastNeed = 3 - n;
+  this.lastTotal = 3;
+  if (n === 1) {
+    this.lastChar[0] = buf[buf.length - 1];
+  } else {
+    this.lastChar[0] = buf[buf.length - 2];
+    this.lastChar[1] = buf[buf.length - 1];
+  }
+  return buf.toString('base64', i, buf.length - n);
+}
+
+function base64End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
+  return r;
+}
+
+// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
+function simpleWrite(buf) {
+  return buf.toString(this.encoding);
+}
+
+function simpleEnd(buf) {
+  return buf && buf.length ? this.write(buf) : '';
+}
+},{"safe-buffer":29}],28:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
-exports.Stream = Stream || exports;
+exports.Stream = exports;
 exports.Readable = exports;
 exports.Writable = require('./lib/_stream_writable.js');
 exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-if (!process.browser && process.env.READABLE_STREAM === 'disable' && Stream) {
-  module.exports = Stream;
+},{"./lib/_stream_duplex.js":19,"./lib/_stream_passthrough.js":20,"./lib/_stream_readable.js":21,"./lib/_stream_transform.js":22,"./lib/_stream_writable.js":23}],29:[function(require,module,exports){
+/* eslint-disable node/no-deprecated-api */
+var buffer = require('buffer')
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
 }
 
-}).call(this,require('_process'))
-},{"./lib/_stream_duplex.js":42,"./lib/_stream_passthrough.js":43,"./lib/_stream_readable.js":44,"./lib/_stream_transform.js":45,"./lib/_stream_writable.js":46,"_process":37}],49:[function(require,module,exports){
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+},{"buffer":4}],30:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
@@ -11664,7 +9822,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":51,"builtin-status-codes":6,"url":55,"xtend":58}],50:[function(require,module,exports){
+},{"./lib/request":32,"builtin-status-codes":5,"url":35,"xtend":38}],31:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
@@ -11674,12 +9832,34 @@ try {
 	exports.blobConstructor = true
 } catch (e) {}
 
-var xhr = new global.XMLHttpRequest()
-// If location.host is empty, e.g. if this page/worker was loaded
-// from a Blob, then use example.com to avoid an error
-xhr.open('GET', global.location.host ? '/' : 'https://example.com')
+// The xhr request to example.com may violate some restrictive CSP configurations,
+// so if we're running in a browser that supports `fetch`, avoid calling getXHR()
+// and assume support for certain features below.
+var xhr
+function getXHR () {
+	// Cache the xhr value
+	if (xhr !== undefined) return xhr
+
+	if (global.XMLHttpRequest) {
+		xhr = new global.XMLHttpRequest()
+		// If XDomainRequest is available (ie only, where xhr might not work
+		// cross domain), use the page location. Otherwise use example.com
+		// Note: this doesn't actually make an http request.
+		try {
+			xhr.open('GET', global.XDomainRequest ? '/' : 'https://example.com')
+		} catch(e) {
+			xhr = null
+		}
+	} else {
+		// Service workers don't have XHR
+		xhr = null
+	}
+	return xhr
+}
 
 function checkTypeSupport (type) {
+	var xhr = getXHR()
+	if (!xhr) return false
 	try {
 		xhr.responseType = type
 		return xhr.responseType === type
@@ -11692,23 +9872,30 @@ function checkTypeSupport (type) {
 var haveArrayBuffer = typeof global.ArrayBuffer !== 'undefined'
 var haveSlice = haveArrayBuffer && isFunction(global.ArrayBuffer.prototype.slice)
 
-exports.arraybuffer = haveArrayBuffer && checkTypeSupport('arraybuffer')
+// If fetch is supported, then arraybuffer will be supported too. Skip calling
+// checkTypeSupport(), since that calls getXHR().
+exports.arraybuffer = exports.fetch || (haveArrayBuffer && checkTypeSupport('arraybuffer'))
+
 // These next two tests unavoidably show warnings in Chrome. Since fetch will always
 // be used if it's available, just return false for these to avoid the warnings.
 exports.msstream = !exports.fetch && haveSlice && checkTypeSupport('ms-stream')
 exports.mozchunkedarraybuffer = !exports.fetch && haveArrayBuffer &&
 	checkTypeSupport('moz-chunked-arraybuffer')
-exports.overrideMimeType = isFunction(xhr.overrideMimeType)
+
+// If fetch is supported, then overrideMimeType will be supported too. Skip calling
+// getXHR().
+exports.overrideMimeType = exports.fetch || (getXHR() ? isFunction(getXHR().overrideMimeType) : false)
+
 exports.vbArray = isFunction(global.VBArray)
 
 function isFunction (value) {
-  return typeof value === 'function'
+	return typeof value === 'function'
 }
 
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],51:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -11750,8 +9937,9 @@ var ClientRequest = module.exports = function (opts) {
 
 	var preferBinary
 	var useFetch = true
-	if (opts.mode === 'disable-fetch') {
-		// If the use of XHR should be preferred and includes preserving the 'content-type' header
+	if (opts.mode === 'disable-fetch' || 'timeout' in opts) {
+		// If the use of XHR should be preferred and includes preserving the 'content-type' header.
+		// Force XHR to be used since the Fetch API does not yet support timeouts.
 		useFetch = false
 		preferBinary = true
 	} else if (opts.mode === 'prefer-streaming') {
@@ -11792,8 +9980,10 @@ ClientRequest.prototype.setHeader = function (name, value) {
 }
 
 ClientRequest.prototype.getHeader = function (name) {
-	var self = this
-	return self._headers[name.toLowerCase()].value
+	var header = this._headers[name.toLowerCase()]
+	if (header)
+		return header.value
+	return null
 }
 
 ClientRequest.prototype.removeHeader = function (name) {
@@ -11809,8 +9999,8 @@ ClientRequest.prototype._onFinish = function () {
 	var opts = self._opts
 
 	var headersObj = self._headers
-	var body
-	if (opts.method === 'POST' || opts.method === 'PUT' || opts.method === 'PATCH') {
+	var body = null
+	if (opts.method !== 'GET' && opts.method !== 'HEAD') {
 		if (capability.blobConstructor) {
 			body = new global.Blob(self._body.map(function (buffer) {
 				return toArrayBuffer(buffer)
@@ -11823,15 +10013,25 @@ ClientRequest.prototype._onFinish = function () {
 		}
 	}
 
-	if (self._mode === 'fetch') {
-		var headers = Object.keys(headersObj).map(function (name) {
-			return [headersObj[name].name, headersObj[name].value]
-		})
+	// create flattened list of headers
+	var headersList = []
+	Object.keys(headersObj).forEach(function (keyName) {
+		var name = headersObj[keyName].name
+		var value = headersObj[keyName].value
+		if (Array.isArray(value)) {
+			value.forEach(function (v) {
+				headersList.push([name, v])
+			})
+		} else {
+			headersList.push([name, value])
+		}
+	})
 
+	if (self._mode === 'fetch') {
 		global.fetch(self._opts.url, {
 			method: self._opts.method,
-			headers: headers,
-			body: body,
+			headers: headersList,
+			body: body || undefined,
 			mode: 'cors',
 			credentials: opts.withCredentials ? 'include' : 'same-origin'
 		}).then(function (response) {
@@ -11861,8 +10061,15 @@ ClientRequest.prototype._onFinish = function () {
 		if (self._mode === 'text' && 'overrideMimeType' in xhr)
 			xhr.overrideMimeType('text/plain; charset=x-user-defined')
 
-		Object.keys(headersObj).forEach(function (name) {
-			xhr.setRequestHeader(headersObj[name].name, headersObj[name].value)
+		if ('timeout' in opts) {
+			xhr.timeout = opts.timeout
+			xhr.ontimeout = function () {
+				self.emit('timeout')
+			}
+		}
+
+		headersList.forEach(function (header) {
+			xhr.setRequestHeader(header[0], header[1])
 		})
 
 		self._response = null
@@ -11932,6 +10139,10 @@ ClientRequest.prototype._connect = function () {
 		return
 
 	self._response = new IncomingMessage(self._xhr, self._fetchResponse, self._mode)
+	self._response.on('error', function(err) {
+		self.emit('error', err)
+	})
+
 	self.emit('response', self._response)
 }
 
@@ -11994,7 +10205,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":50,"./response":52,"_process":37,"buffer":5,"inherits":11,"readable-stream":48,"to-arraybuffer":54}],52:[function(require,module,exports){
+},{"./capability":31,"./response":33,"_process":14,"buffer":4,"inherits":10,"readable-stream":28,"to-arraybuffer":34}],33:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -12032,12 +10243,12 @@ var IncomingMessage = exports.IncomingMessage = function (xhr, response, mode) {
 		self.url = response.url
 		self.statusCode = response.status
 		self.statusMessage = response.statusText
-		// backwards compatible version of for (<item> of <iterable>):
-		// for (var <item>,_i,_it = <iterable>[Symbol.iterator](); <item> = (_i = _it.next()).value,!_i.done;)
-		for (var header, _i, _it = response.headers[Symbol.iterator](); header = (_i = _it.next()).value, !_i.done;) {
-			self.headers[header[0].toLowerCase()] = header[1]
-			self.rawHeaders.push(header[0], header[1])
-		}
+		
+		response.headers.forEach(function(header, key){
+			self.headers[key.toLowerCase()] = header
+			self.rawHeaders.push(key, header)
+		})
+
 
 		// TODO: this doesn't respect backpressure. Once WritableStream is available, this can be fixed
 		var reader = response.body.getReader()
@@ -12051,6 +10262,8 @@ var IncomingMessage = exports.IncomingMessage = function (xhr, response, mode) {
 				}
 				self.push(new Buffer(result.value))
 				read()
+			}).catch(function(err) {
+				self.emit('error', err)
 			})
 		}
 		read()
@@ -12178,230 +10391,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":50,"_process":37,"buffer":5,"inherits":11,"readable-stream":48}],53:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var Buffer = require('buffer').Buffer;
-
-var isBufferEncoding = Buffer.isEncoding
-  || function(encoding) {
-       switch (encoding && encoding.toLowerCase()) {
-         case 'hex': case 'utf8': case 'utf-8': case 'ascii': case 'binary': case 'base64': case 'ucs2': case 'ucs-2': case 'utf16le': case 'utf-16le': case 'raw': return true;
-         default: return false;
-       }
-     }
-
-
-function assertEncoding(encoding) {
-  if (encoding && !isBufferEncoding(encoding)) {
-    throw new Error('Unknown encoding: ' + encoding);
-  }
-}
-
-// StringDecoder provides an interface for efficiently splitting a series of
-// buffers into a series of JS strings without breaking apart multi-byte
-// characters. CESU-8 is handled as part of the UTF-8 encoding.
-//
-// @TODO Handling all encodings inside a single object makes it very difficult
-// to reason about this code, so it should be split up in the future.
-// @TODO There should be a utf8-strict encoding that rejects invalid UTF-8 code
-// points as used by CESU-8.
-var StringDecoder = exports.StringDecoder = function(encoding) {
-  this.encoding = (encoding || 'utf8').toLowerCase().replace(/[-_]/, '');
-  assertEncoding(encoding);
-  switch (this.encoding) {
-    case 'utf8':
-      // CESU-8 represents each of Surrogate Pair by 3-bytes
-      this.surrogateSize = 3;
-      break;
-    case 'ucs2':
-    case 'utf16le':
-      // UTF-16 represents each of Surrogate Pair by 2-bytes
-      this.surrogateSize = 2;
-      this.detectIncompleteChar = utf16DetectIncompleteChar;
-      break;
-    case 'base64':
-      // Base-64 stores 3 bytes in 4 chars, and pads the remainder.
-      this.surrogateSize = 3;
-      this.detectIncompleteChar = base64DetectIncompleteChar;
-      break;
-    default:
-      this.write = passThroughWrite;
-      return;
-  }
-
-  // Enough space to store all bytes of a single character. UTF-8 needs 4
-  // bytes, but CESU-8 may require up to 6 (3 bytes per surrogate).
-  this.charBuffer = new Buffer(6);
-  // Number of bytes received for the current incomplete multi-byte character.
-  this.charReceived = 0;
-  // Number of bytes expected for the current incomplete multi-byte character.
-  this.charLength = 0;
-};
-
-
-// write decodes the given buffer and returns it as JS string that is
-// guaranteed to not contain any partial multi-byte characters. Any partial
-// character found at the end of the buffer is buffered up, and will be
-// returned when calling write again with the remaining bytes.
-//
-// Note: Converting a Buffer containing an orphan surrogate to a String
-// currently works, but converting a String to a Buffer (via `new Buffer`, or
-// Buffer#write) will replace incomplete surrogates with the unicode
-// replacement character. See https://codereview.chromium.org/121173009/ .
-StringDecoder.prototype.write = function(buffer) {
-  var charStr = '';
-  // if our last write ended with an incomplete multibyte character
-  while (this.charLength) {
-    // determine how many remaining bytes this buffer has to offer for this char
-    var available = (buffer.length >= this.charLength - this.charReceived) ?
-        this.charLength - this.charReceived :
-        buffer.length;
-
-    // add the new bytes to the char buffer
-    buffer.copy(this.charBuffer, this.charReceived, 0, available);
-    this.charReceived += available;
-
-    if (this.charReceived < this.charLength) {
-      // still not enough chars in this buffer? wait for more ...
-      return '';
-    }
-
-    // remove bytes belonging to the current character from the buffer
-    buffer = buffer.slice(available, buffer.length);
-
-    // get the character that was split
-    charStr = this.charBuffer.slice(0, this.charLength).toString(this.encoding);
-
-    // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
-    var charCode = charStr.charCodeAt(charStr.length - 1);
-    if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-      this.charLength += this.surrogateSize;
-      charStr = '';
-      continue;
-    }
-    this.charReceived = this.charLength = 0;
-
-    // if there are no more bytes in this buffer, just emit our char
-    if (buffer.length === 0) {
-      return charStr;
-    }
-    break;
-  }
-
-  // determine and set charLength / charReceived
-  this.detectIncompleteChar(buffer);
-
-  var end = buffer.length;
-  if (this.charLength) {
-    // buffer the incomplete character bytes we got
-    buffer.copy(this.charBuffer, 0, buffer.length - this.charReceived, end);
-    end -= this.charReceived;
-  }
-
-  charStr += buffer.toString(this.encoding, 0, end);
-
-  var end = charStr.length - 1;
-  var charCode = charStr.charCodeAt(end);
-  // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
-  if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-    var size = this.surrogateSize;
-    this.charLength += size;
-    this.charReceived += size;
-    this.charBuffer.copy(this.charBuffer, size, 0, size);
-    buffer.copy(this.charBuffer, 0, 0, size);
-    return charStr.substring(0, end);
-  }
-
-  // or just emit the charStr
-  return charStr;
-};
-
-// detectIncompleteChar determines if there is an incomplete UTF-8 character at
-// the end of the given buffer. If so, it sets this.charLength to the byte
-// length that character, and sets this.charReceived to the number of bytes
-// that are available for this character.
-StringDecoder.prototype.detectIncompleteChar = function(buffer) {
-  // determine how many bytes we have to check at the end of this buffer
-  var i = (buffer.length >= 3) ? 3 : buffer.length;
-
-  // Figure out if one of the last i bytes of our buffer announces an
-  // incomplete char.
-  for (; i > 0; i--) {
-    var c = buffer[buffer.length - i];
-
-    // See http://en.wikipedia.org/wiki/UTF-8#Description
-
-    // 110XXXXX
-    if (i == 1 && c >> 5 == 0x06) {
-      this.charLength = 2;
-      break;
-    }
-
-    // 1110XXXX
-    if (i <= 2 && c >> 4 == 0x0E) {
-      this.charLength = 3;
-      break;
-    }
-
-    // 11110XXX
-    if (i <= 3 && c >> 3 == 0x1E) {
-      this.charLength = 4;
-      break;
-    }
-  }
-  this.charReceived = i;
-};
-
-StringDecoder.prototype.end = function(buffer) {
-  var res = '';
-  if (buffer && buffer.length)
-    res = this.write(buffer);
-
-  if (this.charReceived) {
-    var cr = this.charReceived;
-    var buf = this.charBuffer;
-    var enc = this.encoding;
-    res += buf.slice(0, cr).toString(enc);
-  }
-
-  return res;
-};
-
-function passThroughWrite(buffer) {
-  return buffer.toString(this.encoding);
-}
-
-function utf16DetectIncompleteChar(buffer) {
-  this.charReceived = buffer.length % 2;
-  this.charLength = this.charReceived ? 2 : 0;
-}
-
-function base64DetectIncompleteChar(buffer) {
-  this.charReceived = buffer.length % 3;
-  this.charLength = this.charReceived ? 3 : 0;
-}
-
-},{"buffer":5}],54:[function(require,module,exports){
+},{"./capability":31,"_process":14,"buffer":4,"inherits":10,"readable-stream":28}],34:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 
 module.exports = function (buf) {
@@ -12430,7 +10420,7 @@ module.exports = function (buf) {
 	}
 }
 
-},{"buffer":5}],55:[function(require,module,exports){
+},{"buffer":4}],35:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13164,7 +11154,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":56,"punycode":38,"querystring":41}],56:[function(require,module,exports){
+},{"./util":36,"punycode":15,"querystring":18}],36:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -13182,7 +11172,7 @@ module.exports = {
   }
 };
 
-},{}],57:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 
 /**
@@ -13253,7 +11243,7 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],58:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -13276,1076 +11266,12 @@ function extend() {
 
 },{}]},{},[1])(1)
 });
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.manifold = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Manifold;
-(function (Manifold) {
-    var StringValue = (function () {
-        function StringValue(value) {
-            this.value = "";
-            if (value) {
-                this.value = value.toLowerCase();
-            }
-        }
-        StringValue.prototype.toString = function () {
-            return this.value;
-        };
-        return StringValue;
-    }());
-    Manifold.StringValue = StringValue;
-})(Manifold || (Manifold = {}));
+!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.manifold=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var Manifold;!function(Manifold){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();Manifold.StringValue=StringValue}(Manifold||(Manifold={}));var Manifold,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(Manifold){var TreeSortType=function(_super){function TreeSortType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(TreeSortType,_super),TreeSortType.prototype.date=function(){return new TreeSortType(TreeSortType.DATE.toString())},TreeSortType.prototype.none=function(){return new TreeSortType(TreeSortType.NONE.toString())},TreeSortType.DATE=new TreeSortType("date"),TreeSortType.NONE=new TreeSortType("none"),TreeSortType}(Manifold.StringValue);Manifold.TreeSortType=TreeSortType}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var AnnotationGroup=function(){function AnnotationGroup(resource,canvasIndex){this.rects=[],this.canvasIndex=canvasIndex,this.addRect(resource)}return AnnotationGroup.prototype.addRect=function(resource){var rect=new Manifold.AnnotationRect(resource);rect.canvasIndex=this.canvasIndex,rect.index=this.rects.length,this.rects.push(rect),this.rects.sort(function(a,b){return a.index-b.index})},AnnotationGroup}();Manifold.AnnotationGroup=AnnotationGroup}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var AnnotationRect=function(){function AnnotationRect(result){this.isVisible=!0;var xywh=result.on.match(/.*xywh=(\d*),(\d*),(\d*),(\d*)/);this.x=Number(xywh[1]),this.y=Number(xywh[2]),this.width=Number(xywh[3]),this.height=Number(xywh[4]),this.chars=result.resource.chars}return AnnotationRect}();Manifold.AnnotationRect=AnnotationRect}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var Bootstrapper=function(){function Bootstrapper(options){this._options=options,this._options.locale=this._options.locale||"en-GB"}return Bootstrapper.prototype.bootstrap=function(){var that=this;return new Promise(function(resolve,reject){var msie=that._detectIE();if(msie===!1)manifesto.loadManifest(that._options.iiifResourceUri).then(function(json){that._loaded(that,json,resolve,reject)});else if(msie>0)if(9===msie){var settings={url:that._options.iiifResourceUri,type:"GET",dataType:"jsonp",jsonp:"callback",jsonpCallback:"manifestCallback"};$.ajax(settings),global.manifestCallback=function(json){that._loaded(that,JSON.stringify(json),resolve,reject)}}else $.getJSON(that._options.iiifResourceUri,function(json){that._loaded(that,JSON.stringify(json),resolve,reject)})})},Bootstrapper.prototype._loaded=function(bootstrapper,json,resolve,reject){var iiifResource=manifesto.create(json,{locale:bootstrapper._options.locale});if(bootstrapper._options.iiifResource||(bootstrapper._options.iiifResource=iiifResource),iiifResource.getIIIFResourceType().toString()===manifesto.IIIFResourceType.collection().toString()||"collection"===iiifResource.getIIIFResourceType().toString().toLowerCase()){var collections=iiifResource.getCollections();collections&&collections.length?iiifResource.getCollectionByIndex(bootstrapper._options.collectionIndex).then(function(collection){collection||reject("Collection index not found"),0===collection.getTotalManifests()&&0===bootstrapper._options.manifestIndex&&collection.getTotalCollections()>0&&(bootstrapper._options.collectionIndex=0,bootstrapper._options.iiifResourceUri=collection.id,bootstrapper.bootstrap()),collection.getManifestByIndex(bootstrapper._options.manifestIndex).then(function(manifest){bootstrapper._options.manifest=manifest;var helper=new Manifold.Helper(bootstrapper._options);resolve(helper)})}):iiifResource.getManifestByIndex(bootstrapper._options.manifestIndex).then(function(manifest){bootstrapper._options.manifest=manifest;var helper=new Manifold.Helper(bootstrapper._options);resolve(helper)})}else{bootstrapper._options.manifest=iiifResource;var helper=new Manifold.Helper(bootstrapper._options);resolve(helper)}},Bootstrapper.prototype._detectIE=function(){var ua=window.navigator.userAgent,msie=ua.indexOf("MSIE ");if(msie>0)return parseInt(ua.substring(msie+5,ua.indexOf(".",msie)),10);var trident=ua.indexOf("Trident/");if(trident>0){var rv=ua.indexOf("rv:");return parseInt(ua.substring(rv+3,ua.indexOf(".",rv)),10)}var edge=ua.indexOf("Edge/");return edge>0&&parseInt(ua.substring(edge+5,ua.indexOf(".",edge)),10)},Bootstrapper}();Manifold.Bootstrapper=Bootstrapper}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var ExternalResource=function(){function ExternalResource(resource,dataUriFunc){this.authAPIVersion=.9,this.clickThroughService=null,this.externalService=null,this.isResponseHandled=!1,this.loginService=null,this.logoutService=null,this.tokenService=null,resource.externalResource=this,this.dataUri=dataUriFunc(resource),this._parseAuthServices(resource)}return ExternalResource.prototype._parseAuthServices=function(resource){.9===this.authAPIVersion?(this.clickThroughService=manifesto.Utils.getService(resource,manifesto.ServiceProfile.clickThrough().toString()),this.loginService=manifesto.Utils.getService(resource,manifesto.ServiceProfile.login().toString()),this.restrictedService=manifesto.Utils.getService(resource,manifesto.ServiceProfile.restricted().toString()),this.clickThroughService?(this.logoutService=this.clickThroughService.getService(manifesto.ServiceProfile.logout().toString()),this.tokenService=this.clickThroughService.getService(manifesto.ServiceProfile.token().toString())):this.loginService?(this.logoutService=this.loginService.getService(manifesto.ServiceProfile.logout().toString()),this.tokenService=this.loginService.getService(manifesto.ServiceProfile.token().toString())):this.restrictedService&&(this.logoutService=this.restrictedService.getService(manifesto.ServiceProfile.logout().toString()),this.tokenService=this.restrictedService.getService(manifesto.ServiceProfile.token().toString()))):(this.clickThroughService=manifesto.Utils.getService(resource,manifesto.ServiceProfile.auth1Clickthrough().toString()),this.loginService=manifesto.Utils.getService(resource,manifesto.ServiceProfile.auth1Login().toString()),this.externalService=manifesto.Utils.getService(resource,manifesto.ServiceProfile.auth1External().toString()),this.kioskService=manifesto.Utils.getService(resource,manifesto.ServiceProfile.auth1Kiosk().toString()),this.clickThroughService?(this.logoutService=this.clickThroughService.getService(manifesto.ServiceProfile.auth1Logout().toString()),this.tokenService=this.clickThroughService.getService(manifesto.ServiceProfile.auth1Token().toString())):this.loginService?(this.logoutService=this.loginService.getService(manifesto.ServiceProfile.auth1Logout().toString()),this.tokenService=this.loginService.getService(manifesto.ServiceProfile.auth1Token().toString())):this.externalService?(this.logoutService=this.externalService.getService(manifesto.ServiceProfile.auth1Logout().toString()),this.tokenService=this.externalService.getService(manifesto.ServiceProfile.auth1Token().toString())):this.kioskService&&(this.logoutService=this.kioskService.getService(manifesto.ServiceProfile.auth1Logout().toString()),this.tokenService=this.kioskService.getService(manifesto.ServiceProfile.auth1Token().toString())))},ExternalResource.prototype.isAccessControlled=function(){return!!(this.clickThroughService||this.loginService||this.externalService||this.kioskService)},ExternalResource.prototype.hasServiceDescriptor=function(){return this.dataUri.endsWith("info.json")},ExternalResource.prototype.getData=function(accessToken){var that=this;return that.data={},new Promise(function(resolve,reject){var type="GET";if(!that.hasServiceDescriptor()){if(!that.isAccessControlled())return that.status=HTTPStatusCode.OK,void resolve(that);type="HEAD"}$.ajax({url:that.dataUri,type:type,dataType:"json",beforeSend:function(xhr){accessToken&&xhr.setRequestHeader("Authorization","Bearer "+accessToken.accessToken)}}).done(function(data){if(data){var uri=unescape(data["@id"]);that.data=data,that._parseAuthServices(that.data),uri.endsWith("/info.json")&&(uri=uri.substr(0,uri.lastIndexOf("/")));var dataUri=that.dataUri;dataUri.endsWith("/info.json")&&(dataUri=dataUri.substr(0,dataUri.lastIndexOf("/"))),uri!==dataUri&&that.loginService?that.status=HTTPStatusCode.MOVED_TEMPORARILY:that.status=HTTPStatusCode.OK,resolve(that)}else that.status=HTTPStatusCode.OK,resolve(that)}).fail(function(error){that.status=error.status,that.error=error,error.responseJSON&&that._parseAuthServices(error.responseJSON),resolve(that)})})},ExternalResource}();Manifold.ExternalResource=ExternalResource}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var Helper=function(){function Helper(options){this.options=options,this.iiifResource=this.options.iiifResource,this.iiifResourceUri=this.options.iiifResourceUri,this.manifest=this.options.manifest,this.collectionIndex=this.options.collectionIndex||0,this.manifestIndex=this.options.manifestIndex||0,this.sequenceIndex=this.options.sequenceIndex||0,this.canvasIndex=this.options.canvasIndex||0}return Helper.prototype.getAutoCompleteService=function(){var service=this.getSearchService();return service?service.getService(manifesto.ServiceProfile.autoComplete()):null},Helper.prototype.getAttribution=function(){var attribution=this.manifest.getAttribution();return attribution?Manifesto.TranslationCollection.getValue(attribution):null},Helper.prototype.getCanvases=function(){return this.getCurrentSequence().getCanvases()},Helper.prototype.getCanvasById=function(id){return this.getCurrentSequence().getCanvasById(id)},Helper.prototype.getCanvasesById=function(ids){for(var canvases=[],i=0;i<ids.length;i++){var id=ids[i],canvas=this.getCanvasById(id);canvas&&canvases.push(canvas)}return canvases},Helper.prototype.getCanvasByIndex=function(index){return this.getCurrentSequence().getCanvasByIndex(index)},Helper.prototype.getCanvasIndexById=function(id){return this.getCurrentSequence().getCanvasIndexById(id)},Helper.prototype.getCanvasIndexByLabel=function(label){var foliated=this.getManifestType().toString()===manifesto.ManifestType.manuscript().toString();return this.getCurrentSequence().getCanvasIndexByLabel(label,foliated)},Helper.prototype.getCanvasRange=function(canvas,path){var ranges=this.getCanvasRanges(canvas);if(path){for(var i=0;i<ranges.length;i++){var range=ranges[i];if(range.path===path)return range}return null}return ranges[0]},Helper.prototype.getCanvasRanges=function(canvas){return canvas.ranges?canvas.ranges:(canvas.ranges=this.manifest.getAllRanges().en().where(function(range){return range.getCanvasIds().en().any(function(c){return c===canvas.id})}).toArray(),canvas.ranges)},Helper.prototype.getCollectionIndex=function(iiifResource){var index=null;return iiifResource.parentCollection&&(index=iiifResource.parentCollection.index),index},Helper.prototype.getCurrentCanvas=function(){return this.getCurrentSequence().getCanvasByIndex(this.canvasIndex)},Helper.prototype.getCurrentElement=function(){return this.getCanvasByIndex(this.canvasIndex)},Helper.prototype.getCurrentSequence=function(){return this.getSequenceByIndex(this.sequenceIndex)},Helper.prototype.getElementType=function(element){return element||(element=this.getCurrentCanvas()),element.getType()},Helper.prototype.getFirstPageIndex=function(){return 0},Helper.prototype.getInfoUri=function(canvas){var content=canvas.getContent(),images=canvas.getImages();if(content&&content.length){var annotation=content[0],annotationBody=annotation.getBody();return annotationBody.length?annotationBody[0].id:null}if(images&&images.length){for(var infoUri=null,firstImage=images[0],resource=firstImage.getResource(),services=resource.getServices(),i=0;i<services.length;i++){var service=services[i],id=service.id;id.endsWith("/")||(id+="/"),manifesto.Utils.isImageProfile(service.getProfile())&&(infoUri=id+"info.json")}return infoUri}var service=canvas.getService(manifesto.ServiceProfile.ixif());return service?service.getInfoUri():canvas.id},Helper.prototype.getLabel=function(){var label=this.manifest.getLabel();return label?Manifesto.TranslationCollection.getValue(label):null},Helper.prototype.getLastCanvasLabel=function(alphanumeric){return this.getCurrentSequence().getLastCanvasLabel(alphanumeric)},Helper.prototype.getLastPageIndex=function(){return this.getTotalCanvases()-1},Helper.prototype.getLicense=function(){return this.manifest.getLicense()},Helper.prototype.getLogo=function(){return this.manifest.getLogo()},Helper.prototype.getManifestType=function(){var manifestType=this.manifest.getManifestType();return""===manifestType.toString()&&(manifestType=manifesto.ManifestType.monograph()),manifestType},Helper.prototype.getMetadata=function(options){var metadataGroups=[],manifestMetadata=this.manifest.getMetadata(),manifestGroup=new Manifold.MetadataGroup(this.manifest);if(manifestMetadata&&manifestMetadata.length&&manifestGroup.addMetadata(manifestMetadata,!0),this.manifest.getDescription().length){var metadataItem=new Manifesto.MetadataItem(this.options.locale);metadataItem.label=[new Manifesto.Translation("description",this.options.locale)],metadataItem.value=this.manifest.getDescription(),metadataItem.isRootLevel=!0,manifestGroup.addItem(metadataItem)}if(this.manifest.getAttribution().length){var metadataItem=new Manifesto.MetadataItem(this.options.locale);metadataItem.label=[new Manifesto.Translation("attribution",this.options.locale)],metadataItem.value=this.manifest.getAttribution(),metadataItem.isRootLevel=!0,manifestGroup.addItem(metadataItem)}var license=this.manifest.getLicense();if(license){var item={label:"license",value:options&&options.licenseFormatter?options.licenseFormatter.format(license):license},metadataItem=new Manifesto.MetadataItem(this.options.locale);metadataItem.parse(item),metadataItem.isRootLevel=!0,manifestGroup.addItem(metadataItem)}if(this.manifest.getLogo()){var item={label:"logo",value:'<img src="'+this.manifest.getLogo()+'"/>'},metadataItem=new Manifesto.MetadataItem(this.options.locale);metadataItem.parse(item),metadataItem.isRootLevel=!0,manifestGroup.addItem(metadataItem)}return metadataGroups.push(manifestGroup),options?this._parseMetadataOptions(options,metadataGroups):metadataGroups},Helper.prototype._parseMetadataOptions=function(options,metadataGroups){var sequence=this.getCurrentSequence(),sequenceMetadata=sequence.getMetadata();if(sequenceMetadata&&sequenceMetadata.length){var sequenceGroup=new Manifold.MetadataGroup(sequence);sequenceGroup.addMetadata(sequenceMetadata),metadataGroups.push(sequenceGroup)}if(options.range){var rangeGroups=this._getRangeMetadata([],options.range);rangeGroups=rangeGroups.reverse(),metadataGroups=metadataGroups.concat(rangeGroups)}if(options.canvases&&options.canvases.length)for(var i=0;i<options.canvases.length;i++){var canvas=options.canvases[i],canvasMetadata=canvas.getMetadata();if(canvasMetadata&&canvasMetadata.length){var canvasGroup=new Manifold.MetadataGroup(canvas);canvasGroup.addMetadata(canvas.getMetadata()),metadataGroups.push(canvasGroup)}for(var images=canvas.getImages(),j=0;j<images.length;j++){var image=images[j],imageMetadata=image.getMetadata();if(imageMetadata&&imageMetadata.length){var imageGroup=new Manifold.MetadataGroup(image);imageGroup.addMetadata(imageMetadata),metadataGroups.push(imageGroup)}}}return metadataGroups},Helper.prototype._getRangeMetadata=function(metadataGroups,range){var rangeMetadata=range.getMetadata();if(rangeMetadata&&rangeMetadata.length){var rangeGroup=new Manifold.MetadataGroup(range);rangeGroup.addMetadata(rangeMetadata),metadataGroups.push(rangeGroup)}return range.parentRange?this._getRangeMetadata(metadataGroups,range.parentRange):metadataGroups},Helper.prototype.getMultiSelectState=function(){return this._multiSelectState||(this._multiSelectState=new Manifold.MultiSelectState,this._multiSelectState.ranges=this.getRanges().slice(0),this._multiSelectState.canvases=this.getCurrentSequence().getCanvases().slice(0)),this._multiSelectState},Helper.prototype.getRanges=function(){return this.manifest.getAllRanges()},Helper.prototype.getRangeByPath=function(path){return this.manifest.getRangeByPath(path)},Helper.prototype.getRangeCanvases=function(range){var ids=range.getCanvasIds();return this.getCanvasesById(ids)},Helper.prototype.getRelated=function(){return this.manifest.getRelated()},Helper.prototype.getResources=function(){var element=this.getCurrentElement();return element.getResources()},Helper.prototype.getSearchService=function(){return this.manifest.getService(manifesto.ServiceProfile.search())},Helper.prototype.getSeeAlso=function(){return this.manifest.getSeeAlso()},Helper.prototype.getSequenceByIndex=function(index){return this.manifest.getSequenceByIndex(index)},Helper.prototype.getShareServiceUrl=function(){var url=null,shareService=this.manifest.getService(manifesto.ServiceProfile.shareExtensions());return shareService&&(shareService.length&&(shareService=shareService[0]),url=shareService.__jsonld.shareUrl),url},Helper.prototype.getSortedTreeNodesByDate=function(sortedTree,tree){var all=tree.nodes.en().traverseUnique(function(node){return node.nodes}).where(function(n){return n.data.type===manifesto.TreeNodeType.collection().toString()||n.data.type===manifesto.TreeNodeType.manifest().toString()}).toArray(),manifests=tree.nodes.en().traverseUnique(function(n){return n.nodes}).where(function(n){return n.data.type===manifesto.TreeNodeType.manifest().toString()}).toArray();this.createDecadeNodes(sortedTree,all),this.sortDecadeNodes(sortedTree),this.createYearNodes(sortedTree,all),this.sortYearNodes(sortedTree),this.createMonthNodes(sortedTree,manifests),this.sortMonthNodes(sortedTree),this.createDateNodes(sortedTree,manifests),this.pruneDecadeNodes(sortedTree)},Helper.prototype.getStartCanvasIndex=function(){return this.getCurrentSequence().getStartCanvasIndex()},Helper.prototype.getThumbs=function(width,height){return this.getCurrentSequence().getThumbs(width,height)},Helper.prototype.getTopRanges=function(){return this.manifest.getTopRanges()},Helper.prototype.getTotalCanvases=function(){return this.getCurrentSequence().getTotalCanvases()},Helper.prototype.getTrackingLabel=function(){return this.manifest.getTrackingLabel()},Helper.prototype.getTree=function(topRangeIndex,sortType){if(void 0===topRangeIndex&&(topRangeIndex=0),void 0===sortType&&(sortType=Manifold.TreeSortType.NONE),!this.iiifResource)return null;var tree;if(this.iiifResource.isCollection())tree=this.iiifResource.getDefaultTree();else{var topRanges=this.iiifResource.getTopRanges(),root=new manifesto.TreeNode;if(root.label="root",root.data=this.iiifResource,!topRanges.length)return root;var range=topRanges[topRangeIndex];tree=range.getTree(root)}var sortedTree=new manifesto.TreeNode;switch(sortType.toString()){case Manifold.TreeSortType.DATE.toString():if(this.treeHasNavDates(tree)){this.getSortedTreeNodesByDate(sortedTree,tree);break}default:sortedTree=tree}return sortedTree},Helper.prototype.treeHasNavDates=function(tree){var node=tree.nodes.en().traverseUnique(function(node){return node.nodes}).where(function(n){return!isNaN(n.navDate)}).first();return!!node},Helper.prototype.getViewingDirection=function(){var viewingDirection=this.getCurrentSequence().getViewingDirection();return viewingDirection.toString()||(viewingDirection=this.manifest.getViewingDirection()),viewingDirection},Helper.prototype.getViewingHint=function(){var viewingHint=this.getCurrentSequence().getViewingHint();return viewingHint.toString()||(viewingHint=this.manifest.getViewingHint()),viewingHint},Helper.prototype.hasParentCollection=function(){return!!this.manifest.parentCollection},Helper.prototype.hasRelatedPage=function(){var related=this.getRelated();return!!related&&(related.length&&(related=related[0]),"text/html"===related.format)},Helper.prototype.hasResources=function(){return this.getResources().length>0},Helper.prototype.isBottomToTop=function(){return this.getViewingDirection().toString()===manifesto.ViewingDirection.bottomToTop().toString()},Helper.prototype.isCanvasIndexOutOfRange=function(index){return this.getCurrentSequence().isCanvasIndexOutOfRange(index)},Helper.prototype.isContinuous=function(){return this.getViewingHint().toString()===manifesto.ViewingHint.continuous().toString()},Helper.prototype.isFirstCanvas=function(index){return"undefined"!=typeof index?this.getCurrentSequence().isFirstCanvas(index):this.getCurrentSequence().isFirstCanvas(this.canvasIndex)},Helper.prototype.isHorizontallyAligned=function(){return this.isLeftToRight()||this.isRightToLeft()},Helper.prototype.isLastCanvas=function(index){return"undefined"!=typeof index?this.getCurrentSequence().isLastCanvas(index):this.getCurrentSequence().isLastCanvas(this.canvasIndex)},Helper.prototype.isLeftToRight=function(){return this.getViewingDirection().toString()===manifesto.ViewingDirection.leftToRight().toString()},Helper.prototype.isMultiCanvas=function(){return this.getCurrentSequence().isMultiCanvas()},Helper.prototype.isMultiSequence=function(){return this.manifest.isMultiSequence()},Helper.prototype.isPaged=function(){return this.getViewingHint().toString()===manifesto.ViewingHint.paged().toString()},Helper.prototype.isPagingAvailable=function(){return this.isPagingEnabled()&&this.getTotalCanvases()>2},Helper.prototype.isPagingEnabled=function(){return this.manifest.isPagingEnabled()||this.getCurrentSequence().isPagingEnabled()},Helper.prototype.isRightToLeft=function(){return this.getViewingDirection().toString()===manifesto.ViewingDirection.rightToLeft().toString()},Helper.prototype.isTopToBottom=function(){return this.getViewingDirection().toString()===manifesto.ViewingDirection.topToBottom().toString()},Helper.prototype.isTotalCanvasesEven=function(){return this.getCurrentSequence().isTotalCanvasesEven()},Helper.prototype.isUIEnabled=function(name){var uiExtensions=this.manifest.getService(manifesto.ServiceProfile.uiExtensions());if(uiExtensions){var disableUI=uiExtensions.getProperty("disableUI");if(disableUI&&(disableUI.indexOf(name)!==-1||disableUI.indexOf(name.toLowerCase())!==-1))return!1}return!0},Helper.prototype.isVerticallyAligned=function(){return this.isTopToBottom()||this.isBottomToTop()},Helper.prototype.createDateNodes=function(rootNode,nodes){for(var i=0;i<nodes.length;i++){var node=nodes[i],year=this.getNodeYear(node),month=this.getNodeMonth(node),dateNode=new manifesto.TreeNode;dateNode.id=node.id,dateNode.label=this.getNodeDisplayDate(node),dateNode.data=node.data,dateNode.data.type=manifesto.TreeNodeType.manifest().toString(),dateNode.data.year=year,dateNode.data.month=month;var decadeNode=this.getDecadeNode(rootNode,year);if(decadeNode){var yearNode=this.getYearNode(decadeNode,year);if(yearNode){var monthNode=this.getMonthNode(yearNode,month);monthNode&&monthNode.addNode(dateNode)}}}},Helper.prototype.createDecadeNodes=function(rootNode,nodes){for(var i=0;i<nodes.length;i++){var node=nodes[i],year=this.getNodeYear(node),endYear=Number(year.toString().substr(0,3)+"9");if(!this.getDecadeNode(rootNode,year)){var decadeNode=new manifesto.TreeNode;decadeNode.label=year+" - "+endYear,decadeNode.navDate=node.navDate,decadeNode.data.startYear=year,decadeNode.data.endYear=endYear,rootNode.addNode(decadeNode)}}},Helper.prototype.createMonthNodes=function(rootNode,nodes){for(var i=0;i<nodes.length;i++){var node=nodes[i],year=this.getNodeYear(node),month=this.getNodeMonth(node),decadeNode=this.getDecadeNode(rootNode,year),yearNode=null;if(decadeNode&&(yearNode=this.getYearNode(decadeNode,year)),decadeNode&&yearNode&&!this.getMonthNode(yearNode,month)){var monthNode=new manifesto.TreeNode;monthNode.label=this.getNodeDisplayMonth(node),monthNode.navDate=node.navDate,monthNode.data.year=year,monthNode.data.month=month,yearNode.addNode(monthNode)}}},Helper.prototype.createYearNodes=function(rootNode,nodes){for(var i=0;i<nodes.length;i++){var node=nodes[i],year=this.getNodeYear(node),decadeNode=this.getDecadeNode(rootNode,year);if(decadeNode&&!this.getYearNode(decadeNode,year)){var yearNode=new manifesto.TreeNode;yearNode.label=year.toString(),yearNode.navDate=node.navDate,yearNode.data.year=year,decadeNode.addNode(yearNode)}}},Helper.prototype.getDecadeNode=function(rootNode,year){for(var i=0;i<rootNode.nodes.length;i++){var n=rootNode.nodes[i];if(year>=n.data.startYear&&year<=n.data.endYear)return n}return null},Helper.prototype.getMonthNode=function(yearNode,month){for(var i=0;i<yearNode.nodes.length;i++){var n=yearNode.nodes[i];if(month===this.getNodeMonth(n))return n}return null},Helper.prototype.getNodeDisplayDate=function(node){return node.navDate.toDateString()},Helper.prototype.getNodeDisplayMonth=function(node){var months=["January","February","March","April","May","June","July","August","September","October","November","December"];return months[node.navDate.getMonth()]},Helper.prototype.getNodeMonth=function(node){return node.navDate.getMonth()},Helper.prototype.getNodeYear=function(node){return node.navDate.getFullYear()},Helper.prototype.getYearNode=function(decadeNode,year){for(var i=0;i<decadeNode.nodes.length;i++){var n=decadeNode.nodes[i];if(year===this.getNodeYear(n))return n}return null},Helper.prototype.pruneDecadeNodes=function(rootNode){for(var pruned=[],i=0;i<rootNode.nodes.length;i++){var n=rootNode.nodes[i];n.nodes.length||pruned.push(n)}for(var j=0;j<pruned.length;j++){var p=pruned[j],index=rootNode.nodes.indexOf(p);index>-1&&rootNode.nodes.splice(index,1)}},Helper.prototype.sortDecadeNodes=function(rootNode){rootNode.nodes=rootNode.nodes.sort(function(a,b){return a.data.startYear-b.data.startYear})},Helper.prototype.sortMonthNodes=function(rootNode){for(var _this=this,i=0;i<rootNode.nodes.length;i++)for(var decadeNode=rootNode.nodes[i],j=0;j<decadeNode.nodes.length;j++){var monthNode=decadeNode.nodes[j];monthNode.nodes=monthNode.nodes.sort(function(a,b){return _this.getNodeMonth(a)-_this.getNodeMonth(b)})}},Helper.prototype.sortYearNodes=function(rootNode){for(var _this=this,i=0;i<rootNode.nodes.length;i++){var decadeNode=rootNode.nodes[i];decadeNode.nodes=decadeNode.nodes.sort(function(a,b){return _this.getNodeYear(a)-_this.getNodeYear(b)})}},Helper}();Manifold.Helper=Helper}(Manifold||(Manifold={}));var Manifold;!function(Manifold){function loadManifest(options){var bootstrapper=new Manifold.Bootstrapper(options);return bootstrapper.bootstrap()}Manifold.loadManifest=loadManifest}(Manifold||(Manifold={})),function(g){g.Manifold||(g.Manifold=Manifold)}(global);var Manifold;!function(Manifold){var MetadataGroup=function(){function MetadataGroup(resource,label){this.items=[],this.resource=resource,this.label=label}return MetadataGroup.prototype.addItem=function(item){this.items.push(item)},MetadataGroup.prototype.addMetadata=function(metadata,isRootLevel){void 0===isRootLevel&&(isRootLevel=!1);for(var i=0;i<metadata.length;i++){var item=metadata[i];item.isRootLevel=isRootLevel,this.addItem(item)}},MetadataGroup}();Manifold.MetadataGroup=MetadataGroup}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var MetadataOptions=function(){function MetadataOptions(){}return MetadataOptions}();Manifold.MetadataOptions=MetadataOptions}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var MultiSelectState=function(){function MultiSelectState(){this.isEnabled=!1,this.ranges=[],this.canvases=[]}return MultiSelectState.prototype.allCanvasesSelected=function(){return this.canvases.length>0&&this.getAllSelectedCanvases().length===this.canvases.length},MultiSelectState.prototype.allRangesSelected=function(){return this.ranges.length>0&&this.getAllSelectedRanges().length===this.ranges.length},MultiSelectState.prototype.allSelected=function(){return this.allRangesSelected()&&this.allCanvasesSelected()},MultiSelectState.prototype.getAll=function(){return this.canvases.concat(this.ranges)},MultiSelectState.prototype.getAllSelectedCanvases=function(){return this.canvases.en().where(function(c){return c.multiSelected}).toArray()},MultiSelectState.prototype.getAllSelectedRanges=function(){return this.ranges.en().where(function(r){return r.multiSelected}).toArray()},MultiSelectState.prototype.getCanvasById=function(id){return this.canvases.en().where(function(c){return c.id===id}).first()},MultiSelectState.prototype.getCanvasesByIds=function(ids){for(var canvases=[],i=0;i<ids.length;i++){var id=ids[i];canvases.push(this.getCanvasById(id))}return canvases},MultiSelectState.prototype.getRangeCanvases=function(range){var ids=range.getCanvasIds();return this.getCanvasesByIds(ids)},MultiSelectState.prototype.selectAll=function(selected){this.selectRanges(this.ranges,selected),this.selectCanvases(this.canvases,selected)},MultiSelectState.prototype.selectCanvas=function(canvas,selected){var c=this.canvases.en().where(function(c){return c.id===canvas.id}).first();c.multiSelected=selected},MultiSelectState.prototype.selectAllCanvases=function(selected){this.selectCanvases(this.canvases,selected)},MultiSelectState.prototype.selectCanvases=function(canvases,selected){for(var j=0;j<canvases.length;j++){var canvas=canvases[j];canvas.multiSelected=selected}},MultiSelectState.prototype.selectRange=function(range,selected){var r=this.ranges.en().where(function(r){return r.id===range.id}).first();r.multiSelected=selected;var canvases=this.getRangeCanvases(r);this.selectCanvases(canvases,selected)},MultiSelectState.prototype.selectAllRanges=function(selected){this.selectRanges(this.ranges,selected)},MultiSelectState.prototype.selectRanges=function(ranges,selected){for(var i=0;i<ranges.length;i++){var range=ranges[i];range.multiSelected=selected;var canvases=this.getCanvasesByIds(range.getCanvasIds());this.selectCanvases(canvases,selected)}},MultiSelectState.prototype.setEnabled=function(enabled){this.isEnabled=enabled;for(var items=this.getAll(),i=0;i<items.length;i++){var item=items[i];item.multiSelectEnabled=this.isEnabled,enabled||(item.multiSelected=!1)}},MultiSelectState}();Manifold.MultiSelectState=MultiSelectState}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var Translation=function(){function Translation(value,locale){this.value=value,this.locale=locale}return Translation}();Manifold.Translation=Translation}(Manifold||(Manifold={}));var Manifold;!function(Manifold){var UriLabeller=function(){function UriLabeller(labels){this.labels=labels}return UriLabeller.prototype.format=function(url){if(url.indexOf("<a")!=-1)return url;var label=this.labels[url]?this.labels[url]:url;return'<a href="'+url+'">'+label+"</a>"},UriLabeller}();Manifold.UriLabeller=UriLabeller}(Manifold||(Manifold={}))}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});
+// utils v0.1.0 https://github.com/edsilv/utils
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.utils = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
+///<reference path="../node_modules/typescript/lib/lib.es6.d.ts"/> 
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var Manifold;
-(function (Manifold) {
-    var TreeSortType = (function (_super) {
-        __extends(TreeSortType, _super);
-        function TreeSortType() {
-            _super.apply(this, arguments);
-        }
-        // todo: use getters when ES3 target is no longer required.
-        TreeSortType.prototype.date = function () {
-            return new TreeSortType(TreeSortType.DATE.toString());
-        };
-        TreeSortType.prototype.none = function () {
-            return new TreeSortType(TreeSortType.NONE.toString());
-        };
-        TreeSortType.DATE = new TreeSortType("date");
-        TreeSortType.NONE = new TreeSortType("none");
-        return TreeSortType;
-    }(Manifold.StringValue));
-    Manifold.TreeSortType = TreeSortType;
-})(Manifold || (Manifold = {}));
-
-/// <reference path="./StringValue.ts" />
-/// <reference path="./TreeSortType.ts" /> 
-
-var Manifold;
-(function (Manifold) {
-    var Bootstrapper = (function () {
-        function Bootstrapper(options) {
-            this._options = options;
-            this._options.locale = this._options.locale || 'en-GB'; // default locale
-        }
-        Bootstrapper.prototype.bootstrap = function () {
-            var that = this;
-            return new Promise(function (resolve, reject) {
-                var msie = that._msieversion();
-                // if not a recent version of IE
-                if (msie > 0 && msie < 11) {
-                    if (msie === 9) {
-                        // CORS not available, use jsonp
-                        var settings = {
-                            url: that._options.iiifResourceUri,
-                            type: 'GET',
-                            dataType: 'jsonp',
-                            jsonp: 'callback',
-                            jsonpCallback: 'manifestCallback'
-                        };
-                        $.ajax(settings);
-                        window.manifestCallback = function (json) {
-                            that._loaded(that, JSON.stringify(json), resolve, reject);
-                        };
-                    }
-                    else if (msie === 10) {
-                        $.getJSON(that._options.iiifResourceUri, function (json) {
-                            that._loaded(that, JSON.stringify(json), resolve, reject);
-                        });
-                    }
-                }
-                else {
-                    manifesto.loadManifest(that._options.iiifResourceUri).then(function (json) {
-                        that._loaded(that, json, resolve, reject);
-                    });
-                }
-            });
-        };
-        Bootstrapper.prototype._loaded = function (bootstrapper, json, resolve, reject) {
-            var iiifResource = manifesto.create(json, {
-                locale: bootstrapper._options.locale
-            });
-            // only set the root IIIFResource on the first load
-            if (!bootstrapper._options.iiifResource) {
-                bootstrapper._options.iiifResource = iiifResource;
-            }
-            if (iiifResource.getIIIFResourceType().toString() === manifesto.IIIFResourceType.collection().toString()) {
-                // if it's a collection and has child collections, get the collection by index
-                var collections = iiifResource.getCollections();
-                if (collections && collections.length) {
-                    iiifResource.getCollectionByIndex(bootstrapper._options.collectionIndex).then(function (collection) {
-                        if (!collection) {
-                            reject('Collection index not found');
-                        }
-                        // Special case: we're trying to load the first manifest of the
-                        // collection, but the collection has no manifests but does have
-                        // subcollections. Thus, we should dive in until we find something
-                        // we can display!
-                        if (collection.getTotalManifests() === 0 && bootstrapper._options.manifestIndex === 0 && collection.getTotalCollections() > 0) {
-                            bootstrapper._options.collectionIndex = 0;
-                            bootstrapper._options.iiifResourceUri = collection.id;
-                            bootstrapper.bootstrap();
-                        }
-                        collection.getManifestByIndex(bootstrapper._options.manifestIndex).then(function (manifest) {
-                            bootstrapper._options.manifest = manifest;
-                            var helper = new Manifold.Helper(bootstrapper._options);
-                            resolve(helper);
-                        });
-                    });
-                }
-                else {
-                    iiifResource.getManifestByIndex(bootstrapper._options.manifestIndex).then(function (manifest) {
-                        bootstrapper._options.manifest = manifest;
-                        var helper = new Manifold.Helper(bootstrapper._options);
-                        resolve(helper);
-                    });
-                }
-            }
-            else {
-                bootstrapper._options.manifest = iiifResource;
-                var helper = new Manifold.Helper(bootstrapper._options);
-                resolve(helper);
-            }
-        };
-        Bootstrapper.prototype._msieversion = function () {
-            var ua = window.navigator.userAgent;
-            var msie = ua.indexOf("MSIE ");
-            if (msie > 0) {
-                return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie)));
-            }
-            else {
-                return 0;
-            }
-        };
-        return Bootstrapper;
-    }());
-    Manifold.Bootstrapper = Bootstrapper;
-})(Manifold || (Manifold = {}));
-
-var Manifold;
-(function (Manifold) {
-    var ExternalResource = (function () {
-        function ExternalResource(resource, dataUriFunc) {
-            this.isResponseHandled = false;
-            resource.externalResource = this;
-            this.dataUri = dataUriFunc(resource);
-            this._parseAuthServices(resource);
-        }
-        ExternalResource.prototype._parseAuthServices = function (resource) {
-            this.clickThroughService = manifesto.Utils.getService(resource, manifesto.ServiceProfile.clickThrough().toString());
-            this.loginService = manifesto.Utils.getService(resource, manifesto.ServiceProfile.login().toString());
-            this.restrictedService = manifesto.Utils.getService(resource, manifesto.ServiceProfile.restricted().toString());
-            // todo: create this.preferredService?
-            if (this.clickThroughService) {
-                this.logoutService = this.clickThroughService.getService(manifesto.ServiceProfile.logout().toString());
-                this.tokenService = this.clickThroughService.getService(manifesto.ServiceProfile.token().toString());
-            }
-            else if (this.loginService) {
-                this.logoutService = this.loginService.getService(manifesto.ServiceProfile.logout().toString());
-                this.tokenService = this.loginService.getService(manifesto.ServiceProfile.token().toString());
-            }
-            else if (this.restrictedService) {
-                this.logoutService = this.restrictedService.getService(manifesto.ServiceProfile.logout().toString());
-                this.tokenService = this.restrictedService.getService(manifesto.ServiceProfile.token().toString());
-            }
-        };
-        ExternalResource.prototype.isAccessControlled = function () {
-            if (this.clickThroughService || this.loginService || this.restrictedService) {
-                return true;
-            }
-            return false;
-        };
-        ExternalResource.prototype.hasServiceDescriptor = function () {
-            return this.dataUri.endsWith('info.json');
-        };
-        ExternalResource.prototype.getData = function (accessToken) {
-            var that = this;
-            return new Promise(function (resolve, reject) {
-                // check if dataUri ends with info.json
-                // if not issue a HEAD request.
-                var type = 'GET';
-                if (!that.hasServiceDescriptor()) {
-                    // If access control is unnecessary, short circuit the process.
-                    // Note that isAccessControlled check for short-circuiting only
-                    // works in the "binary resource" context, since in that case,
-                    // we know about access control from the manifest. For image
-                    // resources, we need to check info.json for details and can't
-                    // short-circuit like this.
-                    if (!that.isAccessControlled()) {
-                        that.status = HTTPStatusCode.OK;
-                        resolve(that);
-                        return;
-                    }
-                    type = 'HEAD';
-                }
-                $.ajax({
-                    url: that.dataUri,
-                    type: type,
-                    dataType: 'json',
-                    beforeSend: function (xhr) {
-                        if (accessToken) {
-                            xhr.setRequestHeader("Authorization", "Bearer " + accessToken.accessToken);
-                        }
-                    }
-                }).done(function (data) {
-                    // if it's a resource without an info.json
-                    // todo: if resource doesn't have a @profile
-                    if (!data) {
-                        that.status = HTTPStatusCode.OK;
-                        resolve(that);
-                    }
-                    else {
-                        var uri = unescape(data['@id']);
-                        that.data = data;
-                        that._parseAuthServices(that.data);
-                        // remove trailing /info.json
-                        if (uri.endsWith('/info.json')) {
-                            uri = uri.substr(0, uri.lastIndexOf('/'));
-                        }
-                        var dataUri = that.dataUri;
-                        if (dataUri.endsWith('/info.json')) {
-                            dataUri = dataUri.substr(0, dataUri.lastIndexOf('/'));
-                        }
-                        // if the request was redirected to a degraded version and there's a login service to get the full quality version
-                        if (uri !== dataUri && that.loginService) {
-                            that.status = HTTPStatusCode.MOVED_TEMPORARILY;
-                        }
-                        else {
-                            that.status = HTTPStatusCode.OK;
-                        }
-                        resolve(that);
-                    }
-                }).fail(function (error) {
-                    that.status = error.status;
-                    that.error = error;
-                    if (error.responseJSON) {
-                        that._parseAuthServices(error.responseJSON);
-                    }
-                    resolve(that);
-                });
-            });
-        };
-        return ExternalResource;
-    }());
-    Manifold.ExternalResource = ExternalResource;
-})(Manifold || (Manifold = {}));
-
-var Manifold;
-(function (Manifold) {
-    var Helper = (function () {
-        function Helper(options) {
-            this.options = options;
-            this.iiifResource = this.options.iiifResource;
-            this.iiifResourceUri = this.options.iiifResourceUri;
-            this.manifest = this.options.manifest;
-            this.collectionIndex = this.options.collectionIndex || 0;
-            this.manifestIndex = this.options.manifestIndex || 0;
-            this.sequenceIndex = this.options.sequenceIndex || 0;
-            this.canvasIndex = this.options.canvasIndex || 0;
-        }
-        // getters //
-        Helper.prototype.getAutoCompleteService = function () {
-            var service = this.getSearchWithinService();
-            if (!service)
-                return null;
-            return service.getService(manifesto.ServiceProfile.autoComplete());
-        };
-        Helper.prototype.getAttribution = function () {
-            return Manifesto.TranslationCollection.getValue(this.manifest.getAttribution());
-        };
-        Helper.prototype.getCanvases = function () {
-            return this.getCurrentSequence().getCanvases();
-        };
-        Helper.prototype.getCanvasById = function (id) {
-            return this.getCurrentSequence().getCanvasById(id);
-        };
-        Helper.prototype.getCanvasesById = function (ids) {
-            var canvases = [];
-            for (var i = 0; i < ids.length; i++) {
-                var id = ids[i];
-                canvases.push(this.getCanvasById(id));
-            }
-            return canvases;
-        };
-        Helper.prototype.getCanvasByIndex = function (index) {
-            return this.getCurrentSequence().getCanvasByIndex(index);
-        };
-        Helper.prototype.getCanvasIndexById = function (id) {
-            return this.getCurrentSequence().getCanvasIndexById(id);
-        };
-        Helper.prototype.getCanvasIndexByLabel = function (label) {
-            var foliated = this.getManifestType().toString() === manifesto.ManifestType.manuscript().toString();
-            return this.getCurrentSequence().getCanvasIndexByLabel(label, foliated);
-        };
-        Helper.prototype.getCanvasRange = function (canvas, path) {
-            var ranges = this.getCanvasRanges(canvas);
-            if (path) {
-                for (var i = 0; i < ranges.length; i++) {
-                    var range = ranges[i];
-                    if (range.path === path) {
-                        return range;
-                    }
-                }
-                return null;
-            }
-            else {
-                return ranges[0]; // else return the first range
-            }
-        };
-        Helper.prototype.getCanvasRanges = function (canvas) {
-            if (canvas.ranges) {
-                return canvas.ranges; // cache
-            }
-            else {
-                canvas.ranges = this.manifest.getAllRanges().en().where(function (range) { return (range.getCanvasIds().en().any(function (c) { return c === canvas.id; })); }).toArray();
-            }
-            return canvas.ranges;
-        };
-        Helper.prototype.getCollectionIndex = function (iiifResource) {
-            // todo: support nested collections. walk up parents adding to array and return csv string.
-            var index;
-            if (iiifResource.parentCollection) {
-                index = iiifResource.parentCollection.index;
-            }
-            return index;
-        };
-        Helper.prototype.getCurrentCanvas = function () {
-            return this.getCurrentSequence().getCanvasByIndex(this.canvasIndex);
-        };
-        Helper.prototype.getCurrentElement = function () {
-            return this.getCanvasByIndex(this.canvasIndex);
-        };
-        Helper.prototype.getCurrentSequence = function () {
-            return this.getSequenceByIndex(this.sequenceIndex);
-        };
-        Helper.prototype.getElementType = function (element) {
-            if (!element) {
-                element = this.getCurrentCanvas();
-            }
-            return element.getType();
-        };
-        Helper.prototype.getFirstPageIndex = function () {
-            return 0;
-        };
-        Helper.prototype.getInfoUri = function (canvas) {
-            var images = canvas.getImages();
-            // if the canvas has images it's IIIF
-            if (images && images.length) {
-                var infoUri;
-                var firstImage = images[0];
-                var resource = firstImage.getResource();
-                var services = resource.getServices();
-                for (var i = 0; i < services.length; i++) {
-                    var service = services[i];
-                    var id = service.id;
-                    if (!id.endsWith('/')) {
-                        id += '/';
-                    }
-                    if (manifesto.Utils.isImageProfile(service.getProfile())) {
-                        infoUri = id + 'info.json';
-                    }
-                }
-                return infoUri;
-            }
-            else {
-                // IxIF
-                var service = canvas.getService(manifesto.ServiceProfile.ixif());
-                if (service) {
-                    return service.getInfoUri();
-                }
-                // return the canvas id.
-                return canvas.id;
-            }
-        };
-        Helper.prototype.getLabel = function () {
-            return Manifesto.TranslationCollection.getValue(this.manifest.getLabel());
-        };
-        Helper.prototype.getLastCanvasLabel = function (alphanumeric) {
-            return this.getCurrentSequence().getLastCanvasLabel(alphanumeric);
-        };
-        Helper.prototype.getLastPageIndex = function () {
-            return this.getTotalCanvases() - 1;
-        };
-        Helper.prototype.getLicense = function () {
-            return this.manifest.getLicense();
-        };
-        Helper.prototype.getLogo = function () {
-            return this.manifest.getLogo();
-        };
-        Helper.prototype.getManifestType = function () {
-            var manifestType = this.manifest.getManifestType();
-            // default to monograph
-            if (manifestType.toString() === "") {
-                manifestType = manifesto.ManifestType.monograph();
-            }
-            return manifestType;
-        };
-        Helper.prototype.getMetadata = function (options) {
-            var metadataGroups = [];
-            var manifestMetadata = this.manifest.getMetadata();
-            var manifestGroup = new Manifold.MetadataGroup(this.manifest);
-            if (manifestMetadata && manifestMetadata.length) {
-                manifestGroup.addMetadata(manifestMetadata, true);
-            }
-            if (this.manifest.getDescription().length) {
-                var metadataItem = new Manifesto.MetadataItem(this.options.locale);
-                metadataItem.label = [new Manifesto.Translation("description", this.options.locale)];
-                metadataItem.value = this.manifest.getDescription();
-                metadataItem.isRootLevel = true;
-                manifestGroup.addItem(metadataItem);
-            }
-            if (this.manifest.getAttribution().length) {
-                var metadataItem = new Manifesto.MetadataItem(this.options.locale);
-                metadataItem.label = [new Manifesto.Translation("attribution", this.options.locale)];
-                metadataItem.value = this.manifest.getAttribution();
-                metadataItem.isRootLevel = true;
-                manifestGroup.addItem(metadataItem);
-            }
-            if (this.manifest.getLicense()) {
-                var item = {
-                    label: "license",
-                    value: (options && options.licenseFormatter) ? options.licenseFormatter.format(this.manifest.getLicense()) : this.manifest.getLicense()
-                };
-                var metadataItem = new Manifesto.MetadataItem(this.options.locale);
-                metadataItem.parse(item);
-                metadataItem.isRootLevel = true;
-                manifestGroup.addItem(metadataItem);
-            }
-            if (this.manifest.getLogo()) {
-                var item = {
-                    label: "logo",
-                    value: '<img src="' + this.manifest.getLogo() + '"/>'
-                };
-                var metadataItem = new Manifesto.MetadataItem(this.options.locale);
-                metadataItem.parse(item);
-                metadataItem.isRootLevel = true;
-                manifestGroup.addItem(metadataItem);
-            }
-            metadataGroups.push(manifestGroup);
-            if (options) {
-                return this._parseMetadataOptions(options, metadataGroups);
-            }
-            else {
-                return metadataGroups;
-            }
-        };
-        Helper.prototype._parseMetadataOptions = function (options, metadataGroups) {
-            // get sequence metadata
-            var sequence = this.getCurrentSequence();
-            var sequenceMetadata = sequence.getMetadata();
-            if (sequenceMetadata && sequenceMetadata.length) {
-                var sequenceGroup = new Manifold.MetadataGroup(sequence);
-                sequenceGroup.addMetadata(sequenceMetadata);
-                metadataGroups.push(sequenceGroup);
-            }
-            // get range metadata
-            if (options.range) {
-                var rangeGroups = this._getRangeMetadata([], options.range);
-                rangeGroups = rangeGroups.reverse();
-                metadataGroups = metadataGroups.concat(rangeGroups);
-            }
-            // get canvas metadata
-            if (options.canvases && options.canvases.length) {
-                for (var i = 0; i < options.canvases.length; i++) {
-                    var canvas = options.canvases[i];
-                    var canvasMetadata = canvas.getMetadata();
-                    if (canvasMetadata && canvasMetadata.length) {
-                        var canvasGroup = new Manifold.MetadataGroup(canvas);
-                        canvasGroup.addMetadata(canvas.getMetadata());
-                        metadataGroups.push(canvasGroup);
-                    }
-                    // add image metadata
-                    var images = canvas.getImages();
-                    for (var j = 0; j < images.length; j++) {
-                        var image = images[j];
-                        var imageMetadata = image.getMetadata();
-                        if (imageMetadata && imageMetadata.length) {
-                            var imageGroup = new Manifold.MetadataGroup(image);
-                            imageGroup.addMetadata(imageMetadata);
-                            metadataGroups.push(imageGroup);
-                        }
-                    }
-                }
-            }
-            return metadataGroups;
-        };
-        Helper.prototype._getRangeMetadata = function (metadataGroups, range) {
-            var rangeMetadata = range.getMetadata();
-            if (rangeMetadata && rangeMetadata.length) {
-                var rangeGroup = new Manifold.MetadataGroup(range);
-                rangeGroup.addMetadata(rangeMetadata);
-                metadataGroups.push(rangeGroup);
-            }
-            if (range.parentRange) {
-                return this._getRangeMetadata(metadataGroups, range.parentRange);
-            }
-            else {
-                return metadataGroups;
-            }
-        };
-        Helper.prototype.getMultiSelectState = function () {
-            if (!this._multiSelectState) {
-                this._multiSelectState = new Manifold.MultiSelectState();
-                this._multiSelectState.ranges = this.getRanges().clone();
-                this._multiSelectState.canvases = this.getCurrentSequence().getCanvases().clone();
-            }
-            return this._multiSelectState;
-        };
-        Helper.prototype.getRanges = function () {
-            return this.manifest.getAllRanges();
-        };
-        Helper.prototype.getRangeByPath = function (path) {
-            return this.manifest.getRangeByPath(path);
-        };
-        Helper.prototype.getRangeCanvases = function (range) {
-            var ids = range.getCanvasIds();
-            return this.getCanvasesById(ids);
-        };
-        Helper.prototype.getRelated = function () {
-            return this.manifest.getRelated();
-        };
-        Helper.prototype.getResources = function () {
-            var element = this.getCurrentElement();
-            return element.getResources();
-        };
-        Helper.prototype.getSearchWithinService = function () {
-            return this.manifest.getService(manifesto.ServiceProfile.searchWithin());
-        };
-        Helper.prototype.getSeeAlso = function () {
-            return this.manifest.getSeeAlso();
-        };
-        Helper.prototype.getSequenceByIndex = function (index) {
-            return this.manifest.getSequenceByIndex(index);
-        };
-        Helper.prototype.getShareServiceUrl = function () {
-            var url;
-            var shareService = this.manifest.getService(manifesto.ServiceProfile.shareExtensions());
-            if (shareService) {
-                if (shareService.length) {
-                    shareService = shareService[0];
-                }
-                url = shareService.__jsonld.shareUrl;
-            }
-            return url;
-        };
-        Helper.prototype.getSortedTreeNodesByDate = function (sortedTree, tree) {
-            var all = tree.nodes.en().traverseUnique(function (node) { return node.nodes; })
-                .where(function (n) { return n.data.type === manifesto.TreeNodeType.collection().toString() ||
-                n.data.type === manifesto.TreeNodeType.manifest().toString(); }).toArray();
-            //var collections: ITreeNode[] = tree.nodes.en().traverseUnique(n => n.nodes)
-            //    .where((n) => n.data.type === ITreeNodeType.collection().toString()).toArray();
-            var manifests = tree.nodes.en().traverseUnique(function (n) { return n.nodes; })
-                .where(function (n) { return n.data.type === manifesto.TreeNodeType.manifest().toString(); }).toArray();
-            this.createDecadeNodes(sortedTree, all);
-            this.sortDecadeNodes(sortedTree);
-            this.createYearNodes(sortedTree, all);
-            this.sortYearNodes(sortedTree);
-            this.createMonthNodes(sortedTree, manifests);
-            this.sortMonthNodes(sortedTree);
-            this.createDateNodes(sortedTree, manifests);
-            this.pruneDecadeNodes(sortedTree);
-        };
-        Helper.prototype.getStartCanvasIndex = function () {
-            return this.getCurrentSequence().getStartCanvasIndex();
-        };
-        Helper.prototype.getThumbs = function (width, height) {
-            return this.getCurrentSequence().getThumbs(width, height);
-        };
-        Helper.prototype.getTopRanges = function () {
-            return this.manifest.getTopRanges();
-        };
-        Helper.prototype.getTotalCanvases = function () {
-            return this.getCurrentSequence().getTotalCanvases();
-        };
-        Helper.prototype.getTrackingLabel = function () {
-            return this.manifest.getTrackingLabel();
-        };
-        Helper.prototype.getTree = function (topRangeIndex, sortType) {
-            // if it's a collection, use IIIFResource.getDefaultTree()
-            // otherwise, get the top range by index and use Range.getTree()
-            if (topRangeIndex === void 0) { topRangeIndex = 0; }
-            if (sortType === void 0) { sortType = Manifold.TreeSortType.NONE; }
-            var tree;
-            if (this.iiifResource.isCollection()) {
-                tree = this.iiifResource.getDefaultTree();
-            }
-            else {
-                var topRanges = this.iiifResource.getTopRanges();
-                var root = new manifesto.TreeNode();
-                root.label = 'root';
-                root.data = this.iiifResource;
-                if (topRanges.length) {
-                    var range = topRanges[topRangeIndex];
-                    tree = range.getTree(root);
-                }
-                else {
-                    return root;
-                }
-            }
-            var sortedTree = new manifesto.TreeNode();
-            switch (sortType.toString()) {
-                case Manifold.TreeSortType.DATE.toString():
-                    // returns a list of treenodes for each decade.
-                    // expanding a decade generates a list of years
-                    // expanding a year gives a list of months containing issues
-                    // expanding a month gives a list of issues.
-                    if (this.treeHasNavDates(tree)) {
-                        this.getSortedTreeNodesByDate(sortedTree, tree);
-                        break;
-                    }
-                default:
-                    sortedTree = tree;
-            }
-            return sortedTree;
-        };
-        Helper.prototype.treeHasNavDates = function (tree) {
-            var node = tree.nodes.en().traverseUnique(function (node) { return node.nodes; }).where(function (n) { return !isNaN(n.navDate); }).first();
-            return (node) ? true : false;
-        };
-        Helper.prototype.getViewingDirection = function () {
-            var viewingDirection = this.getCurrentSequence().getViewingDirection();
-            if (!viewingDirection.toString()) {
-                viewingDirection = this.manifest.getViewingDirection();
-            }
-            return viewingDirection;
-        };
-        Helper.prototype.getViewingHint = function () {
-            var viewingHint = this.getCurrentSequence().getViewingHint();
-            if (!viewingHint.toString()) {
-                viewingHint = this.manifest.getViewingHint();
-            }
-            return viewingHint;
-        };
-        // inquiries //
-        Helper.prototype.hasParentCollection = function () {
-            return !!this.manifest.parentCollection;
-        };
-        Helper.prototype.hasRelatedPage = function () {
-            var related = this.getRelated();
-            if (related.length) {
-                related = related[0];
-            }
-            return related['format'] === 'text/html';
-        };
-        Helper.prototype.hasResources = function () {
-            return this.getResources().length > 0;
-        };
-        Helper.prototype.isBottomToTop = function () {
-            return this.getViewingDirection().toString() === manifesto.ViewingDirection.bottomToTop().toString();
-        };
-        Helper.prototype.isCanvasIndexOutOfRange = function (index) {
-            return this.getCurrentSequence().isCanvasIndexOutOfRange(index);
-        };
-        Helper.prototype.isContinuous = function () {
-            return this.getViewingHint().toString() === manifesto.ViewingHint.continuous().toString();
-        };
-        Helper.prototype.isFirstCanvas = function (index) {
-            if (typeof index !== 'undefined') {
-                return this.getCurrentSequence().isFirstCanvas(index);
-            }
-            return this.getCurrentSequence().isFirstCanvas(this.canvasIndex);
-        };
-        Helper.prototype.isHorizontallyAligned = function () {
-            return this.isLeftToRight() || this.isRightToLeft();
-        };
-        Helper.prototype.isLastCanvas = function (index) {
-            if (typeof index !== 'undefined') {
-                return this.getCurrentSequence().isLastCanvas(index);
-            }
-            return this.getCurrentSequence().isLastCanvas(this.canvasIndex);
-        };
-        Helper.prototype.isLeftToRight = function () {
-            return this.getViewingDirection().toString() === manifesto.ViewingDirection.leftToRight().toString();
-        };
-        Helper.prototype.isMultiCanvas = function () {
-            return this.getCurrentSequence().isMultiCanvas();
-        };
-        Helper.prototype.isMultiSequence = function () {
-            return this.manifest.isMultiSequence();
-        };
-        Helper.prototype.isPaged = function () {
-            return this.getViewingHint().toString() === manifesto.ViewingHint.paged().toString();
-        };
-        Helper.prototype.isPagingAvailable = function () {
-            // paged mode is useless unless you have at least 3 pages...
-            return this.isPagingEnabled() && this.getTotalCanvases() > 2;
-        };
-        Helper.prototype.isPagingEnabled = function () {
-            return this.getCurrentSequence().isPagingEnabled();
-        };
-        Helper.prototype.isRightToLeft = function () {
-            return this.getViewingDirection().toString() === manifesto.ViewingDirection.rightToLeft().toString();
-        };
-        Helper.prototype.isTopToBottom = function () {
-            return this.getViewingDirection().toString() === manifesto.ViewingDirection.topToBottom().toString();
-        };
-        Helper.prototype.isTotalCanvasesEven = function () {
-            return this.getCurrentSequence().isTotalCanvasesEven();
-        };
-        Helper.prototype.isUIEnabled = function (name) {
-            var uiExtensions = this.manifest.getService(manifesto.ServiceProfile.uiExtensions());
-            if (uiExtensions) {
-                var disableUI = uiExtensions.getProperty('disableUI');
-                if (disableUI) {
-                    if (disableUI.contains(name) || disableUI.contains(name.toLowerCase())) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        };
-        Helper.prototype.isVerticallyAligned = function () {
-            return this.isTopToBottom() || this.isBottomToTop();
-        };
-        // dates //     
-        Helper.prototype.createDateNodes = function (rootNode, nodes) {
-            for (var i = 0; i < nodes.length; i++) {
-                var node = nodes[i];
-                var year = this.getNodeYear(node);
-                var month = this.getNodeMonth(node);
-                var dateNode = new manifesto.TreeNode();
-                dateNode.id = node.id;
-                dateNode.label = this.getNodeDisplayDate(node);
-                dateNode.data = node.data;
-                dateNode.data.type = manifesto.TreeNodeType.manifest().toString();
-                dateNode.data.year = year;
-                dateNode.data.month = month;
-                var decadeNode = this.getDecadeNode(rootNode, year);
-                if (decadeNode) {
-                    var yearNode = this.getYearNode(decadeNode, year);
-                    if (yearNode) {
-                        var monthNode = this.getMonthNode(yearNode, month);
-                        if (monthNode) {
-                            monthNode.addNode(dateNode);
-                        }
-                    }
-                }
-            }
-        };
-        Helper.prototype.createDecadeNodes = function (rootNode, nodes) {
-            var decadeNode;
-            for (var i = 0; i < nodes.length; i++) {
-                var node = nodes[i];
-                var year = this.getNodeYear(node);
-                var decade = Number(year.toString().substr(2, 1));
-                var endYear = Number(year.toString().substr(0, 3) + "9");
-                if (!this.getDecadeNode(rootNode, year)) {
-                    decadeNode = new manifesto.TreeNode();
-                    decadeNode.label = year + " - " + endYear;
-                    decadeNode.navDate = node.navDate;
-                    decadeNode.data.startYear = year;
-                    decadeNode.data.endYear = endYear;
-                    rootNode.addNode(decadeNode);
-                }
-            }
-        };
-        Helper.prototype.createMonthNodes = function (rootNode, nodes) {
-            var monthNode;
-            for (var i = 0; i < nodes.length; i++) {
-                var node = nodes[i];
-                var year = this.getNodeYear(node);
-                var month = this.getNodeMonth(node);
-                var decadeNode = this.getDecadeNode(rootNode, year);
-                var yearNode = this.getYearNode(decadeNode, year);
-                if (decadeNode && yearNode && !this.getMonthNode(yearNode, month)) {
-                    monthNode = new manifesto.TreeNode();
-                    monthNode.label = this.getNodeDisplayMonth(node);
-                    monthNode.navDate = node.navDate;
-                    monthNode.data.year = year;
-                    monthNode.data.month = month;
-                    yearNode.addNode(monthNode);
-                }
-            }
-        };
-        Helper.prototype.createYearNodes = function (rootNode, nodes) {
-            var yearNode;
-            for (var i = 0; i < nodes.length; i++) {
-                var node = nodes[i];
-                var year = this.getNodeYear(node);
-                var decadeNode = this.getDecadeNode(rootNode, year);
-                if (decadeNode && !this.getYearNode(decadeNode, year)) {
-                    yearNode = new manifesto.TreeNode();
-                    yearNode.label = year.toString();
-                    yearNode.navDate = node.navDate;
-                    yearNode.data.year = year;
-                    decadeNode.addNode(yearNode);
-                }
-            }
-        };
-        Helper.prototype.getDecadeNode = function (rootNode, year) {
-            for (var i = 0; i < rootNode.nodes.length; i++) {
-                var n = rootNode.nodes[i];
-                if (year >= n.data.startYear && year <= n.data.endYear)
-                    return n;
-            }
-            return null;
-        };
-        Helper.prototype.getMonthNode = function (yearNode, month) {
-            for (var i = 0; i < yearNode.nodes.length; i++) {
-                var n = yearNode.nodes[i];
-                if (month === this.getNodeMonth(n))
-                    return n;
-            }
-            return null;
-        };
-        Helper.prototype.getNodeDisplayDate = function (node) {
-            return node.navDate.toDateString();
-        };
-        Helper.prototype.getNodeDisplayMonth = function (node) {
-            var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            return months[node.navDate.getMonth()];
-        };
-        Helper.prototype.getNodeMonth = function (node) {
-            return node.navDate.getMonth();
-        };
-        Helper.prototype.getNodeYear = function (node) {
-            return node.navDate.getFullYear();
-        };
-        Helper.prototype.getYearNode = function (decadeNode, year) {
-            for (var i = 0; i < decadeNode.nodes.length; i++) {
-                var n = decadeNode.nodes[i];
-                if (year === this.getNodeYear(n))
-                    return n;
-            }
-            return null;
-        };
-        // delete any empty decades
-        Helper.prototype.pruneDecadeNodes = function (rootNode) {
-            var pruned = [];
-            for (var i = 0; i < rootNode.nodes.length; i++) {
-                var n = rootNode.nodes[i];
-                if (!n.nodes.length) {
-                    pruned.push(n);
-                }
-            }
-            for (var j = 0; j < pruned.length; j++) {
-                var p = pruned[j];
-                rootNode.nodes.remove(p);
-            }
-        };
-        Helper.prototype.sortDecadeNodes = function (rootNode) {
-            rootNode.nodes = rootNode.nodes.sort(function (a, b) {
-                return a.data.startYear - b.data.startYear;
-            });
-        };
-        Helper.prototype.sortMonthNodes = function (rootNode) {
-            var _this = this;
-            for (var i = 0; i < rootNode.nodes.length; i++) {
-                var decadeNode = rootNode.nodes[i];
-                for (var j = 0; j < decadeNode.nodes.length; j++) {
-                    var monthNode = decadeNode.nodes[j];
-                    monthNode.nodes = monthNode.nodes.sort(function (a, b) {
-                        return _this.getNodeMonth(a) - _this.getNodeMonth(b);
-                    });
-                }
-            }
-        };
-        Helper.prototype.sortYearNodes = function (rootNode) {
-            var _this = this;
-            for (var i = 0; i < rootNode.nodes.length; i++) {
-                var decadeNode = rootNode.nodes[i];
-                decadeNode.nodes = decadeNode.nodes.sort(function (a, b) {
-                    return (_this.getNodeYear(a) - _this.getNodeYear(b));
-                });
-            }
-        };
-        return Helper;
-    }());
-    Manifold.Helper = Helper;
-})(Manifold || (Manifold = {}));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var Manifold;
-(function (Manifold) {
-    function loadManifest(options) {
-        var bootstrapper = new Manifold.Bootstrapper(options);
-        return bootstrapper.bootstrap();
-    }
-    Manifold.loadManifest = loadManifest;
-})(Manifold || (Manifold = {}));
-(function (w) {
-    if (!w.Manifold) {
-        w.Manifold = Manifold;
-    }
-})(window);
-
-var Manifold;
-(function (Manifold) {
-    var MetadataGroup = (function () {
-        function MetadataGroup(resource, label) {
-            this.items = [];
-            this.resource = resource;
-            this.label = label;
-        }
-        MetadataGroup.prototype.addItem = function (item) {
-            this.items.push(item);
-        };
-        MetadataGroup.prototype.addMetadata = function (metadata, isRootLevel) {
-            if (isRootLevel === void 0) { isRootLevel = false; }
-            for (var i = 0; i < metadata.length; i++) {
-                var item = metadata[i];
-                item.isRootLevel = isRootLevel;
-                this.addItem(item);
-            }
-        };
-        return MetadataGroup;
-    }());
-    Manifold.MetadataGroup = MetadataGroup;
-})(Manifold || (Manifold = {}));
-
-var Manifold;
-(function (Manifold) {
-    var MetadataOptions = (function () {
-        function MetadataOptions() {
-        }
-        return MetadataOptions;
-    }());
-    Manifold.MetadataOptions = MetadataOptions;
-})(Manifold || (Manifold = {}));
-
-var Manifold;
-(function (Manifold) {
-    var MultiSelectState = (function () {
-        function MultiSelectState() {
-            this.isEnabled = false;
-            this.ranges = [];
-            this.canvases = [];
-        }
-        MultiSelectState.prototype.allCanvasesSelected = function () {
-            return this.canvases.length > 0 && this.getAllSelectedCanvases().length === this.canvases.length;
-        };
-        MultiSelectState.prototype.allRangesSelected = function () {
-            return this.ranges.length > 0 && this.getAllSelectedRanges().length === this.ranges.length;
-        };
-        MultiSelectState.prototype.allSelected = function () {
-            return this.allRangesSelected() && this.allCanvasesSelected();
-        };
-        MultiSelectState.prototype.getAll = function () {
-            return this.canvases.concat(this.ranges);
-        };
-        MultiSelectState.prototype.getAllSelectedCanvases = function () {
-            return this.canvases.en().where(function (c) { return c.multiSelected; }).toArray();
-        };
-        MultiSelectState.prototype.getAllSelectedRanges = function () {
-            return this.ranges.en().where(function (r) { return r.multiSelected; }).toArray();
-        };
-        MultiSelectState.prototype.getCanvasById = function (id) {
-            return this.canvases.en().where(function (c) { return c.id === id; }).first();
-        };
-        MultiSelectState.prototype.getCanvasesByIds = function (ids) {
-            var canvases = [];
-            for (var i = 0; i < ids.length; i++) {
-                var id = ids[i];
-                canvases.push(this.getCanvasById(id));
-            }
-            return canvases;
-        };
-        MultiSelectState.prototype.getRangeCanvases = function (range) {
-            var ids = range.getCanvasIds();
-            return this.getCanvasesByIds(ids);
-        };
-        MultiSelectState.prototype.selectAll = function (selected) {
-            this.selectRanges(this.ranges, selected);
-            this.selectCanvases(this.canvases, selected);
-        };
-        MultiSelectState.prototype.selectCanvas = function (canvas, selected) {
-            var c = this.canvases.en().where(function (c) { return c.id === canvas.id; }).first();
-            c.multiSelected = selected;
-        };
-        MultiSelectState.prototype.selectAllCanvases = function (selected) {
-            this.selectCanvases(this.canvases, selected);
-        };
-        MultiSelectState.prototype.selectCanvases = function (canvases, selected) {
-            for (var j = 0; j < canvases.length; j++) {
-                var canvas = canvases[j];
-                canvas.multiSelected = selected;
-            }
-        };
-        MultiSelectState.prototype.selectRange = function (range, selected) {
-            var r = this.ranges.en().where(function (r) { return r.id === range.id; }).first();
-            r.multiSelected = selected;
-            var canvases = this.getRangeCanvases(r);
-            this.selectCanvases(canvases, selected);
-        };
-        MultiSelectState.prototype.selectAllRanges = function (selected) {
-            this.selectRanges(this.ranges, selected);
-        };
-        MultiSelectState.prototype.selectRanges = function (ranges, selected) {
-            for (var i = 0; i < ranges.length; i++) {
-                var range = ranges[i];
-                range.multiSelected = selected;
-                var canvases = this.getCanvasesByIds(range.getCanvasIds());
-                this.selectCanvases(canvases, selected);
-            }
-        };
-        MultiSelectState.prototype.setEnabled = function (enabled) {
-            this.isEnabled = enabled;
-            var items = this.getAll();
-            for (var i = 0; i < items.length; i++) {
-                var item = items[i];
-                item.multiSelectEnabled = this.isEnabled;
-                if (!enabled) {
-                    item.multiSelected = false;
-                }
-            }
-        };
-        return MultiSelectState;
-    }());
-    Manifold.MultiSelectState = MultiSelectState;
-})(Manifold || (Manifold = {}));
-
-var Manifold;
-(function (Manifold) {
-    var Translation = (function () {
-        function Translation(value, locale) {
-            this.value = value;
-            this.locale = locale;
-        }
-        return Translation;
-    }());
-    Manifold.Translation = Translation;
-})(Manifold || (Manifold = {}));
-
-var Manifold;
-(function (Manifold) {
-    // This class formats URIs into HTML <a> links, applying labels when available
-    var UriLabeller = (function () {
-        function UriLabeller(labels) {
-            this.labels = labels;
-        }
-        UriLabeller.prototype.format = function (url) {
-            // if already a link, do nothing.
-            if (url.indexOf('<a') != -1)
-                return url;
-            var label = this.labels[url] ? this.labels[url] : url;
-            return '<a href="' + url + '">' + label + '</a>';
-        };
-        return UriLabeller;
-    }());
-    Manifold.UriLabeller = UriLabeller;
-})(Manifold || (Manifold = {}));
-
-},{}]},{},[1])(1)
-});
 var Utils;
 (function (Utils) {
     var Async = (function () {
@@ -14373,9 +11299,10 @@ var Utils;
             }
         };
         return Async;
-    })();
+    }());
     Utils.Async = Async;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Bools = (function () {
@@ -14388,9 +11315,10 @@ var Utils;
             return val;
         };
         return Bools;
-    })();
+    }());
     Utils.Bools = Bools;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Clipboard = (function () {
@@ -14412,2522 +11340,10 @@ var Utils;
             return document.queryCommandSupported && document.queryCommandSupported('copy');
         };
         return Clipboard;
-    })();
+    }());
     Utils.Clipboard = Clipboard;
 })(Utils || (Utils = {}));
-// Copyright 2013 Basarat Ali Syed. All Rights Reserved.
-//
-// Licensed under MIT open source license http://opensource.org/licenses/MIT
-//
-// Orginal javascript code was by Mauricio Santos
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-/**
- * @namespace Top level namespace for collections, a TypeScript data structure library.
- */
-var Utils;
-(function (Utils) {
-    var Collections;
-    (function (Collections) {
-        var collections = Collections;
-        var _hasOwnProperty = Object.prototype.hasOwnProperty;
-        var has = function (obj, prop) {
-            return _hasOwnProperty.call(obj, prop);
-        };
-        /**
-         * Default function to compare element order.
-         * @function
-         */
-        function defaultCompare(a, b) {
-            if (a < b) {
-                return -1;
-            }
-            else if (a === b) {
-                return 0;
-            }
-            else {
-                return 1;
-            }
-        }
-        Collections.defaultCompare = defaultCompare;
-        /**
-         * Default function to test equality.
-         * @function
-         */
-        function defaultEquals(a, b) {
-            return a === b;
-        }
-        Collections.defaultEquals = defaultEquals;
-        /**
-         * Default function to convert an object to a string.
-         * @function
-         */
-        function defaultToString(item) {
-            if (item === null) {
-                return 'COLLECTION_NULL';
-            }
-            else if (collections.isUndefined(item)) {
-                return 'COLLECTION_UNDEFINED';
-            }
-            else if (collections.isString(item)) {
-                return '$s' + item;
-            }
-            else {
-                return '$o' + item.toString();
-            }
-        }
-        Collections.defaultToString = defaultToString;
-        /**
-         * Joins all the properies of the object using the provided join string
-         */
-        function makeString(item, join) {
-            if (join === void 0) { join = ","; }
-            if (item === null) {
-                return 'COLLECTION_NULL';
-            }
-            else if (collections.isUndefined(item)) {
-                return 'COLLECTION_UNDEFINED';
-            }
-            else if (collections.isString(item)) {
-                return item.toString();
-            }
-            else {
-                var toret = "{";
-                var first = true;
-                for (var prop in item) {
-                    if (has(item, prop)) {
-                        if (first)
-                            first = false;
-                        else
-                            toret = toret + join;
-                        toret = toret + prop + ":" + item[prop];
-                    }
-                }
-                return toret + "}";
-            }
-        }
-        Collections.makeString = makeString;
-        /**
-         * Checks if the given argument is a function.
-         * @function
-         */
-        function isFunction(func) {
-            return (typeof func) === 'function';
-        }
-        Collections.isFunction = isFunction;
-        /**
-         * Checks if the given argument is undefined.
-         * @function
-         */
-        function isUndefined(obj) {
-            return (typeof obj) === 'undefined';
-        }
-        Collections.isUndefined = isUndefined;
-        /**
-         * Checks if the given argument is a string.
-         * @function
-         */
-        function isString(obj) {
-            return Object.prototype.toString.call(obj) === '[object String]';
-        }
-        Collections.isString = isString;
-        /**
-         * Reverses a compare function.
-         * @function
-         */
-        function reverseCompareFunction(compareFunction) {
-            if (!collections.isFunction(compareFunction)) {
-                return function (a, b) {
-                    if (a < b) {
-                        return 1;
-                    }
-                    else if (a === b) {
-                        return 0;
-                    }
-                    else {
-                        return -1;
-                    }
-                };
-            }
-            else {
-                return function (d, v) {
-                    return compareFunction(d, v) * -1;
-                };
-            }
-        }
-        Collections.reverseCompareFunction = reverseCompareFunction;
-        /**
-         * Returns an equal function given a compare function.
-         * @function
-         */
-        function compareToEquals(compareFunction) {
-            return function (a, b) {
-                return compareFunction(a, b) === 0;
-            };
-        }
-        Collections.compareToEquals = compareToEquals;
-        /**
-         * @namespace Contains various functions for manipulating arrays.
-         */
-        var arrays;
-        (function (arrays) {
-            /**
-             * Returns the position of the first occurrence of the specified item
-             * within the specified array.
-             * @param {*} array the array in which to search the element.
-             * @param {Object} item the element to search.
-             * @param {function(Object,Object):boolean=} equalsFunction optional function used to
-             * check equality between 2 elements.
-             * @return {number} the position of the first occurrence of the specified element
-             * within the specified array, or -1 if not found.
-             */
-            function indexOf(array, item, equalsFunction) {
-                var equals = equalsFunction || collections.defaultEquals;
-                var length = array.length;
-                for (var i = 0; i < length; i++) {
-                    if (equals(array[i], item)) {
-                        return i;
-                    }
-                }
-                return -1;
-            }
-            arrays.indexOf = indexOf;
-            /**
-             * Returns the position of the last occurrence of the specified element
-             * within the specified array.
-             * @param {*} array the array in which to search the element.
-             * @param {Object} item the element to search.
-             * @param {function(Object,Object):boolean=} equalsFunction optional function used to
-             * check equality between 2 elements.
-             * @return {number} the position of the last occurrence of the specified element
-             * within the specified array or -1 if not found.
-             */
-            function lastIndexOf(array, item, equalsFunction) {
-                var equals = equalsFunction || collections.defaultEquals;
-                var length = array.length;
-                for (var i = length - 1; i >= 0; i--) {
-                    if (equals(array[i], item)) {
-                        return i;
-                    }
-                }
-                return -1;
-            }
-            arrays.lastIndexOf = lastIndexOf;
-            /**
-             * Returns true if the specified array contains the specified element.
-             * @param {*} array the array in which to search the element.
-             * @param {Object} item the element to search.
-             * @param {function(Object,Object):boolean=} equalsFunction optional function to
-             * check equality between 2 elements.
-             * @return {boolean} true if the specified array contains the specified element.
-             */
-            function contains(array, item, equalsFunction) {
-                return arrays.indexOf(array, item, equalsFunction) >= 0;
-            }
-            arrays.contains = contains;
-            /**
-             * Removes the first ocurrence of the specified element from the specified array.
-             * @param {*} array the array in which to search element.
-             * @param {Object} item the element to search.
-             * @param {function(Object,Object):boolean=} equalsFunction optional function to
-             * check equality between 2 elements.
-             * @return {boolean} true if the array changed after this call.
-             */
-            function remove(array, item, equalsFunction) {
-                var index = arrays.indexOf(array, item, equalsFunction);
-                if (index < 0) {
-                    return false;
-                }
-                array.splice(index, 1);
-                return true;
-            }
-            arrays.remove = remove;
-            /**
-             * Returns the number of elements in the specified array equal
-             * to the specified object.
-             * @param {Array} array the array in which to determine the frequency of the element.
-             * @param {Object} item the element whose frequency is to be determined.
-             * @param {function(Object,Object):boolean=} equalsFunction optional function used to
-             * check equality between 2 elements.
-             * @return {number} the number of elements in the specified array
-             * equal to the specified object.
-             */
-            function frequency(array, item, equalsFunction) {
-                var equals = equalsFunction || collections.defaultEquals;
-                var length = array.length;
-                var freq = 0;
-                for (var i = 0; i < length; i++) {
-                    if (equals(array[i], item)) {
-                        freq++;
-                    }
-                }
-                return freq;
-            }
-            arrays.frequency = frequency;
-            /**
-             * Returns true if the two specified arrays are equal to one another.
-             * Two arrays are considered equal if both arrays contain the same number
-             * of elements, and all corresponding pairs of elements in the two
-             * arrays are equal and are in the same order.
-             * @param {Array} array1 one array to be tested for equality.
-             * @param {Array} array2 the other array to be tested for equality.
-             * @param {function(Object,Object):boolean=} equalsFunction optional function used to
-             * check equality between elemements in the arrays.
-             * @return {boolean} true if the two arrays are equal
-             */
-            function equals(array1, array2, equalsFunction) {
-                var equals = equalsFunction || collections.defaultEquals;
-                if (array1.length !== array2.length) {
-                    return false;
-                }
-                var length = array1.length;
-                for (var i = 0; i < length; i++) {
-                    if (!equals(array1[i], array2[i])) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            arrays.equals = equals;
-            /**
-             * Returns shallow a copy of the specified array.
-             * @param {*} array the array to copy.
-             * @return {Array} a copy of the specified array
-             */
-            function copy(array) {
-                return array.concat();
-            }
-            arrays.copy = copy;
-            /**
-             * Swaps the elements at the specified positions in the specified array.
-             * @param {Array} array The array in which to swap elements.
-             * @param {number} i the index of one element to be swapped.
-             * @param {number} j the index of the other element to be swapped.
-             * @return {boolean} true if the array is defined and the indexes are valid.
-             */
-            function swap(array, i, j) {
-                if (i < 0 || i >= array.length || j < 0 || j >= array.length) {
-                    return false;
-                }
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-                return true;
-            }
-            arrays.swap = swap;
-            function toString(array) {
-                return '[' + array.toString() + ']';
-            }
-            arrays.toString = toString;
-            /**
-             * Executes the provided function once for each element present in this array
-             * starting from index 0 to length - 1.
-             * @param {Array} array The array in which to iterate.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element value, to break the iteration you can
-             * optionally return false.
-             */
-            function forEach(array, callback) {
-                var lenght = array.length;
-                for (var i = 0; i < lenght; i++) {
-                    if (callback(array[i]) === false) {
-                        return;
-                    }
-                }
-            }
-            arrays.forEach = forEach;
-        })(arrays = Collections.arrays || (Collections.arrays = {}));
-        var LinkedList = (function () {
-            /**
-             * Creates an empty Linked List.
-             * @class A linked list is a data structure consisting of a group of nodes
-             * which together represent a sequence.
-             * @constructor
-             */
-            function LinkedList() {
-                /**
-                 * First node in the list
-                 * @type {Object}
-                 * @private
-                 */
-                this.firstNode = null;
-                /**
-                 * Last node in the list
-                 * @type {Object}
-                 * @private
-                 */
-                this.lastNode = null;
-                /**
-                 * Number of elements in the list
-                 * @type {number}
-                 * @private
-                 */
-                this.nElements = 0;
-            }
-            /**
-             * Adds an element to this list.
-             * @param {Object} item element to be added.
-             * @param {number=} index optional index to add the element. If no index is specified
-             * the element is added to the end of this list.
-             * @return {boolean} true if the element was added or false if the index is invalid
-             * or if the element is undefined.
-             */
-            LinkedList.prototype.add = function (item, index) {
-                if (collections.isUndefined(index)) {
-                    index = this.nElements;
-                }
-                if (index < 0 || index > this.nElements || collections.isUndefined(item)) {
-                    return false;
-                }
-                var newNode = this.createNode(item);
-                if (this.nElements === 0) {
-                    // First node in the list.
-                    this.firstNode = newNode;
-                    this.lastNode = newNode;
-                }
-                else if (index === this.nElements) {
-                    // Insert at the end.
-                    this.lastNode.next = newNode;
-                    this.lastNode = newNode;
-                }
-                else if (index === 0) {
-                    // Change first node.
-                    newNode.next = this.firstNode;
-                    this.firstNode = newNode;
-                }
-                else {
-                    var prev = this.nodeAtIndex(index - 1);
-                    newNode.next = prev.next;
-                    prev.next = newNode;
-                }
-                this.nElements++;
-                return true;
-            };
-            /**
-             * Returns the first element in this list.
-             * @return {*} the first element of the list or undefined if the list is
-             * empty.
-             */
-            LinkedList.prototype.first = function () {
-                if (this.firstNode !== null) {
-                    return this.firstNode.element;
-                }
-                return undefined;
-            };
-            /**
-             * Returns the last element in this list.
-             * @return {*} the last element in the list or undefined if the list is
-             * empty.
-             */
-            LinkedList.prototype.last = function () {
-                if (this.lastNode !== null) {
-                    return this.lastNode.element;
-                }
-                return undefined;
-            };
-            /**
-             * Returns the element at the specified position in this list.
-             * @param {number} index desired index.
-             * @return {*} the element at the given index or undefined if the index is
-             * out of bounds.
-             */
-            LinkedList.prototype.elementAtIndex = function (index) {
-                var node = this.nodeAtIndex(index);
-                if (node === null) {
-                    return undefined;
-                }
-                return node.element;
-            };
-            /**
-             * Returns the index in this list of the first occurrence of the
-             * specified element, or -1 if the List does not contain this element.
-             * <p>If the elements inside this list are
-             * not comparable with the === operator a custom equals function should be
-             * provided to perform searches, the function must receive two arguments and
-             * return true if they are equal, false otherwise. Example:</p>
-             *
-             * <pre>
-             * var petsAreEqualByName = function(pet1, pet2) {
-             *  return pet1.name === pet2.name;
-             * }
-             * </pre>
-             * @param {Object} item element to search for.
-             * @param {function(Object,Object):boolean=} equalsFunction Optional
-             * function used to check if two elements are equal.
-             * @return {number} the index in this list of the first occurrence
-             * of the specified element, or -1 if this list does not contain the
-             * element.
-             */
-            LinkedList.prototype.indexOf = function (item, equalsFunction) {
-                var equalsF = equalsFunction || collections.defaultEquals;
-                if (collections.isUndefined(item)) {
-                    return -1;
-                }
-                var currentNode = this.firstNode;
-                var index = 0;
-                while (currentNode !== null) {
-                    if (equalsF(currentNode.element, item)) {
-                        return index;
-                    }
-                    index++;
-                    currentNode = currentNode.next;
-                }
-                return -1;
-            };
-            /**
-             * Returns true if this list contains the specified element.
-             * <p>If the elements inside the list are
-             * not comparable with the === operator a custom equals function should be
-             * provided to perform searches, the function must receive two arguments and
-             * return true if they are equal, false otherwise. Example:</p>
-             *
-             * <pre>
-             * var petsAreEqualByName = function(pet1, pet2) {
-               *  return pet1.name === pet2.name;
-               * }
-             * </pre>
-             * @param {Object} item element to search for.
-             * @param {function(Object,Object):boolean=} equalsFunction Optional
-             * function used to check if two elements are equal.
-             * @return {boolean} true if this list contains the specified element, false
-             * otherwise.
-             */
-            LinkedList.prototype.contains = function (item, equalsFunction) {
-                return (this.indexOf(item, equalsFunction) >= 0);
-            };
-            /**
-             * Removes the first occurrence of the specified element in this list.
-             * <p>If the elements inside the list are
-             * not comparable with the === operator a custom equals function should be
-             * provided to perform searches, the function must receive two arguments and
-             * return true if they are equal, false otherwise. Example:</p>
-             *
-             * <pre>
-             * var petsAreEqualByName = function(pet1, pet2) {
-             *  return pet1.name === pet2.name;
-             * }
-             * </pre>
-             * @param {Object} item element to be removed from this list, if present.
-             * @return {boolean} true if the list contained the specified element.
-             */
-            LinkedList.prototype.remove = function (item, equalsFunction) {
-                var equalsF = equalsFunction || collections.defaultEquals;
-                if (this.nElements < 1 || collections.isUndefined(item)) {
-                    return false;
-                }
-                var previous = null;
-                var currentNode = this.firstNode;
-                while (currentNode !== null) {
-                    if (equalsF(currentNode.element, item)) {
-                        if (currentNode === this.firstNode) {
-                            this.firstNode = this.firstNode.next;
-                            if (currentNode === this.lastNode) {
-                                this.lastNode = null;
-                            }
-                        }
-                        else if (currentNode === this.lastNode) {
-                            this.lastNode = previous;
-                            previous.next = currentNode.next;
-                            currentNode.next = null;
-                        }
-                        else {
-                            previous.next = currentNode.next;
-                            currentNode.next = null;
-                        }
-                        this.nElements--;
-                        return true;
-                    }
-                    previous = currentNode;
-                    currentNode = currentNode.next;
-                }
-                return false;
-            };
-            /**
-             * Removes all of the elements from this list.
-             */
-            LinkedList.prototype.clear = function () {
-                this.firstNode = null;
-                this.lastNode = null;
-                this.nElements = 0;
-            };
-            /**
-             * Returns true if this list is equal to the given list.
-             * Two lists are equal if they have the same elements in the same order.
-             * @param {LinkedList} other the other list.
-             * @param {function(Object,Object):boolean=} equalsFunction optional
-             * function used to check if two elements are equal. If the elements in the lists
-             * are custom objects you should provide a function, otherwise
-             * the === operator is used to check equality between elements.
-             * @return {boolean} true if this list is equal to the given list.
-             */
-            LinkedList.prototype.equals = function (other, equalsFunction) {
-                var eqF = equalsFunction || collections.defaultEquals;
-                if (!(other instanceof collections.LinkedList)) {
-                    return false;
-                }
-                if (this.size() !== other.size()) {
-                    return false;
-                }
-                return this.equalsAux(this.firstNode, other.firstNode, eqF);
-            };
-            /**
-             * @private
-             */
-            LinkedList.prototype.equalsAux = function (n1, n2, eqF) {
-                while (n1 !== null) {
-                    if (!eqF(n1.element, n2.element)) {
-                        return false;
-                    }
-                    n1 = n1.next;
-                    n2 = n2.next;
-                }
-                return true;
-            };
-            /**
-             * Removes the element at the specified position in this list.
-             * @param {number} index given index.
-             * @return {*} removed element or undefined if the index is out of bounds.
-             */
-            LinkedList.prototype.removeElementAtIndex = function (index) {
-                if (index < 0 || index >= this.nElements) {
-                    return undefined;
-                }
-                var element;
-                if (this.nElements === 1) {
-                    //First node in the list.
-                    element = this.firstNode.element;
-                    this.firstNode = null;
-                    this.lastNode = null;
-                }
-                else {
-                    var previous = this.nodeAtIndex(index - 1);
-                    if (previous === null) {
-                        element = this.firstNode.element;
-                        this.firstNode = this.firstNode.next;
-                    }
-                    else if (previous.next === this.lastNode) {
-                        element = this.lastNode.element;
-                        this.lastNode = previous;
-                    }
-                    if (previous !== null) {
-                        element = previous.next.element;
-                        previous.next = previous.next.next;
-                    }
-                }
-                this.nElements--;
-                return element;
-            };
-            /**
-             * Executes the provided function once for each element present in this list in order.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element value, to break the iteration you can
-             * optionally return false.
-             */
-            LinkedList.prototype.forEach = function (callback) {
-                var currentNode = this.firstNode;
-                while (currentNode !== null) {
-                    if (callback(currentNode.element) === false) {
-                        break;
-                    }
-                    currentNode = currentNode.next;
-                }
-            };
-            /**
-             * Reverses the order of the elements in this linked list (makes the last
-             * element first, and the first element last).
-             */
-            LinkedList.prototype.reverse = function () {
-                var previous = null;
-                var current = this.firstNode;
-                var temp = null;
-                while (current !== null) {
-                    temp = current.next;
-                    current.next = previous;
-                    previous = current;
-                    current = temp;
-                }
-                temp = this.firstNode;
-                this.firstNode = this.lastNode;
-                this.lastNode = temp;
-            };
-            /**
-             * Returns an array containing all of the elements in this list in proper
-             * sequence.
-             * @return {Array.<*>} an array containing all of the elements in this list,
-             * in proper sequence.
-             */
-            LinkedList.prototype.toArray = function () {
-                var array = [];
-                var currentNode = this.firstNode;
-                while (currentNode !== null) {
-                    array.push(currentNode.element);
-                    currentNode = currentNode.next;
-                }
-                return array;
-            };
-            /**
-             * Returns the number of elements in this list.
-             * @return {number} the number of elements in this list.
-             */
-            LinkedList.prototype.size = function () {
-                return this.nElements;
-            };
-            /**
-             * Returns true if this list contains no elements.
-             * @return {boolean} true if this list contains no elements.
-             */
-            LinkedList.prototype.isEmpty = function () {
-                return this.nElements <= 0;
-            };
-            LinkedList.prototype.toString = function () {
-                return collections.arrays.toString(this.toArray());
-            };
-            /**
-             * @private
-             */
-            LinkedList.prototype.nodeAtIndex = function (index) {
-                if (index < 0 || index >= this.nElements) {
-                    return null;
-                }
-                if (index === (this.nElements - 1)) {
-                    return this.lastNode;
-                }
-                var node = this.firstNode;
-                for (var i = 0; i < index; i++) {
-                    node = node.next;
-                }
-                return node;
-            };
-            /**
-             * @private
-             */
-            LinkedList.prototype.createNode = function (item) {
-                return {
-                    element: item,
-                    next: null
-                };
-            };
-            return LinkedList;
-        })();
-        Collections.LinkedList = LinkedList; // End of linked list 
-        var Dictionary = (function () {
-            /**
-             * Creates an empty dictionary.
-             * @class <p>Dictionaries map keys to values; each key can map to at most one value.
-             * This implementation accepts any kind of objects as keys.</p>
-             *
-             * <p>If the keys are custom objects a function which converts keys to unique
-             * strings must be provided. Example:</p>
-             * <pre>
-             * function petToString(pet) {
-             *  return pet.name;
-             * }
-             * </pre>
-             * @constructor
-             * @param {function(Object):string=} toStrFunction optional function used
-             * to convert keys to strings. If the keys aren't strings or if toString()
-             * is not appropriate, a custom function which receives a key and returns a
-             * unique string must be provided.
-             */
-            function Dictionary(toStrFunction) {
-                this.table = {};
-                this.nElements = 0;
-                this.toStr = toStrFunction || collections.defaultToString;
-            }
-            /**
-             * Returns the value to which this dictionary maps the specified key.
-             * Returns undefined if this dictionary contains no mapping for this key.
-             * @param {Object} key key whose associated value is to be returned.
-             * @return {*} the value to which this dictionary maps the specified key or
-             * undefined if the map contains no mapping for this key.
-             */
-            Dictionary.prototype.getValue = function (key) {
-                var pair = this.table['$' + this.toStr(key)];
-                if (collections.isUndefined(pair)) {
-                    return undefined;
-                }
-                return pair.value;
-            };
-            /**
-             * Associates the specified value with the specified key in this dictionary.
-             * If the dictionary previously contained a mapping for this key, the old
-             * value is replaced by the specified value.
-             * @param {Object} key key with which the specified value is to be
-             * associated.
-             * @param {Object} value value to be associated with the specified key.
-             * @return {*} previous value associated with the specified key, or undefined if
-             * there was no mapping for the key or if the key/value are undefined.
-             */
-            Dictionary.prototype.setValue = function (key, value) {
-                if (collections.isUndefined(key) || collections.isUndefined(value)) {
-                    return undefined;
-                }
-                var ret;
-                var k = '$' + this.toStr(key);
-                var previousElement = this.table[k];
-                if (collections.isUndefined(previousElement)) {
-                    this.nElements++;
-                    ret = undefined;
-                }
-                else {
-                    ret = previousElement.value;
-                }
-                this.table[k] = {
-                    key: key,
-                    value: value
-                };
-                return ret;
-            };
-            /**
-             * Removes the mapping for this key from this dictionary if it is present.
-             * @param {Object} key key whose mapping is to be removed from the
-             * dictionary.
-             * @return {*} previous value associated with specified key, or undefined if
-             * there was no mapping for key.
-             */
-            Dictionary.prototype.remove = function (key) {
-                var k = '$' + this.toStr(key);
-                var previousElement = this.table[k];
-                if (!collections.isUndefined(previousElement)) {
-                    delete this.table[k];
-                    this.nElements--;
-                    return previousElement.value;
-                }
-                return undefined;
-            };
-            /**
-             * Returns an array containing all of the keys in this dictionary.
-             * @return {Array} an array containing all of the keys in this dictionary.
-             */
-            Dictionary.prototype.keys = function () {
-                var array = [];
-                for (var name in this.table) {
-                    if (has(this.table, name)) {
-                        var pair = this.table[name];
-                        array.push(pair.key);
-                    }
-                }
-                return array;
-            };
-            /**
-             * Returns an array containing all of the values in this dictionary.
-             * @return {Array} an array containing all of the values in this dictionary.
-             */
-            Dictionary.prototype.values = function () {
-                var array = [];
-                for (var name in this.table) {
-                    if (has(this.table, name)) {
-                        var pair = this.table[name];
-                        array.push(pair.value);
-                    }
-                }
-                return array;
-            };
-            /**
-             * Executes the provided function once for each key-value pair
-             * present in this dictionary.
-             * @param {function(Object,Object):*} callback function to execute, it is
-             * invoked with two arguments: key and value. To break the iteration you can
-             * optionally return false.
-             */
-            Dictionary.prototype.forEach = function (callback) {
-                for (var name in this.table) {
-                    if (has(this.table, name)) {
-                        var pair = this.table[name];
-                        var ret = callback(pair.key, pair.value);
-                        if (ret === false) {
-                            return;
-                        }
-                    }
-                }
-            };
-            /**
-             * Returns true if this dictionary contains a mapping for the specified key.
-             * @param {Object} key key whose presence in this dictionary is to be
-             * tested.
-             * @return {boolean} true if this dictionary contains a mapping for the
-             * specified key.
-             */
-            Dictionary.prototype.containsKey = function (key) {
-                return !collections.isUndefined(this.getValue(key));
-            };
-            /**
-             * Removes all mappings from this dictionary.
-             * @this {collections.Dictionary}
-             */
-            Dictionary.prototype.clear = function () {
-                this.table = {};
-                this.nElements = 0;
-            };
-            /**
-             * Returns the number of keys in this dictionary.
-             * @return {number} the number of key-value mappings in this dictionary.
-             */
-            Dictionary.prototype.size = function () {
-                return this.nElements;
-            };
-            /**
-             * Returns true if this dictionary contains no mappings.
-             * @return {boolean} true if this dictionary contains no mappings.
-             */
-            Dictionary.prototype.isEmpty = function () {
-                return this.nElements <= 0;
-            };
-            Dictionary.prototype.toString = function () {
-                var toret = "{";
-                this.forEach(function (k, v) {
-                    toret = toret + "\n\t" + k.toString() + " : " + v.toString();
-                });
-                return toret + "\n}";
-            };
-            return Dictionary;
-        })();
-        Collections.Dictionary = Dictionary; // End of dictionary
-        /**
-         * This class is used by the LinkedDictionary Internally
-         * Has to be a class, not an interface, because it needs to have
-         * the 'unlink' function defined.
-         */
-        var LinkedDictionaryPair = (function () {
-            function LinkedDictionaryPair(key, value) {
-                this.key = key;
-                this.value = value;
-            }
-            LinkedDictionaryPair.prototype.unlink = function () {
-                this.prev.next = this.next;
-                this.next.prev = this.prev;
-            };
-            return LinkedDictionaryPair;
-        })();
-        var LinkedDictionary = (function (_super) {
-            __extends(LinkedDictionary, _super);
-            function LinkedDictionary(toStrFunction) {
-                _super.call(this, toStrFunction);
-                this.head = new LinkedDictionaryPair(null, null);
-                this.tail = new LinkedDictionaryPair(null, null);
-                this.head.next = this.tail;
-                this.tail.prev = this.head;
-            }
-            /**
-             * Inserts the new node to the 'tail' of the list, updating the
-             * neighbors, and moving 'this.tail' (the End of List indicator) that
-             * to the end.
-             */
-            LinkedDictionary.prototype.appendToTail = function (entry) {
-                var lastNode = this.tail.prev;
-                lastNode.next = entry;
-                entry.prev = lastNode;
-                entry.next = this.tail;
-                this.tail.prev = entry;
-            };
-            /**
-             * Retrieves a linked dictionary from the table internally
-             */
-            LinkedDictionary.prototype.getLinkedDictionaryPair = function (key) {
-                if (collections.isUndefined(key)) {
-                    return undefined;
-                }
-                var k = '$' + this.toStr(key);
-                var pair = (this.table[k]);
-                return pair;
-            };
-            /**
-             * Returns the value to which this dictionary maps the specified key.
-             * Returns undefined if this dictionary contains no mapping for this key.
-             * @param {Object} key key whose associated value is to be returned.
-             * @return {*} the value to which this dictionary maps the specified key or
-             * undefined if the map contains no mapping for this key.
-             */
-            LinkedDictionary.prototype.getValue = function (key) {
-                var pair = this.getLinkedDictionaryPair(key);
-                if (!collections.isUndefined(pair)) {
-                    return pair.value;
-                }
-                return undefined;
-            };
-            /**
-             * Removes the mapping for this key from this dictionary if it is present.
-             * Also, if a value is present for this key, the entry is removed from the
-             * insertion ordering.
-             * @param {Object} key key whose mapping is to be removed from the
-             * dictionary.
-             * @return {*} previous value associated with specified key, or undefined if
-             * there was no mapping for key.
-             */
-            LinkedDictionary.prototype.remove = function (key) {
-                var pair = this.getLinkedDictionaryPair(key);
-                if (!collections.isUndefined(pair)) {
-                    _super.prototype.remove.call(this, key); // This will remove it from the table
-                    pair.unlink(); // This will unlink it from the chain
-                    return pair.value;
-                }
-                return undefined;
-            };
-            /**
-             * Removes all mappings from this LinkedDictionary.
-             * @this {collections.LinkedDictionary}
-             */
-            LinkedDictionary.prototype.clear = function () {
-                _super.prototype.clear.call(this);
-                this.head.next = this.tail;
-                this.tail.prev = this.head;
-            };
-            /**
-             * Internal function used when updating an existing KeyValue pair.
-             * It places the new value indexed by key into the table, but maintains
-             * its place in the linked ordering.
-             */
-            LinkedDictionary.prototype.replace = function (oldPair, newPair) {
-                var k = '$' + this.toStr(newPair.key);
-                // set the new Pair's links to existingPair's links
-                newPair.next = oldPair.next;
-                newPair.prev = oldPair.prev;
-                // Delete Existing Pair from the table, unlink it from chain.
-                // As a result, the nElements gets decremented by this operation
-                this.remove(oldPair.key);
-                // Link new Pair in place of where oldPair was,
-                // by pointing the old pair's neighbors to it.
-                newPair.prev.next = newPair;
-                newPair.next.prev = newPair;
-                this.table[k] = newPair;
-                // To make up for the fact that the number of elements was decremented,
-                // We need to increase it by one.
-                ++this.nElements;
-            };
-            /**
-             * Associates the specified value with the specified key in this dictionary.
-             * If the dictionary previously contained a mapping for this key, the old
-             * value is replaced by the specified value.
-             * Updating of a key that already exists maintains its place in the
-             * insertion order into the map.
-             * @param {Object} key key with which the specified value is to be
-             * associated.
-             * @param {Object} value value to be associated with the specified key.
-             * @return {*} previous value associated with the specified key, or undefined if
-             * there was no mapping for the key or if the key/value are undefined.
-             */
-            LinkedDictionary.prototype.setValue = function (key, value) {
-                if (collections.isUndefined(key) || collections.isUndefined(value)) {
-                    return undefined;
-                }
-                var existingPair = this.getLinkedDictionaryPair(key);
-                var newPair = new LinkedDictionaryPair(key, value);
-                var k = '$' + this.toStr(key);
-                // If there is already an element for that key, we 
-                // keep it's place in the LinkedList
-                if (!collections.isUndefined(existingPair)) {
-                    this.replace(existingPair, newPair);
-                    return existingPair.value;
-                }
-                else {
-                    this.appendToTail(newPair);
-                    this.table[k] = newPair;
-                    ++this.nElements;
-                    return undefined;
-                }
-            };
-            /**
-             * Returns an array containing all of the keys in this LinkedDictionary, ordered
-             * by insertion order.
-             * @return {Array} an array containing all of the keys in this LinkedDictionary,
-             * ordered by insertion order.
-             */
-            LinkedDictionary.prototype.keys = function () {
-                var array = [];
-                this.forEach(function (key, value) {
-                    array.push(key);
-                });
-                return array;
-            };
-            /**
-             * Returns an array containing all of the values in this LinkedDictionary, ordered by
-             * insertion order.
-             * @return {Array} an array containing all of the values in this LinkedDictionary,
-             * ordered by insertion order.
-             */
-            LinkedDictionary.prototype.values = function () {
-                var array = [];
-                this.forEach(function (key, value) {
-                    array.push(value);
-                });
-                return array;
-            };
-            /**
-             * Executes the provided function once for each key-value pair
-             * present in this LinkedDictionary. It is done in the order of insertion
-             * into the LinkedDictionary
-             * @param {function(Object,Object):*} callback function to execute, it is
-             * invoked with two arguments: key and value. To break the iteration you can
-             * optionally return false.
-             */
-            LinkedDictionary.prototype.forEach = function (callback) {
-                var crawlNode = this.head.next;
-                while (crawlNode.next != null) {
-                    var ret = callback(crawlNode.key, crawlNode.value);
-                    if (ret === false) {
-                        return;
-                    }
-                    crawlNode = crawlNode.next;
-                }
-            };
-            return LinkedDictionary;
-        })(Dictionary);
-        Collections.LinkedDictionary = LinkedDictionary; // End of LinkedDictionary
-        // /**
-        //  * Returns true if this dictionary is equal to the given dictionary.
-        //  * Two dictionaries are equal if they contain the same mappings.
-        //  * @param {collections.Dictionary} other the other dictionary.
-        //  * @param {function(Object,Object):boolean=} valuesEqualFunction optional
-        //  * function used to check if two values are equal.
-        //  * @return {boolean} true if this dictionary is equal to the given dictionary.
-        //  */
-        // collections.Dictionary.prototype.equals = function(other,valuesEqualFunction) {
-        // 	var eqF = valuesEqualFunction || collections.defaultEquals;
-        // 	if(!(other instanceof collections.Dictionary)){
-        // 		return false;
-        // 	}
-        // 	if(this.size() !== other.size()){
-        // 		return false;
-        // 	}
-        // 	return this.equalsAux(this.firstNode,other.firstNode,eqF);
-        // }
-        var MultiDictionary = (function () {
-            /**
-             * Creates an empty multi dictionary.
-             * @class <p>A multi dictionary is a special kind of dictionary that holds
-             * multiple values against each key. Setting a value into the dictionary will
-             * add the value to an array at that key. Getting a key will return an array,
-             * holding all the values set to that key.
-             * You can configure to allow duplicates in the values.
-             * This implementation accepts any kind of objects as keys.</p>
-             *
-             * <p>If the keys are custom objects a function which converts keys to strings must be
-             * provided. Example:</p>
-             *
-             * <pre>
-             * function petToString(pet) {
-             *  return pet.name;
-             * }
-             * </pre>
-             * <p>If the values are custom objects a function to check equality between values
-             * must be provided. Example:</p>
-             *
-             * <pre>
-             * function petsAreEqualByAge(pet1,pet2) {
-             *  return pet1.age===pet2.age;
-             * }
-             * </pre>
-             * @constructor
-             * @param {function(Object):string=} toStrFunction optional function
-             * to convert keys to strings. If the keys aren't strings or if toString()
-             * is not appropriate, a custom function which receives a key and returns a
-             * unique string must be provided.
-             * @param {function(Object,Object):boolean=} valuesEqualsFunction optional
-             * function to check if two values are equal.
-             *
-             * @param allowDuplicateValues
-             */
-            function MultiDictionary(toStrFunction, valuesEqualsFunction, allowDuplicateValues) {
-                if (allowDuplicateValues === void 0) { allowDuplicateValues = false; }
-                this.dict = new Dictionary(toStrFunction);
-                this.equalsF = valuesEqualsFunction || collections.defaultEquals;
-                this.allowDuplicate = allowDuplicateValues;
-            }
-            /**
-             * Returns an array holding the values to which this dictionary maps
-             * the specified key.
-             * Returns an empty array if this dictionary contains no mappings for this key.
-             * @param {Object} key key whose associated values are to be returned.
-             * @return {Array} an array holding the values to which this dictionary maps
-             * the specified key.
-             */
-            MultiDictionary.prototype.getValue = function (key) {
-                var values = this.dict.getValue(key);
-                if (collections.isUndefined(values)) {
-                    return [];
-                }
-                return collections.arrays.copy(values);
-            };
-            /**
-             * Adds the value to the array associated with the specified key, if
-             * it is not already present.
-             * @param {Object} key key with which the specified value is to be
-             * associated.
-             * @param {Object} value the value to add to the array at the key
-             * @return {boolean} true if the value was not already associated with that key.
-             */
-            MultiDictionary.prototype.setValue = function (key, value) {
-                if (collections.isUndefined(key) || collections.isUndefined(value)) {
-                    return false;
-                }
-                if (!this.containsKey(key)) {
-                    this.dict.setValue(key, [value]);
-                    return true;
-                }
-                var array = this.dict.getValue(key);
-                if (!this.allowDuplicate) {
-                    if (collections.arrays.contains(array, value, this.equalsF)) {
-                        return false;
-                    }
-                }
-                array.push(value);
-                return true;
-            };
-            /**
-             * Removes the specified values from the array of values associated with the
-             * specified key. If a value isn't given, all values associated with the specified
-             * key are removed.
-             * @param {Object} key key whose mapping is to be removed from the
-             * dictionary.
-             * @param {Object=} value optional argument to specify the value to remove
-             * from the array associated with the specified key.
-             * @return {*} true if the dictionary changed, false if the key doesn't exist or
-             * if the specified value isn't associated with the specified key.
-             */
-            MultiDictionary.prototype.remove = function (key, value) {
-                if (collections.isUndefined(value)) {
-                    var v = this.dict.remove(key);
-                    return !collections.isUndefined(v);
-                }
-                var array = this.dict.getValue(key);
-                if (collections.arrays.remove(array, value, this.equalsF)) {
-                    if (array.length === 0) {
-                        this.dict.remove(key);
-                    }
-                    return true;
-                }
-                return false;
-            };
-            /**
-             * Returns an array containing all of the keys in this dictionary.
-             * @return {Array} an array containing all of the keys in this dictionary.
-             */
-            MultiDictionary.prototype.keys = function () {
-                return this.dict.keys();
-            };
-            /**
-             * Returns an array containing all of the values in this dictionary.
-             * @return {Array} an array containing all of the values in this dictionary.
-             */
-            MultiDictionary.prototype.values = function () {
-                var values = this.dict.values();
-                var array = [];
-                for (var i = 0; i < values.length; i++) {
-                    var v = values[i];
-                    for (var j = 0; j < v.length; j++) {
-                        array.push(v[j]);
-                    }
-                }
-                return array;
-            };
-            /**
-             * Returns true if this dictionary at least one value associatted the specified key.
-             * @param {Object} key key whose presence in this dictionary is to be
-             * tested.
-             * @return {boolean} true if this dictionary at least one value associatted
-             * the specified key.
-             */
-            MultiDictionary.prototype.containsKey = function (key) {
-                return this.dict.containsKey(key);
-            };
-            /**
-             * Removes all mappings from this dictionary.
-             */
-            MultiDictionary.prototype.clear = function () {
-                this.dict.clear();
-            };
-            /**
-             * Returns the number of keys in this dictionary.
-             * @return {number} the number of key-value mappings in this dictionary.
-             */
-            MultiDictionary.prototype.size = function () {
-                return this.dict.size();
-            };
-            /**
-             * Returns true if this dictionary contains no mappings.
-             * @return {boolean} true if this dictionary contains no mappings.
-             */
-            MultiDictionary.prototype.isEmpty = function () {
-                return this.dict.isEmpty();
-            };
-            return MultiDictionary;
-        })();
-        Collections.MultiDictionary = MultiDictionary; // end of multi dictionary 
-        var Heap = (function () {
-            /**
-             * Creates an empty Heap.
-             * @class
-             * <p>A heap is a binary tree, where the nodes maintain the heap property:
-             * each node is smaller than each of its children and therefore a MinHeap
-             * This implementation uses an array to store elements.</p>
-             * <p>If the inserted elements are custom objects a compare function must be provided,
-             *  at construction time, otherwise the <=, === and >= operators are
-             * used to compare elements. Example:</p>
-             *
-             * <pre>
-             * function compare(a, b) {
-             *  if (a is less than b by some ordering criterion) {
-             *     return -1;
-             *  } if (a is greater than b by the ordering criterion) {
-             *     return 1;
-             *  }
-             *  // a must be equal to b
-             *  return 0;
-             * }
-             * </pre>
-             *
-             * <p>If a Max-Heap is wanted (greater elements on top) you can a provide a
-             * reverse compare function to accomplish that behavior. Example:</p>
-             *
-             * <pre>
-             * function reverseCompare(a, b) {
-             *  if (a is less than b by some ordering criterion) {
-             *     return 1;
-             *  } if (a is greater than b by the ordering criterion) {
-             *     return -1;
-             *  }
-             *  // a must be equal to b
-             *  return 0;
-             * }
-             * </pre>
-             *
-             * @constructor
-             * @param {function(Object,Object):number=} compareFunction optional
-             * function used to compare two elements. Must return a negative integer,
-             * zero, or a positive integer as the first argument is less than, equal to,
-             * or greater than the second.
-             */
-            function Heap(compareFunction) {
-                /**
-                 * Array used to store the elements od the heap.
-                 * @type {Array.<Object>}
-                 * @private
-                 */
-                this.data = [];
-                this.compare = compareFunction || collections.defaultCompare;
-            }
-            /**
-             * Returns the index of the left child of the node at the given index.
-             * @param {number} nodeIndex The index of the node to get the left child
-             * for.
-             * @return {number} The index of the left child.
-             * @private
-             */
-            Heap.prototype.leftChildIndex = function (nodeIndex) {
-                return (2 * nodeIndex) + 1;
-            };
-            /**
-             * Returns the index of the right child of the node at the given index.
-             * @param {number} nodeIndex The index of the node to get the right child
-             * for.
-             * @return {number} The index of the right child.
-             * @private
-             */
-            Heap.prototype.rightChildIndex = function (nodeIndex) {
-                return (2 * nodeIndex) + 2;
-            };
-            /**
-             * Returns the index of the parent of the node at the given index.
-             * @param {number} nodeIndex The index of the node to get the parent for.
-             * @return {number} The index of the parent.
-             * @private
-             */
-            Heap.prototype.parentIndex = function (nodeIndex) {
-                return Math.floor((nodeIndex - 1) / 2);
-            };
-            /**
-             * Returns the index of the smaller child node (if it exists).
-             * @param {number} leftChild left child index.
-             * @param {number} rightChild right child index.
-             * @return {number} the index with the minimum value or -1 if it doesn't
-             * exists.
-             * @private
-             */
-            Heap.prototype.minIndex = function (leftChild, rightChild) {
-                if (rightChild >= this.data.length) {
-                    if (leftChild >= this.data.length) {
-                        return -1;
-                    }
-                    else {
-                        return leftChild;
-                    }
-                }
-                else {
-                    if (this.compare(this.data[leftChild], this.data[rightChild]) <= 0) {
-                        return leftChild;
-                    }
-                    else {
-                        return rightChild;
-                    }
-                }
-            };
-            /**
-             * Moves the node at the given index up to its proper place in the heap.
-             * @param {number} index The index of the node to move up.
-             * @private
-             */
-            Heap.prototype.siftUp = function (index) {
-                var parent = this.parentIndex(index);
-                while (index > 0 && this.compare(this.data[parent], this.data[index]) > 0) {
-                    collections.arrays.swap(this.data, parent, index);
-                    index = parent;
-                    parent = this.parentIndex(index);
-                }
-            };
-            /**
-             * Moves the node at the given index down to its proper place in the heap.
-             * @param {number} nodeIndex The index of the node to move down.
-             * @private
-             */
-            Heap.prototype.siftDown = function (nodeIndex) {
-                //smaller child index
-                var min = this.minIndex(this.leftChildIndex(nodeIndex), this.rightChildIndex(nodeIndex));
-                while (min >= 0 && this.compare(this.data[nodeIndex], this.data[min]) > 0) {
-                    collections.arrays.swap(this.data, min, nodeIndex);
-                    nodeIndex = min;
-                    min = this.minIndex(this.leftChildIndex(nodeIndex), this.rightChildIndex(nodeIndex));
-                }
-            };
-            /**
-             * Retrieves but does not remove the root element of this heap.
-             * @return {*} The value at the root of the heap. Returns undefined if the
-             * heap is empty.
-             */
-            Heap.prototype.peek = function () {
-                if (this.data.length > 0) {
-                    return this.data[0];
-                }
-                else {
-                    return undefined;
-                }
-            };
-            /**
-             * Adds the given element into the heap.
-             * @param {*} element the element.
-             * @return true if the element was added or fals if it is undefined.
-             */
-            Heap.prototype.add = function (element) {
-                if (collections.isUndefined(element)) {
-                    return undefined;
-                }
-                this.data.push(element);
-                this.siftUp(this.data.length - 1);
-                return true;
-            };
-            /**
-             * Retrieves and removes the root element of this heap.
-             * @return {*} The value removed from the root of the heap. Returns
-             * undefined if the heap is empty.
-             */
-            Heap.prototype.removeRoot = function () {
-                if (this.data.length > 0) {
-                    var obj = this.data[0];
-                    this.data[0] = this.data[this.data.length - 1];
-                    this.data.splice(this.data.length - 1, 1);
-                    if (this.data.length > 0) {
-                        this.siftDown(0);
-                    }
-                    return obj;
-                }
-                return undefined;
-            };
-            /**
-             * Returns true if this heap contains the specified element.
-             * @param {Object} element element to search for.
-             * @return {boolean} true if this Heap contains the specified element, false
-             * otherwise.
-             */
-            Heap.prototype.contains = function (element) {
-                var equF = collections.compareToEquals(this.compare);
-                return collections.arrays.contains(this.data, element, equF);
-            };
-            /**
-             * Returns the number of elements in this heap.
-             * @return {number} the number of elements in this heap.
-             */
-            Heap.prototype.size = function () {
-                return this.data.length;
-            };
-            /**
-             * Checks if this heap is empty.
-             * @return {boolean} true if and only if this heap contains no items; false
-             * otherwise.
-             */
-            Heap.prototype.isEmpty = function () {
-                return this.data.length <= 0;
-            };
-            /**
-             * Removes all of the elements from this heap.
-             */
-            Heap.prototype.clear = function () {
-                this.data.length = 0;
-            };
-            /**
-             * Executes the provided function once for each element present in this heap in
-             * no particular order.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element value, to break the iteration you can
-             * optionally return false.
-             */
-            Heap.prototype.forEach = function (callback) {
-                collections.arrays.forEach(this.data, callback);
-            };
-            return Heap;
-        })();
-        Collections.Heap = Heap;
-        var Stack = (function () {
-            /**
-             * Creates an empty Stack.
-             * @class A Stack is a Last-In-First-Out (LIFO) data structure, the last
-             * element added to the stack will be the first one to be removed. This
-             * implementation uses a linked list as a container.
-             * @constructor
-             */
-            function Stack() {
-                this.list = new LinkedList();
-            }
-            /**
-             * Pushes an item onto the top of this stack.
-             * @param {Object} elem the element to be pushed onto this stack.
-             * @return {boolean} true if the element was pushed or false if it is undefined.
-             */
-            Stack.prototype.push = function (elem) {
-                return this.list.add(elem, 0);
-            };
-            /**
-             * Pushes an item onto the top of this stack.
-             * @param {Object} elem the element to be pushed onto this stack.
-             * @return {boolean} true if the element was pushed or false if it is undefined.
-             */
-            Stack.prototype.add = function (elem) {
-                return this.list.add(elem, 0);
-            };
-            /**
-             * Removes the object at the top of this stack and returns that object.
-             * @return {*} the object at the top of this stack or undefined if the
-             * stack is empty.
-             */
-            Stack.prototype.pop = function () {
-                return this.list.removeElementAtIndex(0);
-            };
-            /**
-             * Looks at the object at the top of this stack without removing it from the
-             * stack.
-             * @return {*} the object at the top of this stack or undefined if the
-             * stack is empty.
-             */
-            Stack.prototype.peek = function () {
-                return this.list.first();
-            };
-            /**
-             * Returns the number of elements in this stack.
-             * @return {number} the number of elements in this stack.
-             */
-            Stack.prototype.size = function () {
-                return this.list.size();
-            };
-            /**
-             * Returns true if this stack contains the specified element.
-             * <p>If the elements inside this stack are
-             * not comparable with the === operator, a custom equals function should be
-             * provided to perform searches, the function must receive two arguments and
-             * return true if they are equal, false otherwise. Example:</p>
-             *
-             * <pre>
-             * var petsAreEqualByName (pet1, pet2) {
-             *  return pet1.name === pet2.name;
-             * }
-             * </pre>
-             * @param {Object} elem element to search for.
-             * @param {function(Object,Object):boolean=} equalsFunction optional
-             * function to check if two elements are equal.
-             * @return {boolean} true if this stack contains the specified element,
-             * false otherwise.
-             */
-            Stack.prototype.contains = function (elem, equalsFunction) {
-                return this.list.contains(elem, equalsFunction);
-            };
-            /**
-             * Checks if this stack is empty.
-             * @return {boolean} true if and only if this stack contains no items; false
-             * otherwise.
-             */
-            Stack.prototype.isEmpty = function () {
-                return this.list.isEmpty();
-            };
-            /**
-             * Removes all of the elements from this stack.
-             */
-            Stack.prototype.clear = function () {
-                this.list.clear();
-            };
-            /**
-             * Executes the provided function once for each element present in this stack in
-             * LIFO order.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element value, to break the iteration you can
-             * optionally return false.
-             */
-            Stack.prototype.forEach = function (callback) {
-                this.list.forEach(callback);
-            };
-            return Stack;
-        })();
-        Collections.Stack = Stack; // End of stack 
-        var Queue = (function () {
-            /**
-             * Creates an empty queue.
-             * @class A queue is a First-In-First-Out (FIFO) data structure, the first
-             * element added to the queue will be the first one to be removed. This
-             * implementation uses a linked list as a container.
-             * @constructor
-             */
-            function Queue() {
-                this.list = new LinkedList();
-            }
-            /**
-             * Inserts the specified element into the end of this queue.
-             * @param {Object} elem the element to insert.
-             * @return {boolean} true if the element was inserted, or false if it is undefined.
-             */
-            Queue.prototype.enqueue = function (elem) {
-                return this.list.add(elem);
-            };
-            /**
-             * Inserts the specified element into the end of this queue.
-             * @param {Object} elem the element to insert.
-             * @return {boolean} true if the element was inserted, or false if it is undefined.
-             */
-            Queue.prototype.add = function (elem) {
-                return this.list.add(elem);
-            };
-            /**
-             * Retrieves and removes the head of this queue.
-             * @return {*} the head of this queue, or undefined if this queue is empty.
-             */
-            Queue.prototype.dequeue = function () {
-                if (this.list.size() !== 0) {
-                    var el = this.list.first();
-                    this.list.removeElementAtIndex(0);
-                    return el;
-                }
-                return undefined;
-            };
-            /**
-             * Retrieves, but does not remove, the head of this queue.
-             * @return {*} the head of this queue, or undefined if this queue is empty.
-             */
-            Queue.prototype.peek = function () {
-                if (this.list.size() !== 0) {
-                    return this.list.first();
-                }
-                return undefined;
-            };
-            /**
-             * Returns the number of elements in this queue.
-             * @return {number} the number of elements in this queue.
-             */
-            Queue.prototype.size = function () {
-                return this.list.size();
-            };
-            /**
-             * Returns true if this queue contains the specified element.
-             * <p>If the elements inside this stack are
-             * not comparable with the === operator, a custom equals function should be
-             * provided to perform searches, the function must receive two arguments and
-             * return true if they are equal, false otherwise. Example:</p>
-             *
-             * <pre>
-             * var petsAreEqualByName (pet1, pet2) {
-             *  return pet1.name === pet2.name;
-             * }
-             * </pre>
-             * @param {Object} elem element to search for.
-             * @param {function(Object,Object):boolean=} equalsFunction optional
-             * function to check if two elements are equal.
-             * @return {boolean} true if this queue contains the specified element,
-             * false otherwise.
-             */
-            Queue.prototype.contains = function (elem, equalsFunction) {
-                return this.list.contains(elem, equalsFunction);
-            };
-            /**
-             * Checks if this queue is empty.
-             * @return {boolean} true if and only if this queue contains no items; false
-             * otherwise.
-             */
-            Queue.prototype.isEmpty = function () {
-                return this.list.size() <= 0;
-            };
-            /**
-             * Removes all of the elements from this queue.
-             */
-            Queue.prototype.clear = function () {
-                this.list.clear();
-            };
-            /**
-             * Executes the provided function once for each element present in this queue in
-             * FIFO order.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element value, to break the iteration you can
-             * optionally return false.
-             */
-            Queue.prototype.forEach = function (callback) {
-                this.list.forEach(callback);
-            };
-            return Queue;
-        })();
-        Collections.Queue = Queue; // End of queue
-        var PriorityQueue = (function () {
-            /**
-             * Creates an empty priority queue.
-             * @class <p>In a priority queue each element is associated with a "priority",
-             * elements are dequeued in highest-priority-first order (the elements with the
-             * highest priority are dequeued first). Priority Queues are implemented as heaps.
-             * If the inserted elements are custom objects a compare function must be provided,
-             * otherwise the <=, === and >= operators are used to compare object priority.</p>
-             * <pre>
-             * function compare(a, b) {
-             *  if (a is less than b by some ordering criterion) {
-             *     return -1;
-             *  } if (a is greater than b by the ordering criterion) {
-             *     return 1;
-             *  }
-             *  // a must be equal to b
-             *  return 0;
-             * }
-             * </pre>
-             * @constructor
-             * @param {function(Object,Object):number=} compareFunction optional
-             * function used to compare two element priorities. Must return a negative integer,
-             * zero, or a positive integer as the first argument is less than, equal to,
-             * or greater than the second.
-             */
-            function PriorityQueue(compareFunction) {
-                this.heap = new Heap(collections.reverseCompareFunction(compareFunction));
-            }
-            /**
-             * Inserts the specified element into this priority queue.
-             * @param {Object} element the element to insert.
-             * @return {boolean} true if the element was inserted, or false if it is undefined.
-             */
-            PriorityQueue.prototype.enqueue = function (element) {
-                return this.heap.add(element);
-            };
-            /**
-             * Inserts the specified element into this priority queue.
-             * @param {Object} element the element to insert.
-             * @return {boolean} true if the element was inserted, or false if it is undefined.
-             */
-            PriorityQueue.prototype.add = function (element) {
-                return this.heap.add(element);
-            };
-            /**
-             * Retrieves and removes the highest priority element of this queue.
-             * @return {*} the the highest priority element of this queue,
-             *  or undefined if this queue is empty.
-             */
-            PriorityQueue.prototype.dequeue = function () {
-                if (this.heap.size() !== 0) {
-                    var el = this.heap.peek();
-                    this.heap.removeRoot();
-                    return el;
-                }
-                return undefined;
-            };
-            /**
-             * Retrieves, but does not remove, the highest priority element of this queue.
-             * @return {*} the highest priority element of this queue, or undefined if this queue is empty.
-             */
-            PriorityQueue.prototype.peek = function () {
-                return this.heap.peek();
-            };
-            /**
-             * Returns true if this priority queue contains the specified element.
-             * @param {Object} element element to search for.
-             * @return {boolean} true if this priority queue contains the specified element,
-             * false otherwise.
-             */
-            PriorityQueue.prototype.contains = function (element) {
-                return this.heap.contains(element);
-            };
-            /**
-             * Checks if this priority queue is empty.
-             * @return {boolean} true if and only if this priority queue contains no items; false
-             * otherwise.
-             */
-            PriorityQueue.prototype.isEmpty = function () {
-                return this.heap.isEmpty();
-            };
-            /**
-             * Returns the number of elements in this priority queue.
-             * @return {number} the number of elements in this priority queue.
-             */
-            PriorityQueue.prototype.size = function () {
-                return this.heap.size();
-            };
-            /**
-             * Removes all of the elements from this priority queue.
-             */
-            PriorityQueue.prototype.clear = function () {
-                this.heap.clear();
-            };
-            /**
-             * Executes the provided function once for each element present in this queue in
-             * no particular order.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element value, to break the iteration you can
-             * optionally return false.
-             */
-            PriorityQueue.prototype.forEach = function (callback) {
-                this.heap.forEach(callback);
-            };
-            return PriorityQueue;
-        })();
-        Collections.PriorityQueue = PriorityQueue; // end of priority queue
-        var Set = (function () {
-            /**
-             * Creates an empty set.
-             * @class <p>A set is a data structure that contains no duplicate items.</p>
-             * <p>If the inserted elements are custom objects a function
-             * which converts elements to strings must be provided. Example:</p>
-             *
-             * <pre>
-             * function petToString(pet) {
-             *  return pet.name;
-             * }
-             * </pre>
-             *
-             * @constructor
-             * @param {function(Object):string=} toStringFunction optional function used
-             * to convert elements to strings. If the elements aren't strings or if toString()
-             * is not appropriate, a custom function which receives a onject and returns a
-             * unique string must be provided.
-             */
-            function Set(toStringFunction) {
-                this.dictionary = new Dictionary(toStringFunction);
-            }
-            /**
-             * Returns true if this set contains the specified element.
-             * @param {Object} element element to search for.
-             * @return {boolean} true if this set contains the specified element,
-             * false otherwise.
-             */
-            Set.prototype.contains = function (element) {
-                return this.dictionary.containsKey(element);
-            };
-            /**
-             * Adds the specified element to this set if it is not already present.
-             * @param {Object} element the element to insert.
-             * @return {boolean} true if this set did not already contain the specified element.
-             */
-            Set.prototype.add = function (element) {
-                if (this.contains(element) || collections.isUndefined(element)) {
-                    return false;
-                }
-                else {
-                    this.dictionary.setValue(element, element);
-                    return true;
-                }
-            };
-            /**
-             * Performs an intersecion between this an another set.
-             * Removes all values that are not present this set and the given set.
-             * @param {collections.Set} otherSet other set.
-             */
-            Set.prototype.intersection = function (otherSet) {
-                var set = this;
-                this.forEach(function (element) {
-                    if (!otherSet.contains(element)) {
-                        set.remove(element);
-                    }
-                    return true;
-                });
-            };
-            /**
-             * Performs a union between this an another set.
-             * Adds all values from the given set to this set.
-             * @param {collections.Set} otherSet other set.
-             */
-            Set.prototype.union = function (otherSet) {
-                var set = this;
-                otherSet.forEach(function (element) {
-                    set.add(element);
-                    return true;
-                });
-            };
-            /**
-             * Performs a difference between this an another set.
-             * Removes from this set all the values that are present in the given set.
-             * @param {collections.Set} otherSet other set.
-             */
-            Set.prototype.difference = function (otherSet) {
-                var set = this;
-                otherSet.forEach(function (element) {
-                    set.remove(element);
-                    return true;
-                });
-            };
-            /**
-             * Checks whether the given set contains all the elements in this set.
-             * @param {collections.Set} otherSet other set.
-             * @return {boolean} true if this set is a subset of the given set.
-             */
-            Set.prototype.isSubsetOf = function (otherSet) {
-                if (this.size() > otherSet.size()) {
-                    return false;
-                }
-                var isSub = true;
-                this.forEach(function (element) {
-                    if (!otherSet.contains(element)) {
-                        isSub = false;
-                        return false;
-                    }
-                    return true;
-                });
-                return isSub;
-            };
-            /**
-             * Removes the specified element from this set if it is present.
-             * @return {boolean} true if this set contained the specified element.
-             */
-            Set.prototype.remove = function (element) {
-                if (!this.contains(element)) {
-                    return false;
-                }
-                else {
-                    this.dictionary.remove(element);
-                    return true;
-                }
-            };
-            /**
-             * Executes the provided function once for each element
-             * present in this set.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one arguments: the element. To break the iteration you can
-             * optionally return false.
-             */
-            Set.prototype.forEach = function (callback) {
-                this.dictionary.forEach(function (k, v) {
-                    return callback(v);
-                });
-            };
-            /**
-             * Returns an array containing all of the elements in this set in arbitrary order.
-             * @return {Array} an array containing all of the elements in this set.
-             */
-            Set.prototype.toArray = function () {
-                return this.dictionary.values();
-            };
-            /**
-             * Returns true if this set contains no elements.
-             * @return {boolean} true if this set contains no elements.
-             */
-            Set.prototype.isEmpty = function () {
-                return this.dictionary.isEmpty();
-            };
-            /**
-             * Returns the number of elements in this set.
-             * @return {number} the number of elements in this set.
-             */
-            Set.prototype.size = function () {
-                return this.dictionary.size();
-            };
-            /**
-             * Removes all of the elements from this set.
-             */
-            Set.prototype.clear = function () {
-                this.dictionary.clear();
-            };
-            /*
-             * Provides a string representation for display
-             */
-            Set.prototype.toString = function () {
-                return collections.arrays.toString(this.toArray());
-            };
-            return Set;
-        })();
-        Collections.Set = Set; // end of Set
-        var Bag = (function () {
-            /**
-             * Creates an empty bag.
-             * @class <p>A bag is a special kind of set in which members are
-             * allowed to appear more than once.</p>
-             * <p>If the inserted elements are custom objects a function
-             * which converts elements to unique strings must be provided. Example:</p>
-             *
-             * <pre>
-             * function petToString(pet) {
-             *  return pet.name;
-             * }
-             * </pre>
-             *
-             * @constructor
-             * @param {function(Object):string=} toStrFunction optional function used
-             * to convert elements to strings. If the elements aren't strings or if toString()
-             * is not appropriate, a custom function which receives an object and returns a
-             * unique string must be provided.
-             */
-            function Bag(toStrFunction) {
-                this.toStrF = toStrFunction || collections.defaultToString;
-                this.dictionary = new Dictionary(this.toStrF);
-                this.nElements = 0;
-            }
-            /**
-             * Adds nCopies of the specified object to this bag.
-             * @param {Object} element element to add.
-             * @param {number=} nCopies the number of copies to add, if this argument is
-             * undefined 1 copy is added.
-             * @return {boolean} true unless element is undefined.
-             */
-            Bag.prototype.add = function (element, nCopies) {
-                if (nCopies === void 0) { nCopies = 1; }
-                if (collections.isUndefined(element) || nCopies <= 0) {
-                    return false;
-                }
-                if (!this.contains(element)) {
-                    var node = {
-                        value: element,
-                        copies: nCopies
-                    };
-                    this.dictionary.setValue(element, node);
-                }
-                else {
-                    this.dictionary.getValue(element).copies += nCopies;
-                }
-                this.nElements += nCopies;
-                return true;
-            };
-            /**
-             * Counts the number of copies of the specified object in this bag.
-             * @param {Object} element the object to search for..
-             * @return {number} the number of copies of the object, 0 if not found
-             */
-            Bag.prototype.count = function (element) {
-                if (!this.contains(element)) {
-                    return 0;
-                }
-                else {
-                    return this.dictionary.getValue(element).copies;
-                }
-            };
-            /**
-             * Returns true if this bag contains the specified element.
-             * @param {Object} element element to search for.
-             * @return {boolean} true if this bag contains the specified element,
-             * false otherwise.
-             */
-            Bag.prototype.contains = function (element) {
-                return this.dictionary.containsKey(element);
-            };
-            /**
-             * Removes nCopies of the specified object to this bag.
-             * If the number of copies to remove is greater than the actual number
-             * of copies in the Bag, all copies are removed.
-             * @param {Object} element element to remove.
-             * @param {number=} nCopies the number of copies to remove, if this argument is
-             * undefined 1 copy is removed.
-             * @return {boolean} true if at least 1 element was removed.
-             */
-            Bag.prototype.remove = function (element, nCopies) {
-                if (nCopies === void 0) { nCopies = 1; }
-                if (collections.isUndefined(element) || nCopies <= 0) {
-                    return false;
-                }
-                if (!this.contains(element)) {
-                    return false;
-                }
-                else {
-                    var node = this.dictionary.getValue(element);
-                    if (nCopies > node.copies) {
-                        this.nElements -= node.copies;
-                    }
-                    else {
-                        this.nElements -= nCopies;
-                    }
-                    node.copies -= nCopies;
-                    if (node.copies <= 0) {
-                        this.dictionary.remove(element);
-                    }
-                    return true;
-                }
-            };
-            /**
-             * Returns an array containing all of the elements in this big in arbitrary order,
-             * including multiple copies.
-             * @return {Array} an array containing all of the elements in this bag.
-             */
-            Bag.prototype.toArray = function () {
-                var a = [];
-                var values = this.dictionary.values();
-                var vl = values.length;
-                for (var i = 0; i < vl; i++) {
-                    var node = values[i];
-                    var element = node.value;
-                    var copies = node.copies;
-                    for (var j = 0; j < copies; j++) {
-                        a.push(element);
-                    }
-                }
-                return a;
-            };
-            /**
-             * Returns a set of unique elements in this bag.
-             * @return {collections.Set<T>} a set of unique elements in this bag.
-             */
-            Bag.prototype.toSet = function () {
-                var toret = new Set(this.toStrF);
-                var elements = this.dictionary.values();
-                var l = elements.length;
-                for (var i = 0; i < l; i++) {
-                    var value = elements[i].value;
-                    toret.add(value);
-                }
-                return toret;
-            };
-            /**
-             * Executes the provided function once for each element
-             * present in this bag, including multiple copies.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element. To break the iteration you can
-             * optionally return false.
-             */
-            Bag.prototype.forEach = function (callback) {
-                this.dictionary.forEach(function (k, v) {
-                    var value = v.value;
-                    var copies = v.copies;
-                    for (var i = 0; i < copies; i++) {
-                        if (callback(value) === false) {
-                            return false;
-                        }
-                    }
-                    return true;
-                });
-            };
-            /**
-             * Returns the number of elements in this bag.
-             * @return {number} the number of elements in this bag.
-             */
-            Bag.prototype.size = function () {
-                return this.nElements;
-            };
-            /**
-             * Returns true if this bag contains no elements.
-             * @return {boolean} true if this bag contains no elements.
-             */
-            Bag.prototype.isEmpty = function () {
-                return this.nElements === 0;
-            };
-            /**
-             * Removes all of the elements from this bag.
-             */
-            Bag.prototype.clear = function () {
-                this.nElements = 0;
-                this.dictionary.clear();
-            };
-            return Bag;
-        })();
-        Collections.Bag = Bag; // End of bag 
-        var BSTree = (function () {
-            /**
-             * Creates an empty binary search tree.
-             * @class <p>A binary search tree is a binary tree in which each
-             * internal node stores an element such that the elements stored in the
-             * left subtree are less than it and the elements
-             * stored in the right subtree are greater.</p>
-             * <p>Formally, a binary search tree is a node-based binary tree data structure which
-             * has the following properties:</p>
-             * <ul>
-             * <li>The left subtree of a node contains only nodes with elements less
-             * than the node's element</li>
-             * <li>The right subtree of a node contains only nodes with elements greater
-             * than the node's element</li>
-             * <li>Both the left and right subtrees must also be binary search trees.</li>
-             * </ul>
-             * <p>If the inserted elements are custom objects a compare function must
-             * be provided at construction time, otherwise the <=, === and >= operators are
-             * used to compare elements. Example:</p>
-             * <pre>
-             * function compare(a, b) {
-             *  if (a is less than b by some ordering criterion) {
-             *     return -1;
-             *  } if (a is greater than b by the ordering criterion) {
-             *     return 1;
-             *  }
-             *  // a must be equal to b
-             *  return 0;
-             * }
-             * </pre>
-             * @constructor
-             * @param {function(Object,Object):number=} compareFunction optional
-             * function used to compare two elements. Must return a negative integer,
-             * zero, or a positive integer as the first argument is less than, equal to,
-             * or greater than the second.
-             */
-            function BSTree(compareFunction) {
-                this.root = null;
-                this.compare = compareFunction || collections.defaultCompare;
-                this.nElements = 0;
-            }
-            /**
-             * Adds the specified element to this tree if it is not already present.
-             * @param {Object} element the element to insert.
-             * @return {boolean} true if this tree did not already contain the specified element.
-             */
-            BSTree.prototype.add = function (element) {
-                if (collections.isUndefined(element)) {
-                    return false;
-                }
-                if (this.insertNode(this.createNode(element)) !== null) {
-                    this.nElements++;
-                    return true;
-                }
-                return false;
-            };
-            /**
-             * Removes all of the elements from this tree.
-             */
-            BSTree.prototype.clear = function () {
-                this.root = null;
-                this.nElements = 0;
-            };
-            /**
-             * Returns true if this tree contains no elements.
-             * @return {boolean} true if this tree contains no elements.
-             */
-            BSTree.prototype.isEmpty = function () {
-                return this.nElements === 0;
-            };
-            /**
-             * Returns the number of elements in this tree.
-             * @return {number} the number of elements in this tree.
-             */
-            BSTree.prototype.size = function () {
-                return this.nElements;
-            };
-            /**
-             * Returns true if this tree contains the specified element.
-             * @param {Object} element element to search for.
-             * @return {boolean} true if this tree contains the specified element,
-             * false otherwise.
-             */
-            BSTree.prototype.contains = function (element) {
-                if (collections.isUndefined(element)) {
-                    return false;
-                }
-                return this.searchNode(this.root, element) !== null;
-            };
-            /**
-             * Removes the specified element from this tree if it is present.
-             * @return {boolean} true if this tree contained the specified element.
-             */
-            BSTree.prototype.remove = function (element) {
-                var node = this.searchNode(this.root, element);
-                if (node === null) {
-                    return false;
-                }
-                this.removeNode(node);
-                this.nElements--;
-                return true;
-            };
-            /**
-             * Executes the provided function once for each element present in this tree in
-             * in-order.
-             * @param {function(Object):*} callback function to execute, it is invoked with one
-             * argument: the element value, to break the iteration you can optionally return false.
-             */
-            BSTree.prototype.inorderTraversal = function (callback) {
-                this.inorderTraversalAux(this.root, callback, {
-                    stop: false
-                });
-            };
-            /**
-             * Executes the provided function once for each element present in this tree in pre-order.
-             * @param {function(Object):*} callback function to execute, it is invoked with one
-             * argument: the element value, to break the iteration you can optionally return false.
-             */
-            BSTree.prototype.preorderTraversal = function (callback) {
-                this.preorderTraversalAux(this.root, callback, {
-                    stop: false
-                });
-            };
-            /**
-             * Executes the provided function once for each element present in this tree in post-order.
-             * @param {function(Object):*} callback function to execute, it is invoked with one
-             * argument: the element value, to break the iteration you can optionally return false.
-             */
-            BSTree.prototype.postorderTraversal = function (callback) {
-                this.postorderTraversalAux(this.root, callback, {
-                    stop: false
-                });
-            };
-            /**
-             * Executes the provided function once for each element present in this tree in
-             * level-order.
-             * @param {function(Object):*} callback function to execute, it is invoked with one
-             * argument: the element value, to break the iteration you can optionally return false.
-             */
-            BSTree.prototype.levelTraversal = function (callback) {
-                this.levelTraversalAux(this.root, callback);
-            };
-            /**
-             * Returns the minimum element of this tree.
-             * @return {*} the minimum element of this tree or undefined if this tree is
-             * is empty.
-             */
-            BSTree.prototype.minimum = function () {
-                if (this.isEmpty()) {
-                    return undefined;
-                }
-                return this.minimumAux(this.root).element;
-            };
-            /**
-             * Returns the maximum element of this tree.
-             * @return {*} the maximum element of this tree or undefined if this tree is
-             * is empty.
-             */
-            BSTree.prototype.maximum = function () {
-                if (this.isEmpty()) {
-                    return undefined;
-                }
-                return this.maximumAux(this.root).element;
-            };
-            /**
-             * Executes the provided function once for each element present in this tree in inorder.
-             * Equivalent to inorderTraversal.
-             * @param {function(Object):*} callback function to execute, it is
-             * invoked with one argument: the element value, to break the iteration you can
-             * optionally return false.
-             */
-            BSTree.prototype.forEach = function (callback) {
-                this.inorderTraversal(callback);
-            };
-            /**
-             * Returns an array containing all of the elements in this tree in in-order.
-             * @return {Array} an array containing all of the elements in this tree in in-order.
-             */
-            BSTree.prototype.toArray = function () {
-                var array = [];
-                this.inorderTraversal(function (element) {
-                    array.push(element);
-                    return true;
-                });
-                return array;
-            };
-            /**
-             * Returns the height of this tree.
-             * @return {number} the height of this tree or -1 if is empty.
-             */
-            BSTree.prototype.height = function () {
-                return this.heightAux(this.root);
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.searchNode = function (node, element) {
-                var cmp = null;
-                while (node !== null && cmp !== 0) {
-                    cmp = this.compare(element, node.element);
-                    if (cmp < 0) {
-                        node = node.leftCh;
-                    }
-                    else if (cmp > 0) {
-                        node = node.rightCh;
-                    }
-                }
-                return node;
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.transplant = function (n1, n2) {
-                if (n1.parent === null) {
-                    this.root = n2;
-                }
-                else if (n1 === n1.parent.leftCh) {
-                    n1.parent.leftCh = n2;
-                }
-                else {
-                    n1.parent.rightCh = n2;
-                }
-                if (n2 !== null) {
-                    n2.parent = n1.parent;
-                }
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.removeNode = function (node) {
-                if (node.leftCh === null) {
-                    this.transplant(node, node.rightCh);
-                }
-                else if (node.rightCh === null) {
-                    this.transplant(node, node.leftCh);
-                }
-                else {
-                    var y = this.minimumAux(node.rightCh);
-                    if (y.parent !== node) {
-                        this.transplant(y, y.rightCh);
-                        y.rightCh = node.rightCh;
-                        y.rightCh.parent = y;
-                    }
-                    this.transplant(node, y);
-                    y.leftCh = node.leftCh;
-                    y.leftCh.parent = y;
-                }
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.inorderTraversalAux = function (node, callback, signal) {
-                if (node === null || signal.stop) {
-                    return;
-                }
-                this.inorderTraversalAux(node.leftCh, callback, signal);
-                if (signal.stop) {
-                    return;
-                }
-                signal.stop = callback(node.element) === false;
-                if (signal.stop) {
-                    return;
-                }
-                this.inorderTraversalAux(node.rightCh, callback, signal);
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.levelTraversalAux = function (node, callback) {
-                var queue = new Queue();
-                if (node !== null) {
-                    queue.enqueue(node);
-                }
-                while (!queue.isEmpty()) {
-                    node = queue.dequeue();
-                    if (callback(node.element) === false) {
-                        return;
-                    }
-                    if (node.leftCh !== null) {
-                        queue.enqueue(node.leftCh);
-                    }
-                    if (node.rightCh !== null) {
-                        queue.enqueue(node.rightCh);
-                    }
-                }
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.preorderTraversalAux = function (node, callback, signal) {
-                if (node === null || signal.stop) {
-                    return;
-                }
-                signal.stop = callback(node.element) === false;
-                if (signal.stop) {
-                    return;
-                }
-                this.preorderTraversalAux(node.leftCh, callback, signal);
-                if (signal.stop) {
-                    return;
-                }
-                this.preorderTraversalAux(node.rightCh, callback, signal);
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.postorderTraversalAux = function (node, callback, signal) {
-                if (node === null || signal.stop) {
-                    return;
-                }
-                this.postorderTraversalAux(node.leftCh, callback, signal);
-                if (signal.stop) {
-                    return;
-                }
-                this.postorderTraversalAux(node.rightCh, callback, signal);
-                if (signal.stop) {
-                    return;
-                }
-                signal.stop = callback(node.element) === false;
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.minimumAux = function (node) {
-                while (node.leftCh !== null) {
-                    node = node.leftCh;
-                }
-                return node;
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.maximumAux = function (node) {
-                while (node.rightCh !== null) {
-                    node = node.rightCh;
-                }
-                return node;
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.heightAux = function (node) {
-                if (node === null) {
-                    return -1;
-                }
-                return Math.max(this.heightAux(node.leftCh), this.heightAux(node.rightCh)) + 1;
-            };
-            /*
-             * @private
-             */
-            BSTree.prototype.insertNode = function (node) {
-                var parent = null;
-                var position = this.root;
-                var cmp = null;
-                while (position !== null) {
-                    cmp = this.compare(node.element, position.element);
-                    if (cmp === 0) {
-                        return null;
-                    }
-                    else if (cmp < 0) {
-                        parent = position;
-                        position = position.leftCh;
-                    }
-                    else {
-                        parent = position;
-                        position = position.rightCh;
-                    }
-                }
-                node.parent = parent;
-                if (parent === null) {
-                    // tree is empty
-                    this.root = node;
-                }
-                else if (this.compare(node.element, parent.element) < 0) {
-                    parent.leftCh = node;
-                }
-                else {
-                    parent.rightCh = node;
-                }
-                return node;
-            };
-            /**
-             * @private
-             */
-            BSTree.prototype.createNode = function (element) {
-                return {
-                    element: element,
-                    leftCh: null,
-                    rightCh: null,
-                    parent: null
-                };
-            };
-            return BSTree;
-        })();
-        Collections.BSTree = BSTree; // end of BSTree
-    })(Collections = Utils.Collections || (Utils.Collections = {}));
-})(Utils || (Utils = {})); // End of module 
+
 var Utils;
 (function (Utils) {
     var Colors = (function () {
@@ -16959,9 +11375,10 @@ var Utils;
             }
         };
         return Colors;
-    })();
+    }());
     Utils.Colors = Colors;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Dates = (function () {
@@ -16971,9 +11388,10 @@ var Utils;
             return new Date().getTime();
         };
         return Dates;
-    })();
+    }());
     Utils.Dates = Dates;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Device = (function () {
@@ -16992,9 +11410,10 @@ var Utils;
             return !!("ontouchstart" in window) || window.navigator.msMaxTouchPoints > 0;
         };
         return Device;
-    })();
+    }());
     Utils.Device = Device;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Documents = (function () {
@@ -17013,13 +11432,14 @@ var Utils;
             var doc = document.documentElement;
             var support = doc.requestFullscreen || doc.mozRequestFullScreen ||
                 doc.webkitRequestFullScreen || doc.msRequestFullscreen;
-            return support != undefined;
+            return support !== undefined;
         };
         Documents.isHidden = function () {
             var prop = Documents.getHiddenProp();
             if (!prop)
                 return false;
-            return document[prop];
+            return true;
+            //return document[prop];
         };
         Documents.getHiddenProp = function () {
             var prefixes = ['webkit', 'moz', 'ms', 'o'];
@@ -17028,16 +11448,18 @@ var Utils;
                 return 'hidden';
             // otherwise loop over all the known prefixes until we find one
             for (var i = 0; i < prefixes.length; i++) {
-                if ((prefixes[i] + 'Hidden') in document)
+                if ((prefixes[i] + 'Hidden') in document) {
                     return prefixes[i] + 'Hidden';
+                }
             }
             // otherwise it's not supported
             return null;
         };
         return Documents;
-    })();
+    }());
     Utils.Documents = Documents;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Events = (function () {
@@ -17067,9 +11489,10 @@ var Utils;
             };
         };
         return Events;
-    })();
+    }());
     Utils.Events = Events;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Files = (function () {
@@ -17091,9 +11514,10 @@ var Utils;
             }
         };
         return Files;
-    })();
+    }());
     Utils.Files = Files;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Keyboard = (function () {
@@ -17104,9 +11528,10 @@ var Utils;
             return charCode;
         };
         return Keyboard;
-    })();
+    }());
     Utils.Keyboard = Keyboard;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Maths;
@@ -17206,10 +11631,11 @@ var Utils;
                 return new Vector(Math.cos(angle), Math.sin(angle));
             };
             return Vector;
-        })();
+        }());
         Maths.Vector = Vector;
     })(Maths = Utils.Maths || (Utils.Maths = {}));
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Measurements;
@@ -17220,7 +11646,7 @@ var Utils;
                 this.height = height;
             }
             return Size;
-        })();
+        }());
         Measurements.Size = Size;
         var Dimensions = (function () {
             function Dimensions() {
@@ -17228,7 +11654,9 @@ var Utils;
             Dimensions.fitRect = function (width1, height1, width2, height2) {
                 var ratio1 = height1 / width1;
                 var ratio2 = height2 / width2;
-                var width, height, scale;
+                var width = 0;
+                var height = 0;
+                var scale;
                 if (ratio1 < ratio2) {
                     scale = width2 / width1;
                     width = width1 * scale;
@@ -17248,10 +11676,11 @@ var Utils;
                 return false;
             };
             return Dimensions;
-        })();
+        }());
         Measurements.Dimensions = Dimensions;
     })(Measurements = Utils.Measurements || (Utils.Measurements = {}));
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Numbers = (function () {
@@ -17277,9 +11706,28 @@ var Utils;
             }
         };
         return Numbers;
-    })();
+    }());
     Utils.Numbers = Numbers;
 })(Utils || (Utils = {}));
+
+var Utils;
+(function (Utils) {
+    var Objects = (function () {
+        function Objects() {
+        }
+        Objects.toPlainObject = function (value) {
+            value = Object(value);
+            var result = {};
+            for (var key in value) {
+                result[key] = value[key];
+            }
+            return result;
+        };
+        return Objects;
+    }());
+    Utils.Objects = Objects;
+})(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Storage = (function () {
@@ -17311,7 +11759,7 @@ var Utils;
         };
         Storage.get = function (key, storageType) {
             if (storageType === void 0) { storageType = Utils.StorageType.memory; }
-            var data;
+            var data = null;
             switch (storageType.value) {
                 case Utils.StorageType.memory.value:
                     data = this._memoryStorage[key];
@@ -17325,7 +11773,15 @@ var Utils;
             }
             if (!data)
                 return null;
-            var item = JSON.parse(data);
+            var item = null;
+            try {
+                item = JSON.parse(data);
+            }
+            catch (error) {
+                return null;
+            }
+            if (!item)
+                return null;
             if (this._isExpired(item))
                 return null;
             // useful reference
@@ -17354,18 +11810,22 @@ var Utils;
                 case Utils.StorageType.session.value:
                     for (var i = 0; i < sessionStorage.length; i++) {
                         var key = sessionStorage.key(i);
-                        var item = this.get(key, Utils.StorageType.session);
-                        if (item) {
-                            items.push(item);
+                        if (key) {
+                            var item = this.get(key, Utils.StorageType.session);
+                            if (item) {
+                                items.push(item);
+                            }
                         }
                     }
                     break;
                 case Utils.StorageType.local.value:
                     for (var i = 0; i < localStorage.length; i++) {
                         var key = localStorage.key(i);
-                        var item = this.get(key, Utils.StorageType.local);
-                        if (item) {
-                            items.push(item);
+                        if (key) {
+                            var item = this.get(key, Utils.StorageType.local);
+                            if (item) {
+                                items.push(item);
+                            }
                         }
                     }
                     break;
@@ -17407,18 +11867,20 @@ var Utils;
         };
         Storage._memoryStorage = {};
         return Storage;
-    })();
+    }());
     Utils.Storage = Storage;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var StorageItem = (function () {
         function StorageItem() {
         }
         return StorageItem;
-    })();
+    }());
     Utils.StorageItem = StorageItem;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var StorageType = (function () {
@@ -17432,9 +11894,10 @@ var Utils;
         StorageType.session = new StorageType("session");
         StorageType.local = new StorageType("local");
         return StorageType;
-    })();
+    }());
     Utils.StorageType = StorageType;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Strings = (function () {
@@ -17456,9 +11919,10 @@ var Utils;
             return div.firstChild.nodeValue;
         };
         return Strings;
-    })();
+    }());
     Utils.Strings = Strings;
 })(Utils || (Utils = {}));
+
 var Utils;
 (function (Utils) {
     var Urls = (function () {
@@ -17541,8 +12005,13 @@ var Utils;
             return relUri;
         };
         return Urls;
-    })();
+    }());
     Utils.Urls = Urls;
 })(Utils || (Utils = {}));
 
-!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.iiifMetadataComponent=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){var IIIFComponents;!function(IIIFComponents){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();IIIFComponents.StringValue=StringValue}(IIIFComponents||(IIIFComponents={}));var IIIFComponents,__extends=this&&this.__extends||function(d,b){function __(){this.constructor=d}for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p]);d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)};!function(IIIFComponents){var MetadataComponentOptions;!function(MetadataComponentOptions){var LimitType=function(_super){function LimitType(){_super.apply(this,arguments)}return __extends(LimitType,_super),LimitType.LINES=new LimitType("lines"),LimitType.CHARS=new LimitType("chars"),LimitType}(IIIFComponents.StringValue);MetadataComponentOptions.LimitType=LimitType}(MetadataComponentOptions=IIIFComponents.MetadataComponentOptions||(IIIFComponents.MetadataComponentOptions={}))}(IIIFComponents||(IIIFComponents={}));var IIIFComponents,__extends=this&&this.__extends||function(d,b){function __(){this.constructor=d}for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p]);d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)};Manifold.MetadataGroup;!function(IIIFComponents){var MetadataComponent=function(_super){function MetadataComponent(options){_super.call(this,options),this._init(),this._resize()}return __extends(MetadataComponent,_super),MetadataComponent.prototype._init=function(){var success=_super.prototype._init.call(this);return success||console.error("Component failed to initialise"),this._$metadataGroupTemplate=$('<div class="group">                                                   <div class="header"></div>                                                   <div class="items"></div>                                               </div>'),this._$metadataItemTemplate=$('<div class="item">                                                   <div class="label"></div>                                                   <div class="values"></div>                                               </div>'),this._$metadataItemValueTemplate=$('<div class="value"></div>'),this._$copyTextTemplate=$('<div class="copyText" alt="'+this.options.content.copyToClipboard+'" title="'+this.options.content.copyToClipboard+'">                                                   <div class="copiedText">'+this.options.content.copiedToClipboard+" </div>                                               </div>"),this._$metadataGroups=$('<div class="groups"></div>'),this._$element.append(this._$metadataGroups),this._$noData=$('<div class="noData">'+this.options.content.noData+"</div>"),this._$element.append(this._$noData),success},MetadataComponent.prototype._getDefaultOptions=function(){return{aggregateValues:"",canvases:null,canvasDisplayOrder:"",canvasExclude:"",canvasLabels:"",content:{attribution:"Attribution",canvasHeader:"About the canvas",copiedToClipboard:"Copied to clipboard",copyToClipboard:"Copy to clipboard",description:"Description",imageHeader:"About the image",less:"less",license:"License",logo:"Logo",manifestHeader:"About the item",more:"more",noData:"No data to display",rangeHeader:"About the range",sequenceHeader:"About the sequence"},copiedMessageDuration:2e3,copyToClipboardEnabled:!1,helper:null,licenseFormatter:null,limit:4,limitType:IIIFComponents.MetadataComponentOptions.LimitType.LINES,manifestDisplayOrder:"",manifestExclude:"",range:null,rtlLanguageCodes:"ar, ara, dv, div, he, heb, ur, urd",sanitizer:function(html){return html},showAllLanguages:!1}},MetadataComponent.prototype._getManifestGroup=function(){return this._metadataGroups.en().where(function(x){return x.resource.isManifest()}).first()},MetadataComponent.prototype._getCanvasGroups=function(){return this._metadataGroups.en().where(function(x){return x.resource.isCanvas()}).toArray()},MetadataComponent.prototype.databind=function(){var _this=this;this._$metadataGroups.empty();var options={canvases:this.options.canvases,licenseFormatter:this.options.licenseFormatter,range:this.options.range};if(this._metadataGroups=this.options.helper.getMetadata(options),this.options.manifestDisplayOrder){var manifestGroup=this._getManifestGroup();manifestGroup.items=this._sort(manifestGroup.items,this._readCSV(this.options.manifestDisplayOrder))}if(this.options.canvasDisplayOrder){var canvasGroups=this._getCanvasGroups();$.each(canvasGroups,function(index,canvasGroup){canvasGroup.items=_this._sort(canvasGroup.items,_this._readCSV(_this.options.canvasDisplayOrder))})}if(this.options.canvasLabels&&this._label(this._getCanvasGroups(),this._readCSV(this.options.canvasLabels,!1)),this.options.manifestExclude){var manifestGroup=this._getManifestGroup();manifestGroup.items=this._exclude(manifestGroup.items,this._readCSV(this.options.manifestExclude))}if(this.options.canvasExclude){var canvasGroups=this._getCanvasGroups();$.each(canvasGroups,function(index,canvasGroup){canvasGroup.items=_this._exclude(canvasGroup.items,_this._readCSV(_this.options.canvasExclude))})}return this._metadataGroups.length?(this._$noData.hide(),void this._render()):void this._$noData.show()},MetadataComponent.prototype._sort=function(items,displayOrder){var _this=this,sorted=[],unsorted=items.clone();return $.each(displayOrder,function(index,item){var match=unsorted.en().where(function(x){return _this._normalise(x.getLabel())===item}).first();match&&(sorted.push(match),unsorted.remove(match))}),$.each(unsorted,function(index,item){sorted.push(item)}),sorted},MetadataComponent.prototype._label=function(groups,labels){$.each(groups,function(index,group){group.label=labels[index]})},MetadataComponent.prototype._exclude=function(items,excludeConfig){var _this=this;return $.each(excludeConfig,function(index,item){var match=items.en().where(function(x){return _this._normalise(x.getLabel())===item}).first();match&&items.remove(match)}),items},MetadataComponent.prototype._normalise=function(value){return value?value.toLowerCase().replace(/ /g,""):null},MetadataComponent.prototype._render=function(){var _this=this;$.each(this._metadataGroups,function(index,metadataGroup){var $metadataGroup=_this._buildMetadataGroup(metadataGroup);_this._$metadataGroups.append($metadataGroup),_this.options.limitType===IIIFComponents.MetadataComponentOptions.LimitType.LINES?$metadataGroup.find(".value").toggleExpandTextByLines(_this.options.limit,_this.options.content.less,_this.options.content.more,function(){}):_this.options.limitType===IIIFComponents.MetadataComponentOptions.LimitType.CHARS&&$metadataGroup.find(".value").ellipsisHtmlFixed(_this.options.limit,null)})},MetadataComponent.prototype._buildMetadataGroup=function(metadataGroup){var $metadataGroup=this._$metadataGroupTemplate.clone(),$header=$metadataGroup.find(">.header");if(metadataGroup.resource.isManifest()&&this.options.content.manifestHeader)$header.html(this._sanitize(this.options.content.manifestHeader));else if(metadataGroup.resource.isSequence()&&this.options.content.sequenceHeader)$header.html(this._sanitize(this.options.content.sequenceHeader));else if(metadataGroup.resource.isRange()&&this.options.content.rangeHeader)$header.html(this._sanitize(this.options.content.rangeHeader));else if(metadataGroup.resource.isCanvas()&&(metadataGroup.label||this.options.content.canvasHeader)){var header=metadataGroup.label||this.options.content.canvasHeader;$header.html(this._sanitize(header))}else metadataGroup.resource.isAnnotation()&&this.options.content.imageHeader&&$header.html(this._sanitize(this.options.content.imageHeader));$header.text()||$header.hide();for(var $items=$metadataGroup.find(".items"),i=0;i<metadataGroup.items.length;i++){var item=metadataGroup.items[i],$metadataItem=this._buildMetadataItem(item);$items.append($metadataItem)}return $metadataGroup},MetadataComponent.prototype._buildMetadataItem=function(item){var $metadataItem=this._$metadataItemTemplate.clone(),$label=$metadataItem.find(".label"),$values=$metadataItem.find(".values"),label=item.getLabel();if(label&&item.isRootLevel)switch(label.toLowerCase()){case"attribution":label=this.options.content.attribution;break;case"description":label=this.options.content.description;break;case"license":label=this.options.content.license;break;case"logo":label=this.options.content.logo}label=this._sanitize(label),$label.html(label),this._addReadingDirection($label,this._getItemLocale(item)),$metadataItem.addClass(label.toCssClass());var $value;if(this.options.showAllLanguages&&item.value&&item.value.length>1)for(var i=0;i<item.value.length;i++){var translation=item.value[i];$value=this._buildMetadataItemValue(translation.value,translation.locale),$values.append($value)}else{for(var itemLocale=this._getItemLocale(item),valueFound=!1,i=0;i<item.value.length;i++){var translation=item.value[i];itemLocale===translation.locale&&(valueFound=!0,$value=this._buildMetadataItemValue(translation.value,translation.locale),$values.append($value))}if(!valueFound){var translation=item.value[0];translation&&($value=this._buildMetadataItemValue(translation.value,translation.locale),$values.append($value))}}return this.options.copyToClipboardEnabled&&Utils.Clipboard.supportsCopy()&&$label.text()&&this._addCopyButton($metadataItem,$label,$values),$metadataItem},MetadataComponent.prototype._getItemLocale=function(item){return item.label.length&&item.label[0].locale?item.label[0].locale:item.defaultLocale||this.options.helper.options.locale},MetadataComponent.prototype._buildMetadataItemValue=function(value,locale){value=this._sanitize(value),value=value.replace("\n","<br>");var $value=this._$metadataItemValueTemplate.clone();return $value.html(value),$value.targetBlank(),locale&&this._addReadingDirection($value,locale),$value},MetadataComponent.prototype._addReadingDirection=function($elem,locale){locale=Manifesto.Utils.getInexactLocale(locale);var rtlLanguages=this._readCSV(this.options.rtlLanguageCodes),match=rtlLanguages.en().where(function(x){return x===locale}).toArray().length>0;match&&($elem.prop("dir","rtl"),$elem.addClass("rtl"))},MetadataComponent.prototype._addCopyButton=function($elem,$header,$values){var $copyBtn=this._$copyTextTemplate.clone(),$copiedText=$copyBtn.children();$header.append($copyBtn),Utils.Device.isTouch()?$copyBtn.show():($elem.on("mouseenter",function(){$copyBtn.show()}),$elem.on("mouseleave",function(){$copyBtn.hide()}),$copyBtn.on("mouseleave",function(){$copiedText.hide()}));var that=this,originalValue=$values.text();$copyBtn.on("click",function(e){that._copyItemValues($copyBtn,originalValue)})},MetadataComponent.prototype._copyItemValues=function($copyButton,originalValue){Utils.Clipboard.copy(originalValue);var $copiedText=$copyButton.find(".copiedText");$copiedText.show(),setTimeout(function(){$copiedText.hide()},this.options.copiedMessageDuration)},MetadataComponent.prototype._readCSV=function(config,normalise){void 0===normalise&&(normalise=!0);var csv=[];if(config&&(csv=config.split(","),normalise))for(var i=0;i<csv.length;i++)csv[i]=this._normalise(csv[i]);return csv},MetadataComponent.prototype._sanitize=function(html){return this.options.sanitizer(html)},MetadataComponent.prototype._resize=function(){},MetadataComponent}(_Components.BaseComponent);IIIFComponents.MetadataComponent=MetadataComponent}(IIIFComponents||(IIIFComponents={}));var IIIFComponents;!function(IIIFComponents){var MetadataComponent;!function(MetadataComponent){var Events=function(){function Events(){}return Events}();MetadataComponent.Events=Events}(MetadataComponent=IIIFComponents.MetadataComponent||(IIIFComponents.MetadataComponent={}))}(IIIFComponents||(IIIFComponents={})),function(w){w.IIIFComponents?(w.IIIFComponents.MetadataComponent=IIIFComponents.MetadataComponent,w.IIIFComponents.MetadataComponentOptions=IIIFComponents.MetadataComponentOptions):w.IIIFComponents=IIIFComponents}(window)},{}]},{},[1])(1)});
+global.Utils = module.exports = Utils;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}]},{},[1])(1)
+});
+!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.iiifMetadataComponent=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var IIIFComponents;!function(IIIFComponents){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();IIIFComponents.StringValue=StringValue}(IIIFComponents||(IIIFComponents={}));var IIIFComponents,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(IIIFComponents){var MetadataComponentOptions;!function(MetadataComponentOptions){var LimitType=function(_super){function LimitType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(LimitType,_super),LimitType.LINES=new LimitType("lines"),LimitType.CHARS=new LimitType("chars"),LimitType}(IIIFComponents.StringValue);MetadataComponentOptions.LimitType=LimitType}(MetadataComponentOptions=IIIFComponents.MetadataComponentOptions||(IIIFComponents.MetadataComponentOptions={}))}(IIIFComponents||(IIIFComponents={}));var IIIFComponents,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();Manifold.MetadataGroup;!function(IIIFComponents){var MetadataComponent=function(_super){function MetadataComponent(options){var _this=_super.call(this,options)||this;return _this._init(),_this._resize(),_this}return __extends(MetadataComponent,_super),MetadataComponent.prototype._init=function(){var success=_super.prototype._init.call(this);return success||console.error("Component failed to initialise"),this._$metadataGroupTemplate=$('<div class="group">                                                   <div class="header"></div>                                                   <div class="items"></div>                                               </div>'),this._$metadataItemTemplate=$('<div class="item">                                                   <div class="label"></div>                                                   <div class="values"></div>                                               </div>'),this._$metadataItemValueTemplate=$('<div class="value"></div>'),this._$metadataItemURIValueTemplate=$('<a class="value" href="" target="_blank"></a>'),this._$copyTextTemplate=$('<div class="copyText" alt="'+this.options.data.content.copyToClipboard+'" title="'+this.options.data.content.copyToClipboard+'">                                                   <div class="copiedText">'+this.options.data.content.copiedToClipboard+" </div>                                               </div>"),this._$metadataGroups=$('<div class="groups"></div>'),this._$element.append(this._$metadataGroups),this._$noData=$('<div class="noData">'+this.options.data.content.noData+"</div>"),this._$element.append(this._$noData),success},MetadataComponent.prototype.data=function(){return{aggregateValues:"",canvases:null,canvasDisplayOrder:"",canvasExclude:"",canvasLabels:"",content:{attribution:"Attribution",canvasHeader:"About the canvas",copiedToClipboard:"Copied to clipboard",copyToClipboard:"Copy to clipboard",description:"Description",imageHeader:"About the image",less:"less",license:"License",logo:"Logo",manifestHeader:"About the item",more:"more",noData:"No data to display",rangeHeader:"About the range",sequenceHeader:"About the sequence"},copiedMessageDuration:2e3,copyToClipboardEnabled:!1,helper:null,licenseFormatter:null,limit:4,limitType:IIIFComponents.MetadataComponentOptions.LimitType.LINES,manifestDisplayOrder:"",manifestExclude:"",range:null,rtlLanguageCodes:"ar, ara, dv, div, he, heb, ur, urd",sanitizer:function(html){return html},showAllLanguages:!1}},MetadataComponent.prototype._getManifestGroup=function(){return this._metadataGroups.en().where(function(x){return x.resource.isManifest()}).first()},MetadataComponent.prototype._getCanvasGroups=function(){return this._metadataGroups.en().where(function(x){return x.resource.isCanvas()}).toArray()},MetadataComponent.prototype.set=function(){var _this=this;this._$metadataGroups.empty();var options={canvases:this.options.data.canvases,licenseFormatter:this.options.data.licenseFormatter,range:this.options.data.range};if(this._metadataGroups=this.options.data.helper.getMetadata(options),this.options.data.manifestDisplayOrder){var manifestGroup=this._getManifestGroup();manifestGroup.items=this._sort(manifestGroup.items,this._readCSV(this.options.data.manifestDisplayOrder))}if(this.options.data.canvasDisplayOrder){var canvasGroups=this._getCanvasGroups();$.each(canvasGroups,function(index,canvasGroup){canvasGroup.items=_this._sort(canvasGroup.items,_this._readCSV(_this.options.data.canvasDisplayOrder))})}if(this.options.data.canvasLabels&&this._label(this._getCanvasGroups(),this._readCSV(this.options.data.canvasLabels,!1)),this.options.data.manifestExclude){var manifestGroup=this._getManifestGroup();manifestGroup.items=this._exclude(manifestGroup.items,this._readCSV(this.options.data.manifestExclude))}if(this.options.data.canvasExclude){var canvasGroups=this._getCanvasGroups();$.each(canvasGroups,function(index,canvasGroup){canvasGroup.items=_this._exclude(canvasGroup.items,_this._readCSV(_this.options.data.canvasExclude))})}return this._metadataGroups.length?(this._$noData.hide(),void this._render()):void this._$noData.show()},MetadataComponent.prototype._sort=function(items,displayOrder){var _this=this,sorted=[],unsorted=items.clone();return $.each(displayOrder,function(index,item){var match=unsorted.en().where(function(x){return _this._normalise(x.getLabel())===item}).first();match&&(sorted.push(match),unsorted.remove(match))}),$.each(unsorted,function(index,item){sorted.push(item)}),sorted},MetadataComponent.prototype._label=function(groups,labels){$.each(groups,function(index,group){group.label=labels[index]})},MetadataComponent.prototype._exclude=function(items,excludeConfig){var _this=this;return $.each(excludeConfig,function(index,item){var match=items.en().where(function(x){return _this._normalise(x.getLabel())===item}).first();match&&items.remove(match)}),items},MetadataComponent.prototype._normalise=function(value){return value?value.toLowerCase().replace(/ /g,""):null},MetadataComponent.prototype._render=function(){var _this=this;$.each(this._metadataGroups,function(index,metadataGroup){var $metadataGroup=_this._buildMetadataGroup(metadataGroup);_this._$metadataGroups.append($metadataGroup),_this.options.data.limitType===IIIFComponents.MetadataComponentOptions.LimitType.LINES?$metadataGroup.find(".value").toggleExpandTextByLines(_this.options.data.limit,_this.options.data.content.less,_this.options.data.content.more,function(){}):_this.options.data.limitType===IIIFComponents.MetadataComponentOptions.LimitType.CHARS&&$metadataGroup.find(".value").ellipsisHtmlFixed(_this.options.data.limit,function(){})})},MetadataComponent.prototype._buildMetadataGroup=function(metadataGroup){var $metadataGroup=this._$metadataGroupTemplate.clone(),$header=$metadataGroup.find(">.header");if(metadataGroup.resource.isManifest()&&this.options.data.content.manifestHeader)$header.html(this._sanitize(this.options.data.content.manifestHeader));else if(metadataGroup.resource.isSequence()&&this.options.data.content.sequenceHeader)$header.html(this._sanitize(this.options.data.content.sequenceHeader));else if(metadataGroup.resource.isRange()&&this.options.data.content.rangeHeader)$header.html(this._sanitize(this.options.data.content.rangeHeader));else if(metadataGroup.resource.isCanvas()&&(metadataGroup.label||this.options.data.content.canvasHeader)){var header=metadataGroup.label||this.options.data.content.canvasHeader;$header.html(this._sanitize(header))}else metadataGroup.resource.isAnnotation()&&this.options.data.content.imageHeader&&$header.html(this._sanitize(this.options.data.content.imageHeader));$header.text()||$header.hide();for(var $items=$metadataGroup.find(".items"),i=0;i<metadataGroup.items.length;i++){var item=metadataGroup.items[i],$metadataItem=this._buildMetadataItem(item);$items.append($metadataItem)}return $metadataGroup},MetadataComponent.prototype._buildMetadataItem=function(item){var $metadataItem=this._$metadataItemTemplate.clone(),$label=$metadataItem.find(".label"),$values=$metadataItem.find(".values"),originalLabel=item.getLabel(),label=originalLabel;if(label&&item.isRootLevel)switch(label.toLowerCase()){case"attribution":label=this.options.data.content.attribution;break;case"description":label=this.options.data.content.description;break;case"license":label=this.options.data.content.license;break;case"logo":label=this.options.data.content.logo}label=this._sanitize(label),$label.html(label),this._addReadingDirection($label,this._getItemLocale(item)),$metadataItem.addClass(label.toCssClass());var $value;if(originalLabel&&"license"===originalLabel.toLowerCase())$value=this._buildMetadataItemURIValue(item.value[0].value),$values.append($value);else if(this.options.data.showAllLanguages&&item.value&&item.value.length>1)for(var i=0;i<item.value.length;i++){var translation=item.value[i];$value=this._buildMetadataItemValue(translation.value,translation.locale),$values.append($value)}else{for(var itemLocale=this._getItemLocale(item),valueFound=!1,i=0;i<item.value.length;i++){var translation=item.value[i];itemLocale===translation.locale&&(valueFound=!0,$value=this._buildMetadataItemValue(translation.value,translation.locale),$values.append($value))}if(!valueFound){var translation=item.value[0];translation&&($value=this._buildMetadataItemValue(translation.value,translation.locale),$values.append($value))}}return this.options.data.copyToClipboardEnabled&&Utils.Clipboard.supportsCopy()&&$label.text()&&this._addCopyButton($metadataItem,$label,$values),$metadataItem},MetadataComponent.prototype._getItemLocale=function(item){return item.label.length&&item.label[0].locale?item.label[0].locale:item.defaultLocale||this.options.data.helper.options.locale},MetadataComponent.prototype._buildMetadataItemValue=function(value,locale){value=this._sanitize(value),value=value.replace("\n","<br>");var $value=this._$metadataItemValueTemplate.clone();return $value.html(value),$value.targetBlank(),locale&&this._addReadingDirection($value,locale),$value},MetadataComponent.prototype._buildMetadataItemURIValue=function(value){value=this._sanitize(value);var $value=this._$metadataItemURIValueTemplate.clone();return $value.prop("href",value),$value.text(value),$value},MetadataComponent.prototype._addReadingDirection=function($elem,locale){locale=Manifesto.Utils.getInexactLocale(locale);var rtlLanguages=this._readCSV(this.options.data.rtlLanguageCodes),match=rtlLanguages.en().where(function(x){return x===locale}).toArray().length>0;match&&($elem.prop("dir","rtl"),$elem.addClass("rtl"))},MetadataComponent.prototype._addCopyButton=function($elem,$header,$values){var $copyBtn=this._$copyTextTemplate.clone(),$copiedText=$copyBtn.children();$header.append($copyBtn),Utils.Device.isTouch()?$copyBtn.show():($elem.on("mouseenter",function(){$copyBtn.show()}),$elem.on("mouseleave",function(){$copyBtn.hide()}),$copyBtn.on("mouseleave",function(){$copiedText.hide()}));var that=this,originalValue=$values.text();$copyBtn.on("click",function(e){that._copyItemValues($copyBtn,originalValue)})},MetadataComponent.prototype._copyItemValues=function($copyButton,originalValue){Utils.Clipboard.copy(originalValue);var $copiedText=$copyButton.find(".copiedText");$copiedText.show(),setTimeout(function(){$copiedText.hide()},this.options.data.copiedMessageDuration)},MetadataComponent.prototype._readCSV=function(config,normalise){void 0===normalise&&(normalise=!0);var csv=[];if(config&&(csv=config.split(","),normalise))for(var i=0;i<csv.length;i++)csv[i]=this._normalise(csv[i]);return csv},MetadataComponent.prototype._sanitize=function(html){return this.options.data.sanitizer(html)},MetadataComponent.prototype._resize=function(){},MetadataComponent}(_Components.BaseComponent);IIIFComponents.MetadataComponent=MetadataComponent}(IIIFComponents||(IIIFComponents={})),function(IIIFComponents){var MetadataComponent;!function(MetadataComponent){var Events=function(){function Events(){}return Events}();MetadataComponent.Events=Events}(MetadataComponent=IIIFComponents.MetadataComponent||(IIIFComponents.MetadataComponent={}))}(IIIFComponents||(IIIFComponents={})),function(g){g.IIIFComponents?(g.IIIFComponents.MetadataComponent=IIIFComponents.MetadataComponent,g.IIIFComponents.MetadataComponentOptions=IIIFComponents.MetadataComponentOptions):g.IIIFComponents=IIIFComponents}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});
